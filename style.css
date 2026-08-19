@@ -1,12 +1,12 @@
 /*
- * Onchain Suite docs — brand styling.
+ * Onchain Suite docs brand styling.
  *
  * Mintlify automatically loads any .css file in the content directory, so this
  * file needs no import or docs.json reference.
  *
- * Palette (internal-notes/Branding-Guide.txt):
- *   Cloud #F0F7FF · Electric Blue #1727E0 · Midnight #010F31
- *   Sky   #2F94FF · Accent Orange #FF6828
+ * Palette (internal-notes/Branding-Guide.md):
+ *   Cloud #F0F7FF, Electric Blue #1727E0, Midnight #010F31,
+ *   Sky #2F94FF, Accent Orange #FF6828
  */
 
 :root {
@@ -18,6 +18,49 @@
 
   --os-gradient-blue: linear-gradient(90deg, #2f94ff 0%, #1727e0 100%);
   --os-gradient-bright: linear-gradient(90deg, #f0f7ff 0%, #2f94ff 50%, #1727e0 100%);
+}
+
+/* ---------------------------------------------------------------------------
+ * Scrollbars: thin, rounded, brand-tinted. Firefox uses scrollbar-color;
+ * WebKit/Blink use the ::-webkit-scrollbar pseudo-elements.
+ * ------------------------------------------------------------------------ */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: color-mix(in srgb, var(--os-sky) 55%, transparent) transparent;
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  border-radius: 999px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+  background-color: color-mix(in srgb, var(--os-electric) 45%, transparent);
+  transition: background-color 0.2s ease;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background-color: var(--os-electric);
+}
+
+/* Brighter thumb on the Midnight dark surface so it stays visible. */
+.dark ::-webkit-scrollbar-thumb {
+  background-color: color-mix(in srgb, var(--os-sky) 55%, transparent);
+}
+
+.dark ::-webkit-scrollbar-thumb:hover {
+  background-color: var(--os-sky);
+}
+
+::-webkit-scrollbar-corner {
+  background: transparent;
 }
 
 /* ---------------------------------------------------------------------------

@@ -30,17 +30,31 @@ An automation is a trigger plus a flow graph. This page walks through building o
 
 ## Node types
 
-Seven node types are available.
+Seven node types are available. Each node's config lives in its `data` object.
 
-| Type | Category | Required config |
+| Type | Category | What it does |
 | --- | --- | --- |
-| `send_email` | Messaging | `templateId` |
-| `send_inapp` | Messaging | `title`, `body` |
-| `dispatch_campaign` | Messaging | `campaignId` |
-| `wait` | Flow control | `seconds` |
-| `branch` | Flow control | `branches` |
-| `add_tag` | Audience | `tag` |
-| `webhook` | Integrations | `url` |
+| `send_email` | Messaging | Send an email to the recipient |
+| `send_inapp` | Messaging | Send an in-app push to the recipient |
+| `dispatch_campaign` | Messaging | Launch a prepared campaign at the recipient |
+| `wait` | Flow control | Pause the flow for a delay |
+| `branch` | Flow control | Route the entry down different paths |
+| `add_tag` | Audience | Tag the contact |
+| `webhook` | Integrations | Call your endpoint |
+
+<Note>
+When the visual builder saves a node, the canonical type is in `data.actionType` while `node.type` holds the builder's own renderer key (like `"inapp"`). The runtime reads `data.actionType` first, so in hand-authored JSON either set `data.actionType` to the type in the table above, or set `node.type` to it directly, as the examples here do.
+</Note>
+
+### Messaging nodes
+
+All three messaging nodes choose recipients with `recipientMode` (`triggering_profile`, the default, or `wallet_list` with a `walletAddresses` array). Content is merge-rendered per recipient, so `send_inapp` supports the same variables as email, such as `{{ greeting_name }}` and `{{ wallet_short }}`.
+
+**`send_email`** reads `templateId` (loads a template) or inline `subject` and `body`, plus an optional `senderEmail` override. It needs a template, a subject, or a body; with none it fails validation.
+
+**`send_inapp`** reads `title` and `body` (defaulting to generic text if absent), and optional `ctaLabel` and `ctaUrl`. The button renders only when both CTA fields are present. It can also draw content from a `campaignId`.
+
+**`dispatch_campaign`** reads `campaignId` and launches that prepared campaign at the recipient.
 
 ### Waits
 
@@ -56,7 +70,17 @@ You can also use `minutes`, `hours`, or `days`, or an amount-and-unit pair:
 { "data": { "amount": 2, "unit": "hours" } }
 ```
 
-The unit defaults to **minutes** when omitted, and any delay is clamped to a minimum of one second. A waiting entry is scheduled and resumed later, so it doesn't hold a worker open.
+Two more forms are available:
+
+```json
+// Wait until the next occurrence of a local wall-clock time
+{ "data": { "until": "09:00", "timezone": "Africa/Lagos" } }
+
+// Explicit milliseconds
+{ "data": { "delayMs": 90000 } }
+```
+
+The unit defaults to **minutes** when omitted, and any delay is clamped to a minimum of one second. A waiting entry is scheduled and resumed later, so it doesn't hold a worker open, and a stranded resume is recovered if the queue restarts.
 
 ### Tags
 
@@ -208,7 +232,36 @@ Publish after every change you want live. Saving the graph is not publishing.
 
 Each step retries up to 3 times with exponential backoff. After the final attempt the entry is marked `failed` and recorded as a dead letter with the error.
 
-Email steps behave differently. They **skip** rather than fail when delivery is impossible: if sending reputation is blocked, or every recipient is suppressed, the node is skipped and the flow continues. Check entry events for `node_skipped` when an email step produces no sends.
+Each side-effecting node claims itself before it runs, so a retried entry re-runs only the node that failed, not the ones that already succeeded. This gives you effectively exactly-once delivery per node even across retries.
+
+Nodes fail in different ways:
+
+| Node | On trouble |
+| --- | --- |
+| `send_email` | **Skips** (flow continues) if sending reputation is blocked or every recipient is suppressed. Fails and retries only if some recipients exist but every send errors. |
+| `send_inapp` | Wallets with no in-app session are filtered out. Fails only if there are zero wallet recipients. |
+| `webhook`, `add_tag`, `dispatch_campaign` | Fail and retry, then dead-letter. |
+
+## Watching an entry
+
+Every contact that enters an automation is an **entry**, and each entry records events as it moves through the flow. This is how you answer "did this fire, and where did it stop."
+
+An entry is `running`, `waiting` (paused on a `wait`), `completed`, or `failed`. Its events include:
+
+| Event | Meaning |
+| --- | --- |
+| `trigger_received` | The entry was created from a matching event. |
+| `node_entered` | Execution reached a node. |
+| `action_executed` | A node ran, with detail like recipient count and delivery IDs. |
+| `node_skipped` | A node was reachable but declined to run, with a reason such as `reputation_blocked` or `all_suppressed`. |
+| `wait_scheduled` | A `wait` node scheduled a resume. |
+| `dead_lettered` | The entry failed terminally after retries. |
+
+When an email step produces no sends, look for `node_skipped` and its reason before assuming the trigger is broken. When an automation completes, it also emits a public `automation.completed` [webhook event](/api/webhooks) you can subscribe to.
+
+<Note>
+Automation stats (entries, conversions, revenue, time-series, paths) are derived from send and delivery records, so "entries" counts trigger matches. Conversion and revenue are inferred from event names and metadata, so treat them as directional rather than as an accounting source.
+</Note>
 
 ## Best practices
 

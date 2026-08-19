@@ -1,22 +1,55 @@
 ---
-title: "Overview"
-description: "Build on Onchain Suite with wallet-aware auth patterns, webhook ingestion, and safe integration guidance."
+title: "Build on Onchain Suite"
+description: "Integrate Onchain Suite into your dApp: wallet-based in-app notifications, custom events, and a server-to-server API."
 ---
 
-## What This Section Covers
+Onchain Suite drops into your dApp. Most teams start in the frontend, wiring up wallet-based notifications, then send product events and read data from their backend as they grow.
 
-These developer docs explain how to connect systems safely to Onchain Suite without turning the docs into a raw endpoint catalog.
+## Start in the frontend
 
-## What To Expect
+<CardGroup cols={2}>
+  <Card title="In-app notifications" icon="bell" href="/integrations/in-app-notifications">
+    Two lines of SDK gives your dApp wallet-authenticated in-app, web, and mobile push. This is where most integrations begin.
+  </Card>
+  <Card title="Custom events" icon="signal-stream" href="/integrations/custom-events">
+    Send what happens in your product (signups, deposits, upgrades) and trigger messaging from it.
+  </Card>
+</CardGroup>
 
-- Authentication guidance for browser, embedded, and server-to-server use cases
-- Webhook patterns for sending lifecycle events into the platform
-- Rate-limit and reliability guidance for production integrations
+The in-app SDK authenticates users by **wallet signature**, so you can reach someone who has never given you an email. Nothing about it requires a backend: a publishable key and the SDK are enough to start.
 
-## Integration Model
+## Then reach for the backend
 
-Most implementations follow a simple pattern:
+When you need server-side control, a secret key unlocks a small server-to-server API.
 
-1. Authenticate in the right context.
-2. Send events or identity signals into Onchain Suite.
-3. Let campaigns, audiences, and automations operate on the normalized result.
+<CardGroup cols={2}>
+  <Card title="API keys" icon="key" href="/integrations/api-keys">
+    Publishable keys for the browser, secret keys for your server. How to create, scope, and rotate them.
+  </Card>
+  <Card title="Wallet and contract data" icon="wallet" href="/integrations/wallet-and-contract-data">
+    The on-chain and off-chain signals that power audiences and automations.
+  </Card>
+  <Card title="Automation triggers" icon="bolt" href="/api/automation-triggers">
+    Feed trigger events from your own indexer or backend.
+  </Card>
+  <Card title="SQL schema" icon="table" href="/api/sql-schema">
+    Every table and column you can query.
+  </Card>
+</CardGroup>
+
+## How keys work
+
+| Key | Where it lives | What it does |
+| --- | --- | --- |
+| Publishable (`pk_*`) | Browser, safe to ship | The in-app SDK's wallet auth |
+| Secret (`sk_*`) | Server only | Server-to-server API calls |
+
+See [API Keys](/integrations/api-keys) for the full model, including scopes and rotation.
+
+## The shape of an integration
+
+Most implementations follow the same arc:
+
+1. **Add the SDK** to your dApp so wallets can receive notifications.
+2. **Send events** from your product, either from the browser through a form or from your backend with a secret key.
+3. **Let the platform work.** Campaigns, audiences, and automations operate on the normalized result, and reach users on whichever channel they're on.

@@ -5,7 +5,7 @@
   "colors": {
     "primary": "#1727E0",
     "light": "#2F94FF",
-    "dark": "#1727E0"
+    "dark": "#010F31"
   },
   "favicon": "/logo/Icon_light.png",
   "fonts": {
@@ -73,7 +73,8 @@
               "audience/wallet-enrichment",
               "audience/segments",
               "audience/imports-and-exports",
-              "audience/health-and-churn"
+              "audience/health-and-churn",
+              "audience/privacy"
             ]
           },
           {
@@ -113,19 +114,6 @@
             ]
           },
           {
-            "group": "Integrations",
-            "icon": "plug",
-            "pages": [
-              "integrations/overview",
-              "integrations/in-app-notifications",
-              "integrations/custom-events",
-              "integrations/api-keys",
-              "integrations/webhook-events",
-              "integrations/wallet-and-contract-data",
-              "integrations/third-party-connections"
-            ]
-          },
-          {
             "group": "Help",
             "icon": "circle-question",
             "pages": [
@@ -141,25 +129,29 @@
         "tab": "Build on the Platform",
         "groups": [
           {
+            "group": "Integrations",
+            "icon": "plug",
+            "pages": [
+              "integrations/overview",
+              "integrations/in-app-notifications",
+              "integrations/custom-events",
+              "integrations/api-keys",
+              "integrations/webhook-events",
+              "integrations/wallet-and-contract-data",
+              "integrations/third-party-connections"
+            ]
+          },
+          {
             "group": "Developers",
             "icon": "code",
             "pages": [
               "api/overview",
-              "api/authentication",
               "api/domains",
               "api/automation-triggers",
               "api/webhooks",
               "api/rate-limits",
               "api/sql-schema",
               "api/mcp"
-            ]
-          },
-          {
-            "group": "In-App SDK",
-            "icon": "bell",
-            "pages": [
-              "integrations/in-app-notifications",
-              "integrations/custom-events"
             ]
           }
         ],

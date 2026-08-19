@@ -1,0 +1,56 @@
+---
+title: "Privacy and ZK"
+description: "How Onchain Suite protects contact identity: wallet-first by default, and a private fingerprint that matches contacts without exposing their email."
+---
+
+Onchain Suite is built to hold as little personal data as possible while still letting you run real lifecycle messaging. The privacy model has two parts: a wallet-first identity that often needs no personal data at all, and a private fingerprint that lets the platform work with an email without exposing it.
+
+## Wallet-first means less to protect
+
+A contact can exist with **just a wallet address**. Wallets are already public on-chain, so a wallet-only audience carries no personal data to leak. You can enrich, segment, and reach these users with [in-app notifications](/integrations/in-app-notifications) without ever collecting an email or a name.
+
+The privacy question only arises when you *do* collect an email, and that's where the fingerprint comes in.
+
+## The email fingerprint
+
+When you store an email, the platform also computes a **private, per-workspace fingerprint** of it: a one-way keyed hash that can't be reversed back to the address. The fingerprint is what the platform uses to work with the contact:
+
+- **Matching and dedup.** Two imports of the same address collide on the fingerprint, so you never get duplicate contacts.
+- **Suppression.** Bounces, complaints, and unsubscribes are recorded against the fingerprint and honored on every future send.
+- **Engagement analytics.** Opens and clicks join back to the contact through the fingerprint.
+
+Because the key is derived **per workspace**, a fingerprint from one workspace can't be correlated against another. And because it's one-way, it identifies a contact without revealing the address.
+
+<Note>
+Matching on the fingerprint is exact-match by design. You can look a contact up by their full email, but you can't do partial or wildcard searches (like "everyone at a domain") against the fingerprint.
+</Note>
+
+## Optional at-rest encryption
+
+Beyond the fingerprint, you can turn on **encryption of the address itself** so it's stored as ciphertext rather than plain text. This is available:
+
+- **Per import**, with a protection flag when you start the import.
+- **Per form**, so contacts captured through a specific form are protected on capture.
+- **Workspace-wide**, as a default for everything.
+
+Encryption uses a per-record data key wrapped under a workspace master key, so keys can be rotated without re-encrypting every record. Crucially, matching, suppression, and analytics keep working while it's on, because they run on the fingerprint, not the address.
+
+<Note>
+Email verification (syntax, deliverability, spam-trap checks) runs at capture time, before protection is applied, so turning on encryption doesn't reduce list quality. Merge variables are unaffected, since campaigns render tags like `{{ greeting_name }}` and unsubscribe links rather than interpolating the raw address.
+</Note>
+
+## What keeps working
+
+The whole point is that privacy doesn't break your campaigns. With the fingerprint in place, all of this continues to work normally:
+
+| Capability | Runs on |
+| --- | --- |
+| Import dedup | Fingerprint |
+| Suppression (bounces, complaints, unsubscribes) | Fingerprint |
+| Open and click analytics | Fingerprint |
+| Segments and tags | Contact record |
+| Merge variables in emails | Rendered tags, never the raw address |
+
+## Verifiable privacy (roadmap)
+
+We're building toward **on-chain verifiability**: a way to publish a tamper-evident fingerprint of a whole group of records so anyone can confirm the data wasn't altered, without ever seeing the records themselves. This is about proving integrity, never about putting personal data on a chain. It isn't live yet, and this page will cover it in detail when it ships.

@@ -97,9 +97,23 @@ All filters on a trigger must pass. Comparisons are case-insensitive and whitesp
 These five operators are the complete set. An unrecognized operator, `gte`, `gt`, `lt`, is **silently dropped**, and the filter simply stops applying. That makes the automation fire more often than you intended rather than erroring, so double-check operator spelling. For numeric thresholds, filter downstream with a `branch` node instead.
 </Warning>
 
+## Custom event triggers
+
+Anything your product does can be a trigger. Send a [custom event](/integrations/custom-events) and match it with the `app_event` trigger type (aliases `custom_event`, `custom-event`, `appevent` also work).
+
+```json
+{
+  "type": "app_event",
+  "eventNames": ["first_deposit"],
+  "filters": [{ "path": "amountUsd", "operator": "gte", "value": 100 }]
+}
+```
+
+An empty event-name list is a wildcard that matches every custom event, so always name the events you want. Filters read the event payload the same way on-chain filters do. The full flow, from firing the event to receiving an in-app push, is in [Custom Events](/integrations/custom-events#end-to-end-notify-a-user-from-an-offchain-event).
+
 ## Lifecycle triggers
 
-Three non-chain triggers are available.
+Three lifecycle triggers are available.
 
 ### `segment_entered`
 
@@ -130,7 +144,7 @@ Fires when a contact's health score crosses a line.
 </ParamField>
 
 <Note>
-These three triggers fire when an event is **posted to the ingest API**, the platform does not currently emit them on its own. If you want a segment-entry automation to run, your system needs to call the ingest endpoint when membership changes. See [Contract-Based Flows](/automation/contract-based-flows) for the API.
+These lifecycle triggers, and custom events, fire when an event is **sent to the ingest API**. The platform does not emit them on its own, so your system calls the ingest endpoint when the thing happens. See the [Automation Trigger API](/api/automation-triggers).
 </Note>
 
 ## Entry rules and deduplication
@@ -179,14 +193,37 @@ A `branch` node routes an entry down different paths. Conditions here test the *
 | `contains` | Substring or array membership |
 | `eq` | Equality, also the default for any unrecognized operator |
 
-Rules are evaluated in order and **the first match wins**. If nothing matches, the entry follows `defaultTarget`, and failing that, the first outgoing edge.
+Rules are evaluated in order and **the first match wins**. If nothing matches, the entry follows the default target, and failing that, the first outgoing edge.
 
-Two differences from trigger filters are easy to trip over:
+### The rolling context
 
-- Branch fields are **flat keys** on the context, `walletAddress`, `email`, `contactId`, `tags`, `lastEmail`. Dot-paths are not traversed here.
+Each entry carries a context that grows as it runs. Branch fields read flat keys on it (no dot-paths). It starts as:
+
+```json
+{ "email": "...", "walletAddress": "0x...", "contactId": "..." }
+```
+
+and each node that runs adds to it:
+
+| After node | Adds |
+| --- | --- |
+| `send_email` | `lastEmail` (to, subject, templateId, recipient count) |
+| `send_inapp` | `lastInapp` (delivery IDs, delivered-now), and sets `walletAddress` |
+| `webhook` | `lastWebhook` (url, status) |
+| `add_tag` | `tags` (the contact's full tag list) |
+| `dispatch_campaign` | `lastCampaignDispatch` (campaign and run IDs) |
+
+So a branch after a `send_inapp` can route on `lastInapp`, and a branch after `add_tag` can test `tags` with `contains`.
+
+### Differences from trigger filters
+
+- Branch comparisons are **case-sensitive**, while trigger filters are case-insensitive. `email eq "A@x.com"` will not match `a@x.com` in a branch.
 - `gte` and `lte` work in branches but not in trigger filters; `in` works in trigger filters but not in branches.
+- Branch fields are flat context keys; trigger filters use dot-paths into the payload.
 
-The context starts as `{ email, walletAddress, contactId }` and accumulates `lastEmail`, `lastInapp`, `lastWebhook`, `lastCampaignDispatch`, and `tags` as nodes execute.
+<Note>
+Rules are read tolerantly. A branch rule accepts `field`, `path`, or `condition` for the field; `operator` or `op`; and `target`, `targetNodeId`, `to`, or `nodeId` for the destination. The default can be `defaultTarget`, `default`, `elseTarget`, or `fallbackTarget`. Both a `rules` array and a `branches` array are read and combined.
+</Note>
 
 <Note>
 Publishing requires a branch node to have at least two outgoing edges. Draw the edges in the builder even when you've selected targets by node id, or validation will reject the graph with `INVALID_BRANCH_CONFIG`.

@@ -1,59 +1,83 @@
 ---
 title: "Imports and Exports"
-description: "Bring contacts in from CSV or JSON with automatic column mapping, wallet parsing, and capacity handling, and export them back out."
+description: "Bring contacts in from CSV or JSON with automatic column mapping and wallet parsing, and export them back out."
 ---
 
 Import contacts from an existing CRM, snapshot, or partner list. Onchain Suite maps your columns automatically, parses wallet addresses across chains, and holds anything that needs attention rather than dropping it silently.
 
-## Importing
+## Limits and formats
 
-Imports run in the background on a queue, so a large file keeps processing even if you navigate away, and an interrupted run recovers on its own. Upload a **CSV, JSON, or NDJSON** file up to 100 MB, choose the list it belongs to, and track progress from the import's status.
+| Limit | Value |
+| --- | --- |
+| File formats | CSV, JSON, NDJSON |
+| Max file size | 100 MB |
+| List | Required on every import |
+| Tags | Optional |
+| Wallet chains parsed | EVM and Solana |
+
+Imports run in the background on a queue, so a large file keeps processing even if you navigate away, and an interrupted run recovers on its own. Track progress from the import's status. Larger files upload directly to storage first, then import; you can also download a sample CSV or JSON to see the expected shape.
 
 <Note>
 A **list is required** for every import. Contacts imported without one wouldn't appear in any audience, so the import won't start until you pick a list. Tags are optional on top of that.
 </Note>
 
-### Column mapping
+## Columns
 
-You don't have to rename your headers. Common column names are recognized automatically, matching ignores case, spaces, underscores, and hyphens.
+You don't have to rename your headers. Common column names are recognized automatically. Matching ignores case, spaces, underscores, and hyphens, so `Wallet Address`, `wallet_address`, and `walletaddress` are the same column.
 
 | Field | Headers recognized (examples) |
 | --- | --- |
-| Email | `email`, `email address`, `e-mail`, `contact email`, `user email` |
+| Email | `email`, `email address`, `e-mail`, `contact email`, `user email`, `primary email` |
 | First name | `first name`, `fname`, `given name`, `forename` |
 | Last name | `last name`, `lname`, `surname`, `family name` |
-| Full name | `name`, `full name`, `contact name`, split into first and last |
-| Wallet | `wallet`, `wallet address`, `address`, `eth address`, `public key`, `holder`, `owner`, `signer`, `solana address` |
+| Full name | `name`, `full name`, `contact name` (split into first and last) |
+| Wallet | `wallet`, `wallet address`, `address`, `eth address`, `ethereum address`, `public key`, `holder`, `owner`, `signer`, `solana address` |
 | Tags | `tags`, `tag`, `labels`, `groups` |
 
-Anything unrecognized is kept as a contact attribute, so no column is lost. You can also map columns explicitly to override the automatic matching, and there are presets for common tools like Mailchimp.
+Anything unrecognized is kept as a **contact attribute** rather than discarded, so no column is lost, and those attributes are usable later in SQL and merge variables. You can also map columns explicitly to override the automatic matching, and there are presets for common tools.
 
-### Wallet parsing
+<Note>
+Every row needs at least one usable identifier: an email or a wallet. A row with neither is reported as an error rather than imported.
+</Note>
+
+## Wallet parsing
 
 Wallet columns are parsed for **both EVM and Solana** addresses. A value that can't be parsed is reported with a reason rather than dropped quietly:
 
-- `empty`, no address in the cell
-- `unrecognised-format`, not a valid EVM or Solana address
-- `looks-like-ens`, an ENS name like `vitalik.eth`, which is resolvable but isn't a raw address
+| Reason | Meaning |
+| --- | --- |
+| `empty` | No address in the cell. |
+| `unrecognised-format` | Not a valid EVM or Solana address. |
+| `looks-like-ens` | An ENS name like `vitalik.eth`, which is resolvable but isn't a raw address. |
 
 Spreadsheet quirks like a leading apostrophe on a text-formatted cell are handled.
 
-### Warnings vs errors
+## Warnings vs errors
 
-When the import finishes, results are split:
+When the import finishes, results are split so you can see exactly what needs fixing:
 
-- **Errors**, the row didn't import (for example, no usable identifier).
-- **Warnings**, the row imported, but something was incomplete (for example, a wallet was supplied but couldn't be parsed).
+- **Errors.** The row didn't import, for example because it had no usable identifier.
+- **Warnings.** The row imported, but something was incomplete, for example a wallet that was supplied but couldn't be parsed.
 
-Both are sampled in the import status so you can see exactly what needs fixing.
+Both are sampled in the import status. A file that imports "successfully" can still carry warnings, so check the sample.
 
-### When you're over capacity
+## Write behavior
 
-If an import would push you past your plan's contact limit, the extra contacts aren't rejected. They're **quarantined**. They're stored and counted, kept out of every audience (they carry no tags or list membership), and released automatically once you add capacity. Contacts awaiting email confirmation via [double opt-in](/audience/segments) are held the same way.
+An import can be tuned to how it should merge with existing contacts:
 
-### Write behavior
+| Option | Choices |
+| --- | --- |
+| Mode | Create only, update only, or upsert |
+| Deduplicate on | Email or wallet address |
+| On conflict | Skip or update |
+| Dry run | Validate the file without writing anything |
+| Max errors | Abort once errors pass a threshold |
 
-Imports can create only, update only, or upsert; deduplicate on email or wallet address; run as a dry run first; and abort past a threshold of errors.
+You can also turn on [privacy protection](/audience/privacy) for an import so the contacts it creates are protected on the way in.
+
+## When you're over capacity
+
+If an import would push you past your plan's contact limit, the extra contacts aren't rejected. They're **quarantined**: stored and counted, kept out of every audience (they carry no tags or list membership), and released automatically once you add capacity. Contacts awaiting email confirmation via double opt-in are held the same way.
 
 ## Exporting
 
@@ -61,13 +85,14 @@ Export a list or segment back out to a file. Exports run on the same queue and r
 
 ## Managing lists and tags
 
-Rename or delete tags and lists as your taxonomy evolves. A tag that backs a list can't be deleted out from under it, remove the list first.
+Rename or delete tags and lists as your taxonomy evolves. A tag that backs a list can't be deleted out from under it; remove the list first.
 
-To clear a workspace entirely, deleting all contacts is possible but guarded: you confirm the exact current contact count, and it's limited to OWNER and ADMIN.
+To clear a workspace entirely, deleting all contacts is possible but guarded: you confirm the exact current contact count, and it's limited to Owners and Admins.
 
 ## Good practices
 
 - Decide your source of truth before a large import.
 - Import into a clearly named list so the contacts are findable immediately.
-- Review the warnings sample, a file that imports "successfully" can still have unparsed wallets.
+- Run a dry run first on an unfamiliar file to see how columns map and how many rows would import.
+- Review the warnings sample; a file that imports "successfully" can still have unparsed wallets.
 - Export only the fields a workflow actually needs.

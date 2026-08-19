@@ -17,6 +17,24 @@ There are three ways to define one:
 Lists and segments share the same backing. A list is just a segment you import into, so a list can be reused anywhere a segment can.
 </Note>
 
+## How the rules combine
+
+A rule-based segment supports three criteria, and they're combined with **AND**: a contact is in the segment only if it meets every criterion you set.
+
+| Criterion | Meaning |
+| --- | --- |
+| **Tags** | The contact carries any of the chosen tags. |
+| **Minimum score** | The contact's score is at or above a threshold. |
+| **Has wallet** | The contact does, or does not, have a wallet address. |
+
+Leaving a criterion unset makes it a wildcard. A segment with only a tag criterion matches everyone with that tag, regardless of score or wallet.
+
+When a **campaign** targets several segments plus some hand-picked contacts, those are combined with **OR**: a contact is included if it's in any chosen segment or on the explicit list. So within one segment the criteria narrow the audience, and across segments they widen it.
+
+<Note>
+For anything the three criteria can't express, such as on-chain value, activity recency, or NFT holdings, build the segment in [SQL](/intelligence/sql-query-editor) instead. The rule builder is deliberately simple; the SQL editor reaches the enrichment and messaging tables.
+</Note>
+
 ## Good segment types
 
 - Reachable users on a specific channel (email or in-app)

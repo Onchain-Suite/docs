@@ -3,18 +3,35 @@ title: "Overview"
 description: "Understand how Onchain Suite is organized before you send your first campaign."
 ---
 
+## Two ways in
+
+There are two starting points, depending on who you are.
+
+<CardGroup cols={2}>
+  <Card title="Building a dApp" icon="code" href="/api/overview">
+    Drop the SDK into your frontend for wallet-based in-app notifications, then send events and read data as you grow. Start with **Build on the Platform**.
+  </Card>
+  <Card title="Running campaigns" icon="paper-plane" href="/campaigns/overview">
+    Set up a workspace, authenticate a domain, build an audience, and send. Start with the operator sections here.
+  </Card>
+</CardGroup>
+
+Many teams do both: a frontend developer wires up the SDK, and a growth team runs campaigns and automations on top of the same audience.
+
 ## Platform Model
 
-Onchain Suite is designed around what marketers and growth teams actually need to do, not around backend services or internal data systems.
+Onchain Suite is designed around what growth teams and dApp developers actually need to do, not around backend services or internal data systems.
 
-Most teams use the platform in this order:
+An operator team typically works in this order:
 
 1. Create a workspace for your team.
 2. Configure a project for a brand, product line, or environment.
 3. Verify senders and domains.
 4. Connect contract, wallet, and product data sources.
-5. Review audiences, segments, or the first auto-generated cohort insight.
+5. Review audiences, segments, or the first cohort insight.
 6. Launch a campaign or automation.
+
+A dApp developer usually starts the other end: add the [in-app SDK](/integrations/in-app-notifications), send [custom events](/integrations/custom-events), and let automations react to them.
 
 ## Core Concepts
 

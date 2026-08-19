@@ -602,7 +602,7 @@ To trigger a push from something that happens in **your product**, a signup, a d
 
 Expired, dismissed, and clicked notifications are pruned and never replayed.
 
-In-app pushes draw from the **same monthly message allowance as email**. They are not a separate meter. Exceeding it returns `402 PLAN_LIMIT_EXCEEDED`; warnings fire at 75% and 95% of the allowance. Exceeding the daily cap returns `429 Daily in-app push quota exceeded`.
+In-app pushes have their **own monthly allowance**, separate from email. Exceeding it returns `402 PLAN_LIMIT_EXCEEDED`; warnings fire at 75% and 95% of the allowance. Exceeding the daily cap returns `429 Daily in-app push quota exceeded`. See [Plans and billing](/settings/plans-and-billing) for the per-plan numbers.
 
 <Note>
 Rate-limit (429) responses from the throttler return a flat body, `{ statusCode, message, error, retryAfter, limit, remaining, resetAt, path, timestamp }`, rather than the standard error envelope, along with `X-RateLimit-Limit` and `X-RateLimit-Remaining` headers.

@@ -7,19 +7,19 @@ Onchain Suite uses two kinds of key.
 
 | Key | Prefix | Where it lives | What it's for |
 | --- | --- | --- | --- |
-| **Publishable** | `pk_live_*` / `pk_test_*` | Browser, safe to ship publicly | The in-app SDK's wallet auth |
-| **Secret** | `sk_live_*` / `sk_test_*` | Server only, never in client code | Server-to-server API calls |
+| **Publishable** | `pk_live_*` / `pk_test_*` | Browser (safe to ship publicly) | The in-app SDK's wallet auth |
+| **Secret** | `sk_live_*` / `sk_test_*` | Server only (never in client code) | Server-to-server API calls |
 
 The `live` / `test` segment is the environment. Publishable keys only authenticate the SDK's challenge/verify flow; everything that sends or reads data uses a secret key.
 
 ## Secret keys
 
-A secret key looks like `sk_live_<keyId>.<verifier>`. Only a hash of the verifier is stored, the full key is shown **once**, at creation, and can't be retrieved afterward. If you lose it, roll it.
+A secret key looks like `sk_live_<keyId>.<verifier>`. Only a hash of the verifier is stored; the full key is shown **once**, at creation, and can't be retrieved afterward. If you lose it, roll it.
 
 Each key carries a scope:
 
-- **Read/write** (default), full server-to-server access.
-- **Read-only**, reads only, for reporting or export integrations.
+- **Read/write** (default): full server-to-server access.
+- **Read-only**: reads only, for reporting or export integrations.
 
 Creating, rolling, and revoking secret keys is limited to OWNER and ADMIN, and the number of keys is capped by your plan.
 
@@ -46,7 +46,7 @@ A secret key unlocks a small, deliberate set of endpoints built for protocols in
 
 | Endpoint | Purpose |
 | --- | --- |
-| `POST /identify` | Register a wallet as a workspace contact. Wallet addresses only, PII is rejected. |
+| `POST /identify` | Register a wallet as a workspace contact. Wallet addresses only; PII is rejected. |
 | `GET /contacts` | List contacts with reachability flags (email / push) and tags. Never returns the email itself. |
 | `POST /campaigns/{id}/send` | Launch a campaign you've already prepared in the dashboard. |
 | `GET /messages/pending?wallet=` | Fetch queued in-app pushes for one wallet, for clients that can't hold a WebSocket. |
