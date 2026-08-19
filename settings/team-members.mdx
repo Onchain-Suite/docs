@@ -1,17 +1,41 @@
 ---
 title: "Team Members"
-description: "Add teammates and give them the right access for campaigns, settings, and analytics."
+description: "Invite teammates, assign roles, and understand seat limits."
 ---
 
-## Recommended Roles
+Invite teammates by email and give each one a role. Roles control what they can change; the number of seats is set by your plan.
 
-- Admins manage project setup and security.
-- Operators manage campaigns and automations.
-- Analysts review intelligence and reporting.
-- Contributors draft content and support reviews.
+## Roles
 
-## Good Practices
+| Role | Can do |
+| --- | --- |
+| **Owner** | Everything, including billing and transferring ownership. There's always at least one. |
+| **Admin** | Manage settings, domains, API keys, team members, and campaigns. Not billing. |
+| **Editor** | Create and run campaigns, automations, and audiences. No settings or team management. |
+| **Viewer** | Read-only — dashboards, analytics, and reporting. |
 
-- Grant the least access needed for each role.
-- Review access after major team changes.
-- Keep ownership clear for senders, domains, and integrations.
+Managing members (inviting, changing roles, removing) is limited to Owners and Admins. The last Owner can't be removed or downgraded, so a workspace always has one.
+
+## Seats
+
+Each plan includes a fixed number of seats, counting the Owner:
+
+| Plan | Seats |
+| --- | --- |
+| Pay as you go | 2 |
+| Launch | 2 |
+| Growth | 4 |
+| Pro | 7 |
+| Scale | Custom |
+
+See [Plans and billing](/settings/plans-and-billing).
+
+## Inviting
+
+Send an invite from the team settings; the teammate accepts via an emailed link. Invites are rate-limited to a handful per minute, and you can resend or cancel a pending one.
+
+## Good practices
+
+- Grant the least access each person needs — Viewer for stakeholders who only read, Editor for people running campaigns.
+- Reserve Admin for people who manage domains, keys, and settings.
+- Review access after team changes, and keep ownership of senders, domains, and integrations clear.

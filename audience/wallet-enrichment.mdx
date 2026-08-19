@@ -89,7 +89,7 @@ est_ltv = portfolio_value_usd × 0.08
 
 Enrichment pulls from [GoldRush](https://goldrush.dev) (Covalent).
 
-**EVM mainnets:** `eth-mainnet`, `base-mainnet`, `matic-mainnet`, `bsc-mainnet`, `arbitrum-mainnet`, `optimism-mainnet`, `sei-mainnet`. **Solana:** `solana-mainnet`. Testnets including `eth-sepolia`, `base-sepolia-testnet`, and `solana-devnet` are also supported.
+**EVM mainnets:** `eth-mainnet`, `base-mainnet`, `matic-mainnet`, `bsc-mainnet`, `arbitrum-mainnet`, `optimism-mainnet`, `sei-mainnet`. **Solana:** `solana-mainnet`. Testnets including `eth-sepolia`, `base-sepolia-testnet`, `monad-testnet`, and `solana-devnet` are also supported.
 
 A wallet is enriched per chain, so metrics reflect the chain you enriched it on. Enrich the same wallet on multiple chains to build a cross-chain picture — activity summaries are stored per chain.
 
@@ -127,16 +127,17 @@ Enrichment jobs are deduplicated per wallet and chain, so enqueuing the same wal
 
 ## Cost and limits
 
-Enrichment consumes **GoldRush credits** — roughly 4 per wallet (it makes four data calls: balances, transactions, NFTs, and portfolio). Credits are a monthly allowance that scales with your plan:
+Enrichment consumes **wallet-data credits** (GoldRush) — roughly 4 per wallet, from four data calls: balances, transactions, NFTs, and portfolio. Each paid plan includes a monthly allowance:
 
-| Plan | Monthly GoldRush credits | Roughly this many wallets |
+| Plan | Monthly credits | Roughly this many wallets |
 | --- | --- | --- |
-| **Pay as you go** | Metered against your balance | — |
-| **Launch** — $29/mo | 10,000 | ~2,500 |
-| **Growth** — $199/mo | 75,000 | ~18,000 |
-| **Pro** — $499/mo | 200,000 | ~50,000 |
+| **Pay as you go** | Metered — $10 per 10,000 credits | — |
+| **Launch** — $49/mo | 1,000 | ~250 |
+| **Growth** — $349/mo | 10,000 | ~2,500 |
+| **Pro** — $799/mo | 25,000 | ~6,000 |
+| **Scale** — $2,299/mo | 50,000 | ~12,000 |
 
-Once the allowance is exhausted, new enrichment is blocked — the SQL editor and your already-enriched data keep working. On Pay as you go, enrichment draws from your balance rather than a monthly allowance.
+Once the allowance is exhausted, new enrichment is blocked — the SQL editor and your already-enriched data keep working. On Pay as you go, enrichment draws from your balance at $10 per 10,000 credits (about 4¢ a wallet) rather than a monthly allowance.
 
 Responses are cached per organization — 5 minutes for transactions, 10 for balances and portfolio, 15 for NFTs — so repeated enrichment of the same wallet within those windows is served from cache and doesn't re-spend credits (unless you pass `forceRefresh`).
 

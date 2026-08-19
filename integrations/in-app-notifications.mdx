@@ -1,18 +1,25 @@
 ---
 title: In-App Notifications (Wallet-Based)
-description: Deliver real-time, wallet-targeted push notifications to your dApp using publishable keys, signed challenges, and Socket.IO.
+description: Deliver real-time, wallet-targeted notifications to your dApp — in-app, web push, and mobile push — using publishable keys and signed challenges.
 ---
 
-Deliver real-time notifications to your users addressed by **wallet address** — no email, no phone number, no account system required. A user proves ownership of their wallet by signing a message, and from then on you can push notifications straight into your dApp.
+Deliver notifications to your users addressed by **wallet address** — no email, no phone number, no account system required. A user proves ownership of their wallet by signing a message, and from then on you can reach them wherever they are.
 
-<CardGroup cols={2}>
-  <Card title="Drop-in SDK" icon="bolt">
-    Two lines of JavaScript gives you wallet auth, a live socket, and a styled toast UI.
+One send reaches the user through whichever channel they're reachable on:
+
+<CardGroup cols={3}>
+  <Card title="In-app" icon="bell">
+    A live toast in your dApp while the page is open, over a Socket.IO connection.
   </Card>
-  <Card title="Server-to-server API" icon="server">
-    Send pushes from your backend with a secret key when you need full control.
+  <Card title="Web push" icon="browser">
+    An OS notification when the tab is closed, via a service worker.
+  </Card>
+  <Card title="Mobile push" icon="mobile">
+    APNs and FCM delivery to your iOS and Android apps.
   </Card>
 </CardGroup>
+
+The SDK gives you all three plus wallet auth and a styled toast UI; a server-to-server API sends pushes from your backend with a secret key.
 
 ## How it works
 
@@ -24,12 +31,16 @@ Deliver real-time notifications to your users addressed by **wallet address** �
     The browser requests a challenge with your **publishable key**, the wallet signs it, and the server returns a short-lived session token.
   </Step>
   <Step title="Client connects">
-    The client opens a Socket.IO connection with that token and joins a room scoped to its org + wallet.
+    The client opens a Socket.IO connection with that token and joins a room scoped to its org + wallet. Optionally it also registers for web or mobile push.
   </Step>
   <Step title="You send pushes">
-    From your backend (secret key), a campaign, or an automation. Anything sent while the user is offline is replayed on reconnect.
+    From your backend (secret key), a campaign, or an automation. The platform routes each one to a live socket if the user is connected, otherwise to web or mobile push, otherwise it's held and replayed on reconnect.
   </Step>
 </Steps>
+
+<Note>
+The platform never sends a live in-app toast **and** an OS push for the same notification — if the wallet has an open socket, only the toast fires. When the socket is closed, web and mobile push take over. Cross-channel duplicates are collapsed by delivery ID, so tapping an OS push and then opening your dApp won't show the same notification twice.
+</Note>
 
 ## Keys and environments
 
@@ -182,6 +193,10 @@ os.report(notification, "clicked");
   Inject your own `socket.io-client` instead of the bundled one — useful on the CDN path or to pin a version.
 </ParamField>
 
+<ParamField path="options.push" type="false | { serviceWorkerPath?: string }">
+  Web push configuration. Defaults to enabled with the service worker at `/onchainsuite-sw.js`. Set to `false` to disable web push entirely. See [Web push](#web-push).
+</ParamField>
+
 <ParamField path="options.debug" type="boolean">
   Verbose console logging.
 </ParamField>
@@ -190,11 +205,94 @@ You can also construct the client with `createClient(publishableKey, options)`, 
 
 **Display defaults:** `position: "bottom-right"`, `accent: "#6d5efc"`, `background: "#111318"`, `foreground: "#f5f6f8"`, `duration: 8000` (use `0` for sticky), `maxVisible: 3`, `zIndex: 2147483000`.
 
-**Methods:** `start(walletAddress?)`, `stop()`, `on(event, cb)` returning an unsubscribe function, and `report(notification, type)`.
+**Methods:**
+
+| Method | Purpose |
+| --- | --- |
+| `start(walletAddress?)` | Authenticate the wallet and connect. |
+| `stop()` | Disconnect and tear down. |
+| `on(event, cb)` | Subscribe; returns an unsubscribe function. |
+| `report(notification, type)` | Report an interaction (`delivered`, `viewed`, `dismissed`, `clicked`). |
+| `enablePush()` | Prompt for and register web push. Returns the resulting `PushStatus`. |
+| `disablePush()` | Unregister web push for this device. |
+| `pushStatus()` | Current web-push permission — `"unsupported" \| "denied" \| "prompt" \| "granted"`. No prompt. |
+| `registerDevice(token, platform, appId?)` | Register a mobile device token (`platform` is `"ios"` or `"android"`). |
+| `unregisterDevice(token)` | Remove a mobile device token. |
 
 **Events:** `"notification"`, `"connected"`, `"disconnected"`, `"error"`.
 
 Behaviour worth knowing: `delivered` is reported automatically on receipt; the socket reconnects indefinitely with backoff from 1s to 15s; toast content is rendered with `textContent`, so notification text can't inject HTML; and `start()` resolves after 8 seconds even if the socket hasn't connected yet, so it never hangs your boot sequence.
+
+## Web push
+
+Web push delivers an **OS-level notification when your dApp's tab is closed** — the same notifications, reaching users who've navigated away. It needs a service worker and the user's permission.
+
+<Steps>
+  <Step title="Host the service worker">
+    The SDK ships one at `node_modules/@onchainsuite/sdk/public/onchainsuite-sw.js`. Copy it to your site root so it's served at `/onchainsuite-sw.js`.
+
+    Already have a service worker? Import ours into it instead:
+
+    ```js
+    // your-sw.js
+    importScripts("/onchainsuite-sw.js");
+    ```
+
+    Point the SDK at a custom path with `push: { serviceWorkerPath: "/my-sw.js" }`.
+  </Step>
+
+  <Step title="Prompt from a user action">
+    Call `enablePush()` in response to a click — not on load — so the permission prompt has context. Gate it on `pushStatus()` so you don't re-prompt someone who already decided.
+
+    ```ts
+    const client = createClient("pk_live_yourorg_xxx", {
+      apiBaseUrl: "https://api.onchainsuite.com",
+    });
+    await client.start();
+
+    if (client.pushStatus() === "prompt") {
+      const status = await client.enablePush(); // "granted" | "denied" | ...
+    }
+    ```
+  </Step>
+</Steps>
+
+The SDK fetches the platform VAPID key, registers the subscription with the server, and re-syncs a granted subscription automatically on every `start()`. There's no VAPID key for you to configure. Turn it off per user with `disablePush()`, or disable the feature entirely with `push: false`.
+
+## Mobile push
+
+For a native iOS or Android app, register the device's push token after `start()`. The SDK doesn't fetch the token — obtain it with your own push library (`expo-notifications`, `@react-native-firebase/messaging`, etc.) and hand it over.
+
+```ts
+import messaging from "@react-native-firebase/messaging";
+
+await client.start(walletAddress);
+await messaging().requestPermission();
+
+const token = await messaging().getToken();
+await client.registerDevice(token, "android");
+
+// Keep it fresh — tokens rotate.
+messaging().onTokenRefresh((t) => client.registerDevice(t, "android"));
+```
+
+Use `"ios"` for APNs. Stop delivery to one device with `unregisterDevice(token)`.
+
+<Note>
+Mobile push requires your Apple (APNs `.p8`) or Firebase (FCM service account) credentials on file — an OWNER or ADMIN uploads them once in the dashboard under organization push credentials. Without them, device tokens register but nothing is delivered.
+</Note>
+
+## Choosing a channel is automatic
+
+You don't pick the channel — the platform routes each notification per recipient:
+
+| Recipient state | Delivery |
+| --- | --- |
+| Socket connected | In-app toast only |
+| No socket, has push registered | Web and/or mobile push |
+| Neither | Held, replayed on next connect |
+
+A wallet with both a browser subscription and a phone can receive both. What never happens is a live toast and an OS push for the same notification. `deliveredNow: false` on a send is still not an error — it means the user wasn't socket-connected on the node that handled the request, and OS push or replay takes over.
 
 ## Dashboard setup
 

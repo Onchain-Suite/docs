@@ -119,6 +119,10 @@ For sustained volume, prefer these over the synchronous endpoint.
 
 Batch takes `{ "sourceId": "…", "events": [ … ] }` where each entry has the same shape as a single GoldRush event. Both return a queued acknowledgement — `mode`, `accepted`, `queued`, and per-event results for batch — rather than the match result, since matching happens after the response.
 
+<Note>
+The queued and batch endpoints apply a short **finality delay** before matching — a per-chain wait (seconds on an L2, up to a couple of minutes on Ethereum mainnet) so a re-orged transaction never fires a trigger. The two synchronous endpoints (`/triggers/onchain-event`, `/triggers/goldrush-event`) match immediately with no delay, so send those only for events you already consider final.
+</Note>
+
 ```bash
 curl -X POST https://api.onchainsuite.com/api/v1/v2/automations/runtime/triggers/goldrush-events/batch \
   -H "Authorization: Bearer sk_live_…" \

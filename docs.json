@@ -108,7 +108,8 @@
               "settings/sender-verification",
               "settings/domain-authentication",
               "settings/dns-records",
-              "settings/team-members"
+              "settings/team-members",
+              "settings/plans-and-billing"
             ]
           },
           {

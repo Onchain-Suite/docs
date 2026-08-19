@@ -9,6 +9,8 @@ A trigger decides **who enters** an automation. Filters narrow that entry. Branc
 
 Ten on-chain trigger types are available. Nine are presets: they're the generic `onchain_event` trigger with event names and filters pre-filled for a specific business moment.
 
+On **EVM** chains these fire automatically — the platform watches the contract and turns matching on-chain activity into automation entries, with no indexer or ABI needed from you. See [Contract-Based Flows](/automation/contract-based-flows). On Solana, on-chain events are sent in through the [Automation Trigger API](/api/automation-triggers).
+
 | Type | Fires on | Built-in filter |
 | --- | --- | --- |
 | `onchain_event` | Any event you name | — |

@@ -1,29 +1,49 @@
 ---
 title: "Domain Authentication"
-description: "Authenticate your sending domain so campaigns are delivered with stronger trust and alignment."
+description: "Authenticate your sending domain with SPF, DKIM, and DMARC so campaigns land in the inbox."
 ---
 
-## What You Configure
+Authenticating your domain proves Onchain Suite is allowed to send on its behalf, which is what gets your campaigns past spam filtering and into the inbox. It's a one-time DNS setup per domain.
 
-Domain authentication usually includes DNS records that prove Onchain Suite is authorized to send on behalf of your domain.
+## Setup flow
 
-## Setup Flow
+<Steps>
+  <Step title="Add your domain">
+    Register the domain you'll send from in domain settings.
+  </Step>
+  <Step title="Get the DNS records">
+    The setup shows the exact records to add — see [DNS Records](/settings/dns-records) for what each one is.
+  </Step>
+  <Step title="Add them at your DNS provider">
+    Enter them manually, or use the automatic option if your DNS provider is connected — it adds them for you.
+  </Step>
+  <Step title="Verify">
+    Re-check after the records propagate. Verification passes once every record resolves correctly.
+  </Step>
+</Steps>
 
-1. Open the project domain settings.
-2. Add the domain you plan to send from.
-3. Copy the DNS records shown in the setup flow.
-4. Add the records in your DNS provider.
-5. Wait for propagation and re-check verification.
+## What gets checked
 
-## Common DNS Records
+A complete setup has four kinds of record:
 
-- SPF records identify authorized sending infrastructure.
-- DKIM records sign outgoing mail.
-- DMARC records define how receiving providers handle failures.
+- **Ownership** — a TXT record proving you control the domain.
+- **SPF** — a TXT record (`v=spf1 …`) listing who may send for the domain.
+- **DKIM** — **two CNAME records** that let outgoing mail be cryptographically signed.
+- **DMARC** — a TXT record telling receivers what to do with mail that fails the checks.
 
-## Troubleshooting Tips
+## Handling conflicts
 
-- Double-check for missing quotes or trailing characters.
-- Make sure records are added to the correct host.
-- Allow time for propagation before retrying verification.
-- Remove conflicting legacy records if your DNS provider recommends it.
+The setup inspects your existing DNS and tells you exactly what to change rather than leaving you to guess:
+
+- **An existing SPF record is merged, not replaced.** Two separate `v=spf1` records is an invalid setup, so if you already have one, you add the Onchain Suite include to it rather than adding a second record.
+- **A clashing DKIM selector** — if the CNAME host is already taken — is flagged so you can clear it.
+- **An existing DMARC record** is left as-is; you don't need a second one.
+
+You'll also see advisories for weak existing policies, like an SPF ending in `~all` or a DMARC at `p=none`.
+
+## Troubleshooting
+
+- Add records to the correct host — a trailing domain doubled onto the host is the most common mistake.
+- Watch for stray quotes or characters copied around a value.
+- Give DNS time to propagate before re-checking.
+- If SPF won't verify, confirm you have a single merged `v=spf1` record, not two.

@@ -52,7 +52,23 @@ Use `profile.greetingName` in salutations. It's the only name variable guarantee
 
 Common variables have flat aliases that ignore case, underscores, and hyphens — so `{{first_name}}`, `{{FirstName}}`, and `{{firstname}}` are all the same:
 
-`firstName`, `lastName`, `fullName`, `displayName`, `greetingName`, `initials`, `email`, `wallet`, `walletAddress`, `walletShort`, `ensName`, `ensOrWallet`, `chain`, `unsubscribeUrl`, `preferenceCenterUrl`.
+`firstName`, `lastName`, `fullName`, `displayName`, `greetingName`, `initials`, `email`, `wallet`, `walletAddress`, `walletShort`, `ensName`, `ensOrWallet`, `chain`, `unsubscribeUrl`, `preferenceCenterUrl`, `managePreferences`, `ens`.
+
+### `[Bracket]` placeholders
+
+Templates imported from another email tool often use square-bracket placeholders like `[First Name]`. These work too — they're rewritten to the matching merge variable before rendering, so you don't have to convert a pasted template by hand.
+
+```text
+Hi [First Name], your wallet [Wallet] is on the list.
+```
+
+The rules:
+
+- A bracket label matches the same way aliases do — case, spaces, underscores, and hyphens are ignored, so `[First Name]`, `[first_name]`, and `[FIRSTNAME]` are equivalent.
+- Name-style brackets (`[First Name]`, `[Name]`, `[Greeting]`, `[Full Name]`) resolve to the blank-safe **`greetingName`**, never the raw first name — so an imported template can't turn a missing name into a blocked send.
+- Any other label maps to a known merge variable if one matches (`[Wallet]`, `[Wallet Address]`, `[ENS]`, `[Unsubscribe]`, `[Manage Preferences]`).
+- **An unrecognized label is left exactly as written.** `[Product Name]` stays `[Product Name]` in the email rather than becoming a broken variable — brackets are safe to leave in place.
+- A `[Label](url)` markdown link is left alone, so link text keeps working.
 
 ### Contact metadata
 

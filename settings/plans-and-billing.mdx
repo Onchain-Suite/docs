@@ -1,0 +1,52 @@
+---
+title: "Plans and Billing"
+description: "Plans, allowances, pay-as-you-go metering, and how usage is priced."
+---
+
+Onchain Suite bills monthly. You either pick a plan with included allowances, or run on **Pay as you go** and pay for exactly what you use from a prepaid balance. There's no free tier and no annual discount — annual is simply twelve months up front.
+
+## Plans
+
+| Plan | Price | Contacts | Messages/mo | Wallet-data credits | AI credits | Seats | Automations |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| **Pay as you go** | $0 + usage | 1,000 | metered | metered | metered | 2 | 3 |
+| **Launch** | $49/mo | 5,000 | 50,000 | 1,000 | 500 | 2 | Unlimited |
+| **Growth** | $349/mo | 25,000 | 250,000 | 10,000 | 8,000 | 4 | Unlimited |
+| **Pro** | $799/mo | 75,000 | 750,000 | 25,000 | 16,000 | 7 | Unlimited |
+| **Scale** | $2,299/mo | 150,000 | 1.5M | 50,000 | 40,000 | Custom | Unlimited |
+
+"Messages" is one shared allowance for **email and in-app push** together. A dedicated sending IP is provisioned automatically once an account sustains 100,000 sends a month; below that, sending runs on a managed warm pool.
+
+<Note>
+Buying a contact count between two tiers is supported — the price scales smoothly between them. You get the **capabilities** of the tier below your contact count and the **capacity** you paid for. For example, 11,000 contacts costs less than full Growth and carries Launch's features until you cross 25,000.
+</Note>
+
+## Pay as you go
+
+New workspaces start on Pay as you go with a prepaid balance. You top up, and metered actions debit that balance as they happen. The first metered action requires a **$10 minimum top-up**; top-ups run from $10 to $1,000.
+
+| Meter | Rate |
+| --- | --- |
+| Email | $1 per 1,000 |
+| In-app push | $1 per 1,000 |
+| AI actions | $5 per 1,000 |
+| Wallet-data credits (enrichment) | $10 per 10,000 |
+| ONS+ verified contacts | $10 per 1,000 |
+
+A launch is gated on your balance covering it. The charge is estimated up front, then **reconciled against what actually sent** — if suppression or unsubscribes shrink the audience after launch, the difference is refunded. Every debit and credit is written to a ledger you can review.
+
+<Note>
+When a paid plan lapses, you aren't cut off — the workspace falls back to pay-as-you-go rates against your balance. Sending only stops when the balance is also empty.
+</Note>
+
+## ONS+ list protection
+
+ONS+ verifies email addresses at import or capture time, clearing typos, dead mailboxes, and spam traps before they hurt your sending reputation. It's available on every plan, metered at $10 per 1,000 addresses submitted. A large first-stage check runs in-house at no charge, so most addresses never reach the paid stage.
+
+## Invoices and receipts
+
+Every paid invoice generates a branded PDF and emails a receipt to the workspace owner. Invoices are available in the billing area to view or download.
+
+## Managing billing
+
+Billing is owner-only. From the billing area you can change plan, buy contact capacity, top up a pay-as-you-go balance, manage payment methods (card or crypto), and read live usage against every allowance — contacts, messages, credits, seats, automations, and API keys.

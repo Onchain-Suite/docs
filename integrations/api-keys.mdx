@@ -1,11 +1,64 @@
 ---
 title: "API Keys"
-description: "Manage API keys and other credentials used to connect systems securely."
+description: "Publishable and secret keys — how to create, scope, rotate, and revoke them, and the server-to-server endpoints they unlock."
 ---
 
-## Best Practices
+Onchain Suite uses two kinds of key.
 
-- Store secrets outside client-side code.
-- Rotate credentials on a regular schedule.
-- Scope keys to the minimum access needed.
-- Remove unused keys promptly.
+| Key | Prefix | Where it lives | What it's for |
+| --- | --- | --- | --- |
+| **Publishable** | `pk_live_*` / `pk_test_*` | Browser — safe to ship publicly | The in-app SDK's wallet auth |
+| **Secret** | `sk_live_*` / `sk_test_*` | Server only — never in client code | Server-to-server API calls |
+
+The `live` / `test` segment is the environment. Publishable keys only authenticate the SDK's challenge/verify flow; everything that sends or reads data uses a secret key.
+
+## Secret keys
+
+A secret key looks like `sk_live_<keyId>.<verifier>`. Only a hash of the verifier is stored — the full key is shown **once**, at creation, and can't be retrieved afterward. If you lose it, roll it.
+
+Each key carries a scope:
+
+- **Read/write** (default) — full server-to-server access.
+- **Read-only** — reads only, for reporting or export integrations.
+
+Creating, rolling, and revoking secret keys is limited to OWNER and ADMIN, and the number of keys is capped by your plan.
+
+### Rolling a key
+
+Rolling issues a replacement and schedules the old key to stop working after a grace period you choose (up to 7 days), so you can redeploy before the old one dies. The replacement keeps the same name, scope, and environment, and doesn't count against your plan's key limit — so a leaked key can always be replaced.
+
+- **Leaked key:** roll with a **zero** grace period to kill it immediately.
+- **Planned rotation:** roll with a grace window (say 24–72 hours), deploy the new key, and let the old one expire on its own.
+
+Revoking a key removes it outright.
+
+<Warning>
+Treat a secret key like a password. Keep it in server-side configuration or a secrets manager, never in frontend code, a repo, or a browser. If one is exposed, roll it with zero grace immediately.
+</Warning>
+
+## Publishable keys
+
+Publishable keys are embedded in your dApp's page source on purpose — they only permit the wallet challenge/verify handshake, scoped to your allowed origins. They can be rotated too (production, test, or both at once); since they live in public source there's no grace period. See [In-App Notifications](/integrations/in-app-notifications).
+
+## Server-to-server endpoints
+
+A secret key unlocks a small, deliberate set of endpoints built for protocols integrating from their own backend. Base path `https://api.onchainsuite.com/api/v1`, authenticated with `Authorization: Bearer sk_live_…`.
+
+| Endpoint | Purpose |
+| --- | --- |
+| `POST /identify` | Register a wallet as a workspace contact. Wallet addresses only — PII is rejected. |
+| `GET /contacts` | List contacts with reachability flags (email / push) and tags. Never returns the email itself. |
+| `POST /campaigns/{id}/send` | Launch a campaign you've already prepared in the dashboard. |
+| `GET /messages/pending?wallet=` | Fetch queued in-app pushes for one wallet, for clients that can't hold a WebSocket. |
+
+Three more server-to-server entry points are documented elsewhere: [`POST /events`](/integrations/custom-events) for custom events, [`POST /inapp/push`](/integrations/in-app-notifications) for direct pushes, and the [Automation Trigger API](/api/automation-triggers) for feeding trigger events.
+
+You can also register outbound **webhooks** to receive events from the platform; the signing secret is shown once when you create the webhook.
+
+## Practices that hold up
+
+- Keep secret keys server-side only.
+- Use a **read-only** key for anything that only reports or exports.
+- Use `test` keys in non-production environments.
+- Roll on a schedule, and roll with zero grace the moment a key might be exposed.
+- Remove keys you no longer use.

@@ -1,26 +1,36 @@
 ---
 title: "Sender Verification"
-description: "Verify the sender identity you want to use for outbound email campaigns."
+description: "Verify the from-address your campaigns send from, and keep your list clean so it stays deliverable."
 ---
 
-## Why It Matters
+Your campaigns send from a verified sender identity — the name and address recipients see. Verifying it is what lets mailbox providers trust the mail, and it's required before a campaign can go out.
 
-Sender verification helps mailbox providers trust your emails and helps recipients recognize the brand behind the message.
+## Verifying a sender
 
-## Typical Setup
+<Steps>
+  <Step title="Authenticate the domain first">
+    A sender address lives on a domain. Authenticate that domain — SPF, DKIM, DMARC — before adding senders on it. See [Domain Authentication](/settings/domain-authentication).
+  </Step>
+  <Step title="Add the sender">
+    Set the from-name and from-address on the verified domain.
+  </Step>
+  <Step title="Confirm and test">
+    Once it's available, send a test campaign and confirm it lands as expected.
+  </Step>
+</Steps>
 
-1. Open project settings.
-2. Add the sender name and sender address.
-3. Complete the verification flow required by the platform.
-4. Confirm the sender is available for campaign use.
-5. Send a test campaign from the verified sender.
+## Keeping the list deliverable
+
+A verified sender only stays deliverable if you send to real, engaged addresses. Two features help:
+
+- **ONS+ verification** cleans addresses — typos, dead mailboxes, spam traps — at import or capture time. See [Plans and billing](/settings/plans-and-billing) for how it's metered. You can also run a one-off verification pass over an existing list.
+- **Double opt-in** (on forms) holds a newly captured contact until they click a confirmation link, so only real, consenting addresses ever enter your audience.
+
+Hard bounces and spam complaints are added to a suppression list automatically and never contacted again.
 
 ## Recommendations
 
-- Use a sender name users will immediately recognize.
-- Keep sender identities specific to the project or brand.
-- Avoid switching sender identity between related campaigns unless there is a clear reason.
-
-## Before Going Live
-
-Verify that the sender is approved, the linked domain is authenticated, and test sends land as expected.
+- Use a from-name recipients recognize instantly.
+- Keep sender identities specific to a project or brand.
+- Don't switch sender identity between related campaigns without a clear reason — consistency builds recipient trust.
+- Before going live, confirm the sender is verified, its domain is authenticated, and a test send lands.

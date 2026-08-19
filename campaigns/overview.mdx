@@ -9,17 +9,14 @@ A campaign is a one-off send to an audience you define: a launch announcement, a
 
 | Type | Channel | What it does |
 | --- | --- | --- |
-| `EMAIL_BLAST` | Email | A single email to the whole audience. The default. |
-| `DRIP_CAMPAIGN` | Email | A sequence of steps in order. |
+| `EMAIL_BLAST` | Email | A single email to the whole audience. The default, and the one that sends. |
 | `SMART_SENDING` | Multi-channel | In-app, Telegram, Discord, X. |
 
 <Warning>
-**Only `EMAIL_BLAST` sends today.** Drip campaigns send their first step and stop — later steps and their delays are stored but never dispatched. `SMART_SENDING` campaigns mark themselves as sent without delivering anything.
-
-For sequenced or in-app messaging that works now, use an [automation](/automation/overview) with `wait` and `send_inapp` steps, or send in-app from a campaign via the [in-app path](#in-app-campaigns).
+`SMART_SENDING` campaigns currently mark themselves as sent without delivering anything. For in-app messaging that works now, use an [automation](/automation/overview) with a `send_inapp` step, or send in-app from a campaign via the [in-app path](#in-app-campaigns).
 </Warning>
 
-The campaign type is set implicitly by what you configure: adding channels makes it `SMART_SENDING`, adding drip steps makes it `DRIP`.
+(The older drip type has been retired — a sequence is now built as an [automation](/automation/overview) with `wait` steps.)
 
 ## Lifecycle
 
@@ -53,10 +50,15 @@ Segment criteria support three filters: tags, minimum contact score, and whether
 Before sending, recipients are filtered by:
 
 - **Unsubscribes** — contacts who opted out of email are removed
-- **Suppression** — hard bounces and complaints are dropped
+- **Suppression** — hard bounces and complaints are dropped, re-checked at the moment each message is dispatched, not just at launch
+- **Unconfirmed double opt-in** — contacts captured by a form who haven't clicked the confirmation link are held back
 - **Smart sending** — if enabled, anyone emailed in the last 10 hours is skipped
 
 Use the audience estimate to see the resulting count, including how many smart sending would exclude.
+
+<Note>
+The estimate is an **upper bound**. Because suppression is re-checked at dispatch, a contact who unsubscribes or bounces after you launch is dropped from later sends — so the number actually sent can be lower than the estimate. On Pay as you go, the launch charge is reconciled against what actually went out, and the difference is refunded.
+</Note>
 
 <Warning>
 If a campaign's audience resolves to nobody — an empty segment, or criteria that match nothing — launch does not currently fail cleanly. Always check the estimate before launching, and confirm it's a number you expect.
@@ -64,13 +66,9 @@ If a campaign's audience resolves to nobody — an empty segment, or criteria th
 
 ## Scheduling
 
-<Warning>
-**Scheduled campaigns are not sent automatically.** There is no scheduler running. A campaign set to `SCHEDULED` stays there until someone launches it manually.
+Schedule a campaign for a future time and it sends on its own — a scheduler checks every few minutes and launches any campaign whose scheduled time has passed, through the same validation and allowance checks as a manual launch.
 
-Treat scheduling as a reminder, not a delivery mechanism — set a calendar alert and launch by hand at the intended time.
-</Warning>
-
-When you do schedule, the date you pick is the one that counts. The separate time and timezone fields are recorded alongside it but don't currently affect when the campaign would send.
+Because a scheduled launch still runs those checks, a campaign that would fail validation, or whose send wouldn't fit your allowance, won't go out at its scheduled time. Confirm it validates cleanly before you rely on the schedule.
 
 ## Tracking
 
@@ -103,14 +101,15 @@ Email and in-app share **one monthly message allowance** — they aren't metered
 
 | Plan | Messages/month | Contacts |
 | --- | --- | --- |
-| **Pay as you go** | Metered — pay per message | 25,000 |
-| **Launch** — $29/mo | 15,000 | 5,000 |
-| **Growth** — $199/mo | 100,000 | 100,000 |
-| **Pro** — $499/mo | 250,000 | 250,000 |
+| **Pay as you go** — $0 + usage | Metered — $1 per 1,000 | 1,000 |
+| **Launch** — $49/mo | 50,000 | 5,000 |
+| **Growth** — $349/mo | 250,000 | 25,000 |
+| **Pro** — $799/mo | 750,000 | 75,000 |
+| **Scale** — $2,299/mo | 1,500,000 | 150,000 |
 
 The allowance is checked at launch against your estimated recipients plus what you've already sent this calendar month, and the send is blocked if it wouldn't fit. Warnings appear at 75% and 95% of the allowance.
 
-On **Pay as you go** there's no monthly cap — sends are metered against your balance instead, so a launch is blocked when the balance won't cover it rather than when an allowance runs out. Top up before a large send.
+On **Pay as you go** there's no monthly cap — email and in-app pushes are metered at $1 per 1,000 against your prepaid balance, so a launch is blocked when the balance won't cover it. Top up before a large send. See [Plans and billing](/settings/plans-and-billing) for the full model.
 
 ## Where to go next
 

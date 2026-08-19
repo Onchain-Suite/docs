@@ -107,6 +107,10 @@ Your endpoint receives:
 Any response of 400 or above counts as a failure and is retried — up to 5 attempts with exponential backoff, then dead-lettered. Requests time out after 10 seconds.
 
 <Warning>
+The URL must be a **public** `https` (or `http`) endpoint. URLs pointing at private networks — `localhost`, private IP ranges, or a cloud metadata address — are rejected when you save the node, and again at send time, including via redirects. It also can't embed credentials (`user:pass@host`). This is an anti-SSRF safeguard; host your webhook on a reachable public address.
+</Warning>
+
+<Warning>
 Keys in your `payload` are merged **last**, so a payload key named `organizationId`, `automationId`, `entryId`, or `context` will overwrite the platform's own value. Namespace your custom fields.
 </Warning>
 
@@ -186,7 +190,7 @@ Blocking errors you'll encounter:
 | `INVALID_INAPP_RECIPIENTS` | Wallet-list mode with no wallets |
 | `INVALID_WAIT_CONFIG` | Missing or non-positive duration |
 | `INVALID_BRANCH_CONFIG` | Fewer than two outgoing edges |
-| `INVALID_WEBHOOK_CONFIG` | Missing or malformed URL |
+| `INVALID_WEBHOOK_CONFIG` | Missing, malformed, or private/blocked URL |
 | `INVALID_TAG_CONFIG` | Empty tag |
 | `INVALID_EDGE` | Edge references a missing node |
 

@@ -3,7 +3,7 @@ title: "Contract-Based Flows"
 description: "React to normalized smart contract activity — configure on-chain triggers that fire on mints, swaps, approvals, and liquidations."
 ---
 
-Contract-based flows respond to what wallets actually do on-chain: minting, swapping, borrowing, approving, getting liquidated. Events are normalized into a consistent shape before matching, so a `Transfer` on Base and an SPL transfer on Solana both land as something your trigger can match.
+Contract-based flows respond to what wallets actually do on-chain: minting, swapping, borrowing, approving, getting liquidated. For **EVM contracts, the platform watches the chain for you** — publish an automation with an on-chain trigger and it starts firing on real activity, no indexer to run and no ABI to paste.
 
 ## Scenarios worth building
 
@@ -15,6 +15,31 @@ Contract-based flows respond to what wallets actually do on-chain: minting, swap
 | Position liquidated | `liquidation_detected` | Recovery guidance |
 | Liquidity withdrawn | `capital_withdrawn` | Win-back |
 | Proposal opened | `governance_activity` | Voting reminder |
+
+## How it fires
+
+<Steps>
+  <Step title="You give it a chain and a contract">
+    Just the address. You don't paste an ABI.
+  </Step>
+  <Step title="The platform resolves the ABI">
+    It looks the contract up on Sourcify, then a block explorer, following proxies to the implementation. This tells it how to decode the contract's events.
+  </Step>
+  <Step title="Publishing registers a watch">
+    When you publish the automation, its on-chain triggers become live watches. The platform subscribes to the contract's logs, decodes each one, and turns matching logs into automation entries.
+  </Step>
+  <Step title="Events fire after finality">
+    A short delay lets the chain settle before the trigger fires, so a re-orged transaction doesn't message anyone. This is seconds on an L2, a couple of minutes on Ethereum mainnet.
+  </Step>
+</Steps>
+
+<Warning>
+**Automatic watching is EVM-only.** Solana contract triggers, and any case where you run your own indexer, still send events in through the [Automation Trigger API](/api/automation-triggers).
+</Warning>
+
+<Note>
+If a contract isn't verified on Sourcify or the explorer, the platform can't resolve its ABI. You'll be prompted to paste the ABI (or just the one event's signature) when you build the trigger. Until a trigger has a resolvable event, publishing reports it as skipped rather than silently doing nothing.
+</Note>
 
 ## Configuring the trigger
 
@@ -50,9 +75,12 @@ The platform recognizes 29 event definitions across standards, browsable in the 
 
 ## Feeding in your own events
 
-If you run your own indexer, you can post chain events straight into the automation runtime rather than relying on what the platform observes — see the [Automation Trigger API](/api/automation-triggers).
+For EVM contracts you rarely need this — the platform watches the chain itself. Send events in yourself when the platform can't watch for you:
 
-For activity that happens in your product rather than on-chain, use [Custom Events](/integrations/custom-events).
+- **Solana contracts**, which aren't auto-watched.
+- **You already run an indexer** and would rather push decoded events than have the platform subscribe.
+
+Post them through the [Automation Trigger API](/api/automation-triggers). For activity that happens in your product rather than on-chain, use [Custom Events](/integrations/custom-events).
 
 ## How events are normalized
 
@@ -86,8 +114,8 @@ Every normalized payload carries `source`, `chain`, `chainFamily`, `event`, `top
   <Step title="Preview the trigger">
     Preview returns how many wallets match, plus sample profiles. Zero matches means the trigger is wrong — usually the contract address or chain slug.
   </Step>
-  <Step title="Post one real event">
-    Trigger the activity with a wallet you control and confirm the automation registered an entry for it.
+  <Step title="Do the thing on-chain">
+    Perform the activity with a wallet you control, then wait out the finality delay (seconds on an L2, ~2 minutes on Ethereum mainnet) and confirm the automation registered an entry.
   </Step>
   <Step title="Confirm each node fired">
     Check the automation's entries. A `node_skipped` event means the step was reachable but declined to run — suppressed recipients or blocked sending reputation.
@@ -96,6 +124,10 @@ Every normalized payload carries `source`, `chain`, `chainFamily`, `event`, `top
     Only after a single wallet completes the flow correctly.
   </Step>
 </Steps>
+
+<Note>
+Don't expect an instant notification when testing. The finality delay means an on-chain trigger fires a short while after the transaction confirms — that's deliberate, so a dropped or re-orged transaction never messages your users.
+</Note>
 
 ## Best practices
 
