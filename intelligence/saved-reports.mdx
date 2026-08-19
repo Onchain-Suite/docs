@@ -1,9 +1,11 @@
 ---
 title: "Saved Reports"
-description: "Store and reuse reports your team needs regularly."
+description: "Save a query as a report you can rerun, share, and export."
 ---
 
-## Good Report Categories
+Save a query as a report and it becomes a named result your team can rerun on demand rather than rebuilding. Reports are free to rerun; only [generating SQL from a prompt](/intelligence/generate-sql) costs credits.
+
+## What makes a good report
 
 - Weekly audience health
 - Campaign response by segment
@@ -11,8 +13,13 @@ description: "Store and reuse reports your team needs regularly."
 - Contract activity summaries
 - High-value wallet cohorts
 
-## Best Practices
+## Exporting
 
-- Use consistent names and owners.
-- Make date ranges explicit.
-- Archive outdated reports to keep the workspace clean.
+A report's results can be exported to CSV for a spreadsheet, a deck, or another tool.
+
+## Best practices
+
+- Use consistent names and clear owners.
+- Make date windows explicit so a rerun means the same thing next month.
+- Prefer `contact_360` for anything blending identity, on-chain, and email data; it joins them for you.
+- Archive reports you no longer use to keep the workspace tidy.

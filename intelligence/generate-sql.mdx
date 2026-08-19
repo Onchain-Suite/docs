@@ -10,22 +10,22 @@ Describe the cohort you want and get back a draft query against the [curated sch
 | Mode | Credits | Use it for |
 | --- | --- | --- |
 | `fast` | 1 | Simple single-table filters |
-| `best` | 5 | Multi-table joins and derived logic — the default |
+| `best` | 5 | Multi-table joins and derived logic, the default |
 
 Repeating the same prompt within 6 hours returns the cached result and costs **nothing**. Running the resulting SQL is always free; only generation consumes credits.
 
-Other AI features draw from the same monthly AI-credit allowance at higher rates — a copywriting or segment-rule suggestion costs 5, and a turn with the [AI assistant](/intelligence/overview#ai-assistant), which can reason and run queries, costs 10. Your plan's allowance is listed on [Plans and billing](/settings/plans-and-billing).
+Other AI features draw from the same monthly AI-credit allowance at higher rates. A copywriting or segment-rule suggestion costs 5, and a turn with the [AI assistant](/intelligence/overview#ai-assistant), which can reason and run queries, costs 10. Your plan's allowance is listed on [Plans and billing](/settings/plans-and-billing).
 
-If your workspace runs out of credits, generation is blocked while the editor itself keeps working — you can still write and run SQL by hand.
+If your workspace runs out of credits, generation is blocked while the editor itself keeps working. You can still write and run SQL by hand.
 
 ## Writing a good prompt
 
 The strongest prompts name four things:
 
-- The **behavior** to isolate — minted, swapped, clicked, went quiet
-- The **time window** — "in the last 30 days"
+- The **behavior** to isolate: minted, swapped, clicked, or went quiet
+- The **time window**, such as "in the last 30 days"
 - The **chain or contract**, when relevant
-- The **business goal** — win-back, VIP targeting, governance reminder
+- The **business goal**: win-back, VIP targeting, or a governance reminder
 
 <CodeGroup>
 ```text Vague
@@ -39,7 +39,7 @@ in the last 90 days. I want a win-back audience.
 ```
 </CodeGroup>
 
-The second prompt names the chain, the threshold, both time windows, and the goal — so the generated query needs far less editing.
+The second prompt names the chain, the threshold, both time windows, and the goal, so the generated query needs far less editing.
 
 ### More examples
 
@@ -54,11 +54,11 @@ Generated SQL is always re-validated against the schema before it reaches you, s
 
 <AccordionGroup>
   <Accordion title="Does it answer the question you asked?" icon="circle-question">
-    The most common failure isn't invalid SQL — it's a valid query for a subtly different question. Read the `WHERE` clause against your original intent, line by line.
+    The most common failure isn't invalid SQL. It's a valid query for a subtly different question. Read the `WHERE` clause against your original intent, line by line.
   </Accordion>
 
   <Accordion title="Will the joins duplicate rows?" icon="copy">
-    `wallet_activity_summary` is per wallet per chain; `nft_holdings` is per token. Joining either to a per-wallet table fans out rows. If a wallet appears twice, that's why — add a `chain` filter or aggregate.
+    `wallet_activity_summary` is per wallet per chain; `nft_holdings` is per token. Joining either to a per-wallet table fans out rows. If a wallet appears twice, that's why; add a `chain` filter or aggregate.
   </Accordion>
 
   <Accordion title="Are wallet joins case-safe?" icon="text-size">
@@ -70,12 +70,12 @@ Generated SQL is always re-validated against the schema before it reaches you, s
   </Accordion>
 
   <Accordion title="Is the output shaped for its destination?" icon="table">
-    Saving as a segment requires a wallet column — `wallet_address`, `wallet`, or `address`. Reports are free-form.
+    Saving as a segment requires a wallet column named `wallet_address`, `wallet`, or `address`. Reports are free-form.
   </Accordion>
 </AccordionGroup>
 
 ## After generating
 
-Run it on a narrow window first, spot-check a few rows against wallets you recognize, then save. Once saved, the query re-runs for free — so the credit cost is one-time, not per use.
+Run it on a narrow window first, spot-check a few rows against wallets you recognize, then save. Once saved, the query re-runs for free, so the credit cost is one-time, not per use.
 
 Treat generated SQL as a first draft from someone who knows the schema but not your business.

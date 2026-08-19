@@ -55,7 +55,7 @@ LIMIT 100
 <Note>
 This query returns one row per wallet **per chain**, because `wallet_activity_summary` is chain-scoped. Add `AND was.chain = 'base-mainnet'` to pin it to a single chain, or aggregate if you want one row per wallet.
 
-If wallets seem to be missing, wrap both sides of the joins in `lower()` — casing isn't normalized on `contacts`.
+If wallets seem to be missing, wrap both sides of the joins in `lower()`, casing isn't normalized on `contacts`.
 </Note>
 
 ## Volume scoring
@@ -85,7 +85,7 @@ These three run against `contact_360`, which already joins identity, on-chain me
 
 ### Churn-risk whales
 
-High-value contacts going quiet on-chain but still email-reachable — prime win-back targets.
+High-value contacts going quiet on-chain but still email-reachable, prime win-back targets.
 
 ```sql
 SELECT
@@ -126,7 +126,7 @@ LIMIT 100
 
 ### Healthy VIPs
 
-Your best customers right now — high LTV, active on-chain, engaging with email. Reward and retain.
+Your best customers right now, high LTV, active on-chain, engaging with email. Reward and retain.
 
 ```sql
 SELECT
@@ -149,7 +149,7 @@ LIMIT 100
 
 <Steps>
   <Step title="Pick the closest starting point">
-    Match on the question shape, not the exact columns — columns are easy to swap.
+    Match on the question shape, not the exact columns, columns are easy to swap.
   </Step>
   <Step title="Tighten the filters">
     Adjust the thresholds (`portfolio_value_usd`, `days_since_last_activity`) to your audience. The defaults are deliberately broad.
@@ -158,7 +158,7 @@ LIMIT 100
     Spot-check wallets you recognize before trusting the whole result.
   </Step>
   <Step title="Save as a report or segment">
-    Segments need a wallet column in the output — every retention query above already has one.
+    Segments need a wallet column in the output. Every retention query above already has one.
   </Step>
 </Steps>
 

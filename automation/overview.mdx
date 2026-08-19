@@ -3,7 +3,7 @@ title: "Overview"
 description: "How automations connect on-chain and lifecycle events to messaging, waits, branches, and campaign handoff."
 ---
 
-An automation watches for an event, checks conditions, and runs a flow — send an in-app push, wait two hours, send an email, branch on what happened. Instead of exporting a list and sending a batch, you respond the moment a wallet does something.
+An automation watches for an event, checks conditions, and runs a flow, send an in-app push, wait two hours, send an email, branch on what happened. Instead of exporting a list and sending a batch, you respond the moment a wallet does something.
 
 ## Anatomy of an automation
 
@@ -11,7 +11,7 @@ Every automation has exactly two parts:
 
 <CardGroup cols={2}>
   <Card title="A trigger" icon="bolt">
-    One event type plus its matching rules — which chain, which contract, which event names, which payload filters.
+    One event type plus its matching rules, which chain, which contract, which event names, which payload filters.
   </Card>
   <Card title="A flow graph" icon="diagram-project">
     Nodes and edges. Each node is an action, a wait, or a branch. Execution follows the edges from the trigger node.
@@ -61,7 +61,7 @@ Six built-in plays are available to every workspace:
 | **Exchange Outflow Save Flow** | Advanced | Transfer to a labeled exchange | In-app → email |
 | **Liquidation Recovery** | Advanced | Liquidation detected | In-app → wait 2h → email |
 
-Forking a play creates a **draft** automation you own. The four on-chain plays ship with an empty contract address — fill it in before publishing.
+Forking a play creates a **draft** automation you own. The four on-chain plays ship with an empty contract address, fill it in before publishing.
 
 <Note>
 **Advanced** plays are gated on workspace readiness: indexed wallet count, days of indexing history, and enabled protocol features. If a play reports `readyToShip: false`, the response lists the setup steps still outstanding.
@@ -79,8 +79,8 @@ Active automations are capped only on the entry tier:
 | Plan | Active automations |
 | --- | --- |
 | **Pay as you go** | 3 |
-| **Launch** — $49/mo | Unlimited |
-| **Growth** — $349/mo and up | Unlimited |
+| **Launch**, $49/mo | Unlimited |
+| **Growth**, $349/mo and up | Unlimited |
 
 Archived automations never count. On Pay as you go, once you're at three, activating another is blocked until you archive one or move to a paid plan.
 

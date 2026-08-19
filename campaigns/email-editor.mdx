@@ -3,7 +3,7 @@ title: "Email Editor"
 description: "Compose campaign content with merge variables, conditionals, and filters that render safely for every recipient."
 ---
 
-Campaign content is written once and rendered per recipient. This page covers the personalization syntax — the part most likely to break a send if you get it wrong.
+Campaign content is written once and rendered per recipient. This page covers the personalization syntax, the part most likely to break a send if you get it wrong.
 
 ## Merge variables
 
@@ -50,13 +50,13 @@ Use `profile.greetingName` in salutations. It's the only name variable guarantee
 
 ### Short aliases
 
-Common variables have flat aliases that ignore case, underscores, and hyphens — so `{{first_name}}`, `{{FirstName}}`, and `{{firstname}}` are all the same:
+Common variables have flat aliases that ignore case, underscores, and hyphens, so `{{first_name}}`, `{{FirstName}}`, and `{{firstname}}` are all the same:
 
 `firstName`, `lastName`, `fullName`, `displayName`, `greetingName`, `initials`, `email`, `wallet`, `walletAddress`, `walletShort`, `ensName`, `ensOrWallet`, `chain`, `unsubscribeUrl`, `preferenceCenterUrl`, `managePreferences`, `ens`.
 
 ### `[Bracket]` placeholders
 
-Templates imported from another email tool often use square-bracket placeholders like `[First Name]`. These work too — they're rewritten to the matching merge variable before rendering, so you don't have to convert a pasted template by hand.
+Templates imported from another email tool often use square-bracket placeholders like `[First Name]`. These work too. They're rewritten to the matching merge variable before rendering, so you don't have to convert a pasted template by hand.
 
 ```text
 Hi [First Name], your wallet [Wallet] is on the list.
@@ -64,15 +64,15 @@ Hi [First Name], your wallet [Wallet] is on the list.
 
 The rules:
 
-- A bracket label matches the same way aliases do — case, spaces, underscores, and hyphens are ignored, so `[First Name]`, `[first_name]`, and `[FIRSTNAME]` are equivalent.
-- Name-style brackets (`[First Name]`, `[Name]`, `[Greeting]`, `[Full Name]`) resolve to the blank-safe **`greetingName`**, never the raw first name — so an imported template can't turn a missing name into a blocked send.
+- A bracket label matches the same way aliases do, case, spaces, underscores, and hyphens are ignored, so `[First Name]`, `[first_name]`, and `[FIRSTNAME]` are equivalent.
+- Name-style brackets (`[First Name]`, `[Name]`, `[Greeting]`, `[Full Name]`) resolve to the blank-safe **`greetingName`**, never the raw first name, so an imported template can't turn a missing name into a blocked send.
 - Any other label maps to a known merge variable if one matches (`[Wallet]`, `[Wallet Address]`, `[ENS]`, `[Unsubscribe]`, `[Manage Preferences]`).
-- **An unrecognized label is left exactly as written.** `[Product Name]` stays `[Product Name]` in the email rather than becoming a broken variable — brackets are safe to leave in place.
+- **An unrecognized label is left exactly as written.** `[Product Name]` stays `[Product Name]` in the email rather than becoming a broken variable, brackets are safe to leave in place.
 - A `[Label](url)` markdown link is left alone, so link text keeps working.
 
 ### Contact metadata
 
-Anything you've stored on a contact — including via [custom event attributes](/integrations/custom-events) — is available:
+Anything you've stored on a contact, including via [custom event attributes](/integrations/custom-events), is available:
 
 ```text
 You've made {{ txCount30d }} transactions this month.
@@ -100,7 +100,7 @@ Chain filters with `|`:
 | `json` | Serialize an object |
 | `raw` | Skip HTML escaping |
 
-Values are HTML-escaped in the body by default. Use `raw` only for content you control — never for anything a user supplied.
+Values are HTML-escaped in the body by default. Use `raw` only for content you control, never for anything a user supplied.
 
 Unknown filters pass the value through untouched rather than erroring, so a typo like `| uppercase` silently does nothing. Check rendered output rather than trusting the syntax.
 
@@ -121,7 +121,7 @@ Unknown filters pass the value through untouched rather than erroring, so a typo
 Any variable that renders blank **without** a `default` filter is recorded as a missing field, and missing fields fail validation at launch with `RENDER_FIELD_MISSING`.
 
 <Warning>
-This is the most common reason a campaign won't launch. A variable that looks fine in preview — because *your* test contact has the value — will block the send if any recipient lacks it.
+This is the most common reason a campaign won't launch. A variable that looks fine in preview, because *your* test contact has the value, will block the send if any recipient lacks it.
 
 Give every optional variable a fallback:
 
@@ -134,13 +134,13 @@ Unsubscribe and preference-centre variables are exempt, because they only resolv
 
 ## Sender identity
 
-The sender is resolved at render time, not taken from what you type. Only **verified** sender identities can be used. If the requested sender isn't verified, it falls back to your workspace default, then the first verified identity, then the platform sender — each substitution adding a warning to the render.
+The sender is resolved at render time, not taken from what you type. Only **verified** sender identities can be used. If the requested sender isn't verified, it falls back to your workspace default, then the first verified identity, then the platform sender. Each substitution adding a warning to the render.
 
 If test emails arrive from an address you didn't choose, check [Sender Verification](/settings/sender-verification) rather than the campaign.
 
 ## Plain text
 
-A plain-text version is derived automatically from your HTML when you don't supply one. Supply your own when the automatic version reads poorly — stripped HTML rarely produces good copy for content-heavy emails.
+A plain-text version is derived automatically from your HTML when you don't supply one. Supply your own when the automatic version reads poorly, stripped HTML rarely produces good copy for content-heavy emails.
 
 ## Writing checklist
 

@@ -3,12 +3,12 @@ title: "Automation Trigger API"
 description: "Push trigger events into Onchain Suite from your own indexer or backend to start automations."
 ---
 
-Onchain Suite observes on-chain activity for you, but when you run your own indexer — or you need to trigger automations from something the platform can't see — you can post trigger events directly.
+Onchain Suite observes on-chain activity for you, but when you run your own indexer, or you need to trigger automations from something the platform can't see. You can post trigger events directly.
 
 Each request is matched against your active, published automations. Every automation whose trigger spec matches creates an entry and starts running.
 
 <Note>
-For product events from your own application (signups, deposits, plan changes), use [Custom Events](/integrations/custom-events) instead. That path resolves contacts for you and is the right tool for off-chain behavior. This API is for feeding **trigger events** — chain activity and lifecycle signals — straight into the automation runtime.
+For product events from your own application (signups, deposits, plan changes), use [Custom Events](/integrations/custom-events) instead. That path resolves contacts for you and is the right tool for off-chain behavior. This API is for feeding **trigger events**, chain activity and lifecycle signals, straight into the automation runtime.
 </Note>
 
 ## Authentication
@@ -45,7 +45,7 @@ Every trigger endpoint returns the same shape:
 
 `matchedAutomations: 0` means nothing matched. Check, in order: the automation is **active**, it has been **published**, and your chain slug, contract address, and event name match the trigger spec exactly.
 
-`duplicate: true` means an entry already exists for this event — see [Deduplication](#deduplication).
+`duplicate: true` means an entry already exists for this event, see [Deduplication](#deduplication).
 
 ## Endpoints
 
@@ -70,7 +70,7 @@ Every trigger endpoint returns the same shape:
 </ParamField>
 
 <ParamField path="txHash" type="string">
-  Transaction hash. Strongly recommended — it backs deduplication.
+  Transaction hash. Strongly recommended. It backs deduplication.
 </ParamField>
 
 <ParamField path="sourceEventId" type="string">
@@ -100,45 +100,15 @@ curl -X POST https://api.onchainsuite.com/api/v1/v2/automations/runtime/triggers
   }'
 ```
 
-### GoldRush-decoded event
-
-`POST /triggers/goldrush-event`
-
-For events already decoded against the GoldRush catalog. Processed synchronously. Every field is optional — the platform resolves the canonical event from whatever you supply, preferring `topic0`, then Solana program plus instruction, then the event name.
-
-Accepts `chain`, `walletAddress`, `contractAddress`, `event`, `txHash`, `sourceEventId`, `topic0`, `programId`, `instructionName`, `payload`, and `goldrush`.
-
-### Queued and batch variants
-
-For sustained volume, prefer these over the synchronous endpoint.
-
-| Endpoint | Use |
-| --- | --- |
-| `POST /triggers/goldrush-event/queue` | One event, queued. Also accepts `sourceId`. |
-| `POST /triggers/goldrush-events/batch` | Many events in one request. |
-
-Batch takes `{ "sourceId": "…", "events": [ … ] }` where each entry has the same shape as a single GoldRush event. Both return a queued acknowledgement — `mode`, `accepted`, `queued`, and per-event results for batch — rather than the match result, since matching happens after the response.
+Optional fields let you match more precisely: `topic0` (the event signature hash), `programId` and `instructionName` (Solana), and `sourceId` to tag the origin. The platform resolves the canonical event from whatever you supply, preferring `topic0`, then Solana program plus instruction, then the event name.
 
 <Note>
-The queued and batch endpoints apply a short **finality delay** before matching — a per-chain wait (seconds on an L2, up to a couple of minutes on Ethereum mainnet) so a re-orged transaction never fires a trigger. The two synchronous endpoints (`/triggers/onchain-event`, `/triggers/goldrush-event`) match immediately with no delay, so send those only for events you already consider final.
+For most EVM contracts you don't need this endpoint at all. The platform watches the contract for you once the automation is published. Send events in only for Solana contracts or when you run your own indexer. See [Contract-Based Flows](/automation/contract-based-flows).
 </Note>
-
-```bash
-curl -X POST https://api.onchainsuite.com/api/v1/v2/automations/runtime/triggers/goldrush-events/batch \
-  -H "Authorization: Bearer sk_live_…" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "sourceId": "my-indexer",
-    "events": [
-      { "chain": "base-mainnet", "event": "Transfer", "txHash": "0xaaa...", "walletAddress": "0x111..." },
-      { "chain": "base-mainnet", "event": "Transfer", "txHash": "0xbbb...", "walletAddress": "0x222..." }
-    ]
-  }'
-```
 
 ### Lifecycle triggers
 
-These three fire automations whose trigger types are `segment_entered`, `email_opened`, and `health_threshold`. The platform does not emit them on its own — post them when the corresponding thing happens in your systems.
+These three fire automations whose trigger types are `segment_entered`, `email_opened`, and `health_threshold`. The platform does not emit them on its own, post them when the corresponding thing happens in your systems.
 
 <AccordionGroup>
   <Accordion title="POST /triggers/segment-entered" icon="filter">
@@ -180,7 +150,7 @@ When you don't supply `sourceEventId`, one is derived:
 | Health threshold | `health_threshold:<contact>:<score>` |
 
 <Warning>
-**Always send `txHash` on on-chain events.** Without it — and without an explicit `sourceEventId` — the derived key falls back to random bytes, so a retried or re-delivered event creates a duplicate entry and your users get messaged twice.
+**Always send `txHash` on on-chain events.** Without it, and without an explicit `sourceEventId`, the derived key falls back to random bytes, so a retried or re-delivered event creates a duplicate entry and your users get messaged twice.
 
 Send an explicit `sourceEventId` such as `<txHash>:<logIndex>` when one transaction should legitimately produce several distinct entries.
 </Warning>
@@ -197,7 +167,7 @@ A contact can only enter a `segment_entered` automation **once, ever**, because 
     An active-but-unpublished automation matches your event and creates an entry, then runs an empty graph and does nothing. This is the most common cause of "it matched but nothing happened".
   </Step>
   <Step title="The trigger spec agrees">
-    Any field you set on the trigger — chain, contract, event names, `topic0`, filters — must match. Unset fields are wildcards.
+    Any field you set on the trigger, chain, contract, event names, `topic0`, filters, must match. Unset fields are wildcards.
   </Step>
 </Steps>
 

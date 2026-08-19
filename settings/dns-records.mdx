@@ -3,35 +3,35 @@ title: "DNS Records"
 description: "The DNS records that authenticate your sending domain, and what each one does."
 ---
 
-Authenticating a sending domain adds four kinds of record. The setup flow shows the exact values for your domain — this page explains what each is for.
+Authenticating a sending domain adds a handful of records. The setup flow shows the exact values for your domain; this page explains what each one is for.
 
-| Record | Type | Purpose |
-| --- | --- | --- |
-| Ownership | TXT | Proves you control the domain before any sending is enabled. |
-| SPF | TXT | Lists the infrastructure allowed to send for your domain (`v=spf1 …`). |
-| DKIM | **CNAME × 2** | Two records that let outgoing mail carry a cryptographic signature. |
-| DMARC | TXT | Tells receiving providers how to treat mail that fails SPF or DKIM. |
+| Record | Type | Host | Purpose |
+| --- | --- | --- | --- |
+| DKIM (three) | CNAME | `<token>._domainkey` | Let outgoing mail carry a cryptographic signature. |
+| Mail-from MX | MX | `bounce` subdomain | Route bounce and complaint reports on your domain. |
+| Mail-from SPF | TXT | `bounce` subdomain | Align SPF so DMARC passes. |
+| DMARC | TXT | `_dmarc` | Tell receiving providers how to treat mail that fails the checks. |
 
 <Note>
-DKIM is **two CNAME records**, not a TXT record — a common point of confusion. Add both exactly as shown.
+DKIM is **three CNAME records**, not a TXT record. All three must resolve for the domain to be send-ready. Add them exactly as shown.
 </Note>
 
 ## Adding them
 
-Enter each record in your DNS provider's zone for the domain, or use the automatic option if your provider is connected. Verification checks the TXT and CNAME (and any A) records and passes once they all resolve.
+Enter each record in your DNS provider's zone for the domain, or use the automatic option if your provider is connected. Verification checks the records and passes once the three DKIM CNAMEs resolve.
 
 ## If you already send email
 
-You likely already have an SPF and maybe a DMARC record. Don't add a second one:
+You may already have a DMARC record, or a leftover DKIM selector from a previous provider. Don't stack a second one:
 
-- **SPF** — a domain may have only one `v=spf1` record. Merge the Onchain Suite include into your existing record; the setup shows the merged value.
-- **DMARC** — keep your existing policy; you don't need another record.
+- **DKIM.** If a CNAME already sits at one of the selector hosts, edit it to the new value rather than adding a duplicate.
+- **DMARC.** Keep your existing policy; you don't need another record.
 
-The setup detects these and tells you whether to add or merge, so follow what it shows rather than blindly pasting.
+The setup detects these and tells you whether to add or edit, so follow what it shows rather than pasting blindly.
 
 ## Tips
 
-- Copy each value exactly — no added quotes or trailing characters.
+- Copy each value exactly, with no added quotes or trailing characters.
 - Make changes in the correct DNS zone.
 - Allow propagation time (minutes to an hour, sometimes longer) before re-checking.
-- A weak existing setup — SPF `~all`, DMARC `p=none` — still verifies, but the setup flags it so you can tighten it.
+- A weak existing DMARC (`p=none`) still verifies, but the setup flags it so you can tighten it.

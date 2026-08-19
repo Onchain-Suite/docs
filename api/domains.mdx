@@ -1,27 +1,31 @@
 ---
 title: "Domain Verification"
-description: "Verify your sending domain — every DNS record, its live status, and exact fix instructions when records clash with what's already in your DNS."
+description: "Verify your sending domain: every DNS record, its live status, and exact fix instructions when records clash with what's already in your DNS."
 ---
 
 ## How verification works
 
-Sending email from your own domain requires proving ownership and authenticating your mail. Onchain Suite provisions your domain and gives you **five DNS records** to add at your DNS provider:
+Sending email from your own domain means authenticating your mail with DNS records so mailbox providers trust it. Register the domain and Onchain Suite returns the exact record set to add at your DNS provider.
 
-| Record | Type | Purpose | Required to send? |
-|---|---|---|---|
-| Ownership | TXT at `@` | Proves you control the domain | Yes |
-| SPF | TXT at `@` | Authorizes our servers to send for you | Yes |
-| DKIM 1 & 2 | CNAME at `selector1/2._domainkey` | Cryptographically signs your mail | Yes |
-| DMARC | TXT at `_dmarc` | Tells inboxes how to treat failures | Recommended |
+| Record | Type | Host | Purpose | Required to send? |
+| --- | --- | --- | --- | --- |
+| DKIM (three) | CNAME | `<token>._domainkey` | Cryptographically sign your mail | Yes |
+| Mail-from MX | MX | `bounce` (subdomain) | Route bounce and complaint reports | Recommended |
+| Mail-from SPF | TXT | `bounce` (subdomain) | Align SPF for DMARC | Recommended |
+| DMARC | TXT | `_dmarc` | Tell inboxes how to treat failures | Recommended |
 
-A domain is **send-ready** when Ownership, SPF, and both DKIM records verify. Ownership alone is not enough.
+A domain is **send-ready** once its three DKIM CNAME records verify. The mail-from and DMARC records aren't required to send, but they improve deliverability and are worth adding in the same session.
+
+<Note>
+The exact record values are unique to your domain and are returned in the API response. Add them verbatim rather than copying values from this page.
+</Note>
 
 ## The flow
 
-1. **Register** — `POST /domain` with your domain. The response includes the complete `dns` record set immediately, so you can add everything in one DNS session.
+1. **Register.** `POST /domain` with your domain. The response includes the complete `dns` record set immediately, so you can add everything in one DNS session.
 2. **Add the records** at your DNS provider.
-3. **Verify** — `POST /domain/{id}/verify`, or watch `GET /domain/{id}/dns` update live as records propagate.
-4. **Done** — on completion your `noreply@yourdomain` sender is created automatically and campaigns can send from your domain.
+3. **Verify.** `POST /domain/{id}/verify`, or watch `GET /domain/{id}/dns` update live as records propagate.
+4. **Done.** On completion, a `noreply@yourdomain` sender is created automatically and campaigns can send from your domain.
 
 ## Live status for every record
 
@@ -31,52 +35,52 @@ A domain is **send-ready** when Ownership, SPF, and both DKIM records verify. Ow
 {
   "sendReady": false,
   "verificationStates": {
-    "domain": "Verified",
-    "spf": "NotStarted",
-    "dkim": "VerificationFailed",
+    "dkim1": "Verified",
     "dkim2": "NotStarted",
+    "dkim3": "VerificationFailed",
+    "mailFromMx": "NotStarted",
+    "mailFromSpf": "NotStarted",
     "dmarc": "NotStarted"
   },
   "records": [
     {
       "type": "CNAME",
-      "host": "selector1._domainkey",
-      "value": "selector1-....azurecomm.net",
+      "host": "<token3>._domainkey",
+      "value": "<dkim-target-3>",
       "verification": "VerificationFailed",
       "conflict": {
-        "reason": "A CNAME already exists at selector1._domainkey pointing to \"selector1.mailprovider.example\" (likely a previous email provider).",
-        "resolution": "Edit ONLY the CNAME at \"selector1._domainkey\" from \"selector1.mailprovider.example\" to \"selector1-....azurecomm.net\" — change nothing else.",
+        "reason": "A CNAME already exists at this host pointing to \"selector.mailprovider.example\" (likely a previous email provider).",
+        "resolution": "Edit ONLY this CNAME to the value shown, and change nothing else.",
         "actions": [
           {
             "action": "edit",
             "type": "CNAME",
-            "host": "selector1._domainkey",
-            "currentValue": "selector1.mailprovider.example",
-            "newValue": "selector1-....azurecomm.net"
+            "host": "<token3>._domainkey",
+            "currentValue": "selector.mailprovider.example",
+            "newValue": "<dkim-target-3>"
           }
         ]
       }
     }
   ],
   "fixes": [
-    "DKIM Record 1: Edit ONLY the CNAME at \"selector1._domainkey\" from \"selector1.mailprovider.example\" to \"selector1-....azurecomm.net\" — change nothing else."
+    "DKIM record 3: edit ONLY the CNAME at this host to the value shown, and change nothing else."
   ]
 }
 ```
 
-## Conflict detection — when a record "won't verify"
+## Conflict detection: when a record won't verify
 
-Most stuck verifications aren't missing records — they're **clashes with records that already exist**. Onchain Suite checks your live DNS and tells you exactly what to change:
+Most stuck verifications aren't missing records. They're **clashes with records that already exist**. Onchain Suite checks your live DNS and tells you exactly what to change:
 
-- **Two SPF records** — multiple `v=spf1` records make SPF fail entirely. We compute the exact merged record to publish, tell you which record to keep and edit, and name the specific record(s) to delete — everything else in your DNS is left alone.
-- **Existing SPF without our include** — never add a second SPF record; we return the merged value to edit into your existing one.
-- **DKIM name occupied** — a previous email provider's CNAME (edit it to our value) or an old TXT key squatting the selector name (delete only that TXT, then add the CNAME).
-- **Existing DMARC** — informational only; your existing policy is fine.
+- **A DKIM host is occupied.** A previous email provider's CNAME sits at the selector, so edit it to the value shown. An old TXT key squatting the same name should be deleted, then the CNAME added.
+- **An existing mail-from record.** If the `bounce` subdomain already carries an MX or TXT, the response names exactly what to change.
+- **An existing DMARC record.** Informational only. Your existing policy is fine.
 
-Every fix is **surgical**: instructions quote the exact record values to edit or delete, so you never risk removing unrelated records (site verifications, other providers' tokens).
+Every fix is **surgical**: instructions quote the exact record to edit or delete, so you never risk removing unrelated records such as site verifications or another provider's tokens.
 
 ## Tips
 
-- Your registrar may show the host as `selector1._domainkey` or `selector1._domainkey.yourdomain.com` — both are the same record.
-- SPF and Ownership both live at `@` (the domain root) as TXT records — they coexist fine; only a *second* `v=spf1` record is a problem.
+- Your registrar may show the host as `<token>._domainkey` or `<token>._domainkey.yourdomain.com`. Both are the same record.
+- DKIM is **three CNAME records**, not one. All three must resolve for the domain to be send-ready.
 - DNS changes usually propagate in minutes but can take up to an hour depending on your provider's TTL.

@@ -1,22 +1,33 @@
 ---
 title: "Segments"
-description: "Create and reuse segments for campaigns, automations, reporting, and lifecycle targeting."
+description: "Create reusable audience segments for campaigns and automations, from rules or from SQL."
 ---
 
-## How Segments Are Used
+A segment is a reusable group of contacts. Once saved, a segment feeds campaigns, automations, and reports, so you define the audience once and target it everywhere.
 
-Segments are the reusable audience layer behind campaigns, automations, saved reports, and handoff workflows.
+## Building a segment
 
-## Good Segment Types
+There are three ways to define one:
 
-- Reachable users on a specific channel
+- **Rules.** Combine the built-in criteria: tags, a minimum contact score, and whether a wallet address is present.
+- **SQL.** Save any query result as a segment. This is how you build on-chain cohorts, since the [SQL editor](/intelligence/sql-query-editor) can reach enrichment and messaging data the rule builder can't. See [Segments From Queries](/intelligence/segments-from-queries).
+- **Natural language.** Describe the audience you want and get back draft rules to review.
+
+<Note>
+Lists and segments share the same backing. A list is just a segment you import into, so a list can be reused anywhere a segment can.
+</Note>
+
+## Good segment types
+
+- Reachable users on a specific channel (email or in-app)
 - Recently active wallets
 - High-value cohorts with declining engagement
-- Product users who match a contract-based condition
+- Holders of a specific contract or collection
 - Query-built audiences ready for follow-up
 
-## Best Practices
+## Best practices
 
-- Name segments by business meaning, not by one-off execution detail.
-- Refresh or review segments that drive important automation paths.
-- Keep ownership clear when multiple teams depend on the same segment.
+- Name segments by business meaning, not a one-off execution detail.
+- Review segments that drive important automation paths; a segment whose criteria drift will quietly change who gets messaged.
+- Keep ownership clear when several teams depend on the same segment.
+- Preview the count before wiring a segment into a live send.

@@ -20,13 +20,13 @@ Only **organization templates** can be attached to a campaign or referenced by a
 
 Attach an organization template to a campaign, or detach it to go back to standalone content.
 
-Template content has the **lowest** precedence at render time: content stored on the campaign wins over the template. So editing a campaign's body effectively detaches it from the template — a template is a starting point, not a live link. Changing the template later won't update campaigns already built from it.
+Template content has the **lowest** precedence at render time: content stored on the campaign wins over the template. So editing a campaign's body effectively detaches it from the template, a template is a starting point, not a live link. Changing the template later won't update campaigns already built from it.
 
 ## In-app templates
 
 A template can hold in-app push content instead of email by setting its channel to `inapp`. These are what you reference from an [in-app push](/integrations/in-app-notifications) `templateId`, and they support the same merge variables.
 
-An email template passed where an in-app template is expected is rejected — the channel must match.
+An email template passed where an in-app template is expected is rejected, the channel must match.
 
 ## Worth templating
 

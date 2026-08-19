@@ -3,7 +3,7 @@ title: "SQL Schema Reference"
 description: "Every table, column, and type you can query in the Intelligence SQL editor, plus the rules the validator enforces."
 ---
 
-The Intelligence SQL editor runs read-only `SELECT` queries over a curated, organization-scoped schema. Every table below is pre-filtered to your workspace before your query runs, so a query can never read another organization's data — even if you join across tables.
+The Intelligence SQL editor runs read-only `SELECT` queries over a curated, organization-scoped schema. Every table below is pre-filtered to your workspace before your query runs, so a query can never read another organization's data, even if you join across tables.
 
 ## Query rules
 
@@ -18,9 +18,9 @@ The Intelligence SQL editor runs read-only `SELECT` queries over a curated, orga
 Also enforced:
 
 - **No semicolons** anywhere in the query.
-- **No SQL comments** — `--`, `/*`, and `*/` are all rejected.
+- **No SQL comments**, `--`, `/*`, and `*/` are all rejected.
 - **No double quotes**, so no quoted identifiers. Use bare `snake_case` names.
-- **Your query must begin with `SELECT`.** A leading `WITH` is rejected — see [Common gotchas](#common-gotchas).
+- **Your query must begin with `SELECT`.** A leading `WITH` is rejected, see [Common gotchas](#common-gotchas).
 - Every table after `FROM` or `JOIN` must be one of the eleven tables listed below.
 
 Saved SQL runs are free and never consume AI credits. Credits apply only when you *generate* SQL from a prompt.
@@ -31,13 +31,13 @@ Identical queries completing within 10 minutes of each other are served from cac
 
 ## Reading the type column
 
-`TIMESTAMP` values serialize as ISO 8601 strings. `JSONB` columns come back as parsed objects. Note that **`BIGINT` and `NUMERIC` values are returned as strings**, not numbers — all the aggregate counts and rate columns in `campaign_performance` and the `email_*` counters in `contact_360` are affected. Cast in your client before doing arithmetic.
+`TIMESTAMP` values serialize as ISO 8601 strings. `JSONB` columns come back as parsed objects. Note that **`BIGINT` and `NUMERIC` values are returned as strings**, not numbers, all the aggregate counts and rate columns in `campaign_performance` and the `email_*` counters in `contact_360` are affected. Cast in your client before doing arithmetic.
 
 ## Tables
 
 ### `app_events`
 
-[Custom events](/integrations/custom-events) you send from your own product. This is how product behavior — signups, deposits, upgrades — becomes queryable alongside on-chain and messaging data.
+[Custom events](/integrations/custom-events) you send from your own product. This is how product behavior, signups, deposits, upgrades, becomes queryable alongside on-chain and messaging data.
 
 | Column | Type |
 | --- | --- |
@@ -53,11 +53,11 @@ Identical queries completing within 10 minutes of each other are served from cac
 Events sent with `test: true` are **excluded** from this table by design, so your test traffic never contaminates a segment or report.
 </Note>
 
-Use `occurred_at` rather than `created_at` for time windows — `occurred_at` is when the event happened in your system, `created_at` is when we received it.
+Use `occurred_at` rather than `created_at` for time windows, `occurred_at` is when the event happened in your system, `created_at` is when we received it.
 
 ### `contacts`
 
-Your audience contacts — wallet-first identity with optional email and name.
+Your audience contacts, wallet-first identity with optional email and name.
 
 | Column | Type |
 | --- | --- |
@@ -91,12 +91,12 @@ Per-recipient message events across email and in-app push.
 | `metadata` | `JSONB` nullable |
 
 <Warning>
-`campaign_run_id` identifies a *send run*, not a campaign. To attribute events to a campaign, join on `metadata->>'campaignId'` — there is no `campaign_id` column.
+`campaign_run_id` identifies a *send run*, not a campaign. To attribute events to a campaign, join on `metadata->>'campaignId'`. There is no `campaign_id` column.
 </Warning>
 
 ### `audience_profiles`
 
-Wallet profiles with channel reachability and ENS. Keyed by `(organization_id, wallet_address)` — there is no `id` column.
+Wallet profiles with channel reachability and ENS. Keyed by `(organization_id, wallet_address)`. There is no `id` column.
 
 | Column | Type |
 | --- | --- |
@@ -110,7 +110,7 @@ Wallet profiles with channel reachability and ENS. Keyed by `(organization_id, w
 
 ### `audience_segments`
 
-Saved segments — wallet lists or rule criteria.
+Saved segments, wallet lists or rule criteria.
 
 | Column | Type |
 | --- | --- |
@@ -148,7 +148,7 @@ Campaigns with status, type, and UTM parameters lifted out of the tracking JSON.
 
 ### `campaign_performance`
 
-Per-campaign engagement rollup, ready for reporting. Derived — one row per campaign, no per-recipient grain.
+Per-campaign engagement rollup, ready for reporting. Derived, one row per campaign, no per-recipient grain.
 
 | Column | Type |
 | --- | --- |
@@ -250,7 +250,7 @@ NFT holdings per wallet: collections, items, floor prices. One row per `(wallet,
 
 ### `contact_360`
 
-The customer-360 view — one row per contact, joining identity, on-chain metrics, activity, and email engagement, plus derived churn signals. This is usually the fastest place to start.
+The customer-360 view, one row per contact, joining identity, on-chain metrics, activity, and email engagement, plus derived churn signals. This is usually the fastest place to start.
 
 | Column | Type |
 | --- | --- |
@@ -282,7 +282,7 @@ The customer-360 view — one row per contact, joining identity, on-chain metric
 | `days_since_last_activity` | `INTEGER` nullable |
 | `churn_risk` | `TEXT` |
 
-`contact_360` has **no `organization_id` column** — it's already scoped to your workspace.
+`contact_360` has **no `organization_id` column**. It's already scoped to your workspace.
 
 ## Column values
 
@@ -353,7 +353,7 @@ Wallet casing is not normalized on `contacts`. Always join wallets with `lower()
     ```
   </Accordion>
 
-  <Accordion title="Only read-only queries are allowed — on a SELECT" icon="ban">
+  <Accordion title="Only read-only queries are allowed, on a SELECT" icon="ban">
     The read-only check scans for banned keywords as plain substrings, so ordinary text can trip it. `DO `, `SET `, `CALL `, and `COPY ` are the easy ones to hit:
 
     ```sql
@@ -416,7 +416,7 @@ LIMIT 25
 ```
 
 ```sql
--- High-value wallets with no email engagement — an in-app push audience
+-- High-value wallets with no email engagement (an in-app push audience)
 SELECT c.wallet_address, m.portfolio_value_usd, m.engagement_score
 FROM contacts c
 JOIN user_onchain_metrics m

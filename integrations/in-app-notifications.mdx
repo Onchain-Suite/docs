@@ -1,9 +1,9 @@
 ---
 title: In-App Notifications (Wallet-Based)
-description: Deliver real-time, wallet-targeted notifications to your dApp — in-app, web push, and mobile push — using publishable keys and signed challenges.
+description: Deliver real-time, wallet-targeted notifications to your dApp through in-app, web push, and mobile push, using publishable keys and signed challenges.
 ---
 
-Deliver notifications to your users addressed by **wallet address** — no email, no phone number, no account system required. A user proves ownership of their wallet by signing a message, and from then on you can reach them wherever they are.
+Deliver notifications to your users addressed by **wallet address**, no email, no phone number, no account system required. A user proves ownership of their wallet by signing a message, and from then on you can reach them wherever they are.
 
 One send reaches the user through whichever channel they're reachable on:
 
@@ -39,15 +39,15 @@ The SDK gives you all three plus wallet auth and a styled toast UI; a server-to-
 </Steps>
 
 <Note>
-The platform never sends a live in-app toast **and** an OS push for the same notification — if the wallet has an open socket, only the toast fires. When the socket is closed, web and mobile push take over. Cross-channel duplicates are collapsed by delivery ID, so tapping an OS push and then opening your dApp won't show the same notification twice.
+The platform never sends a live in-app toast **and** an OS push for the same notification. If the wallet has an open socket, only the toast fires. When the socket is closed, web and mobile push take over. Cross-channel duplicates are collapsed by delivery ID, so tapping an OS push and then opening your dApp won't show the same notification twice.
 </Note>
 
 ## Keys and environments
 
 | Key | Where it lives | What it does |
 | --- | --- | --- |
-| `pk_live_*` / `pk_test_*` | Browser — safe to ship publicly | Challenge/verify wallet auth only |
-| `sk_live_*` / `sk_test_*` | Server only — never in client code | Send pushes programmatically |
+| `pk_live_*` / `pk_test_*` | Browser, safe to ship publicly | Challenge/verify wallet auth only |
+| `sk_live_*` / `sk_test_*` | Server only, never in client code | Send pushes programmatically |
 
 Your publishable key's environment decides which allowed origins apply:
 
@@ -55,7 +55,7 @@ Your publishable key's environment decides which allowed origins apply:
 - `pk_test_*` matches origins registered as **`development`**
 
 <Warning>
-The origins API also accepts `staging`, but no publishable key ever resolves to it. An origin registered as `staging` will never match any key — use `production` or `development`.
+The origins API also accepts `staging`, but no publishable key ever resolves to it. An origin registered as `staging` will never match any key, use `production` or `development`.
 </Warning>
 
 <Note>
@@ -64,7 +64,7 @@ The in-app allowlist is separate from the API's CORS allowlist. Your origin must
 
 ## Quickstart with the SDK
 
-The fastest path is the official browser SDK — it handles the challenge/verify handshake, the socket lifecycle, reconnection, delivery reporting, and an optional toast UI.
+The fastest path is the official browser SDK. It handles the challenge/verify handshake, the socket lifecycle, reconnection, delivery reporting, and an optional toast UI.
 
 <CodeGroup>
 ```bash npm
@@ -86,7 +86,7 @@ npm i @onchainsuite/sdk
 </CodeGroup>
 
 <Note>
-The two paths differ: on the **npm/bundler path** the bundled `socket.io-client` is pulled in automatically — nothing else to install. On the **CDN script-tag path** a raw `esm.sh` import can't provide the bundled copy, so you still load `socket.io-client` first (the SDK finds it on `window.io`). You can also inject your own client with the `ioClient` option.
+The two paths differ: on the **npm/bundler path** the bundled `socket.io-client` is pulled in automatically. Nothing else to install. On the **CDN script-tag path** a raw `esm.sh` import can't provide the bundled copy, so you still load `socket.io-client` first (the SDK finds it on `window.io`). You can also inject your own client with the `ioClient` option.
 </Note>
 
 The SDK is ESM-only and tree-shakeable.
@@ -139,7 +139,7 @@ useEffect(() => {
 
 ### Custom rendering
 
-Return `false` from `onNotification` to suppress the built-in toast while keeping delivery analytics intact — then render the notification however you like.
+Return `false` from `onNotification` to suppress the built-in toast while keeping delivery analytics intact, then render the notification however you like.
 
 ```ts
 const os = new OnchainSuite("pk_live_yourorg_xxx", {
@@ -170,7 +170,7 @@ os.report(notification, "clicked");
 </ParamField>
 
 <ParamField path="options.apiBaseUrl" type="string">
-  API origin **without** the `/api/v1` suffix — e.g. `https://api.onchainsuite.com`.
+  API origin **without** the `/api/v1` suffix, e.g. `https://api.onchainsuite.com`.
 </ParamField>
 
 <ParamField path="options.signMessage" type="(message: string, walletAddress: string) => Promise<string>">
@@ -190,7 +190,7 @@ os.report(notification, "clicked");
 </ParamField>
 
 <ParamField path="options.ioClient" type="io factory">
-  Inject your own `socket.io-client` instead of the bundled one — useful on the CDN path or to pin a version.
+  Inject your own `socket.io-client` instead of the bundled one, useful on the CDN path or to pin a version.
 </ParamField>
 
 <ParamField path="options.push" type="false | { serviceWorkerPath?: string }">
@@ -215,7 +215,7 @@ You can also construct the client with `createClient(publishableKey, options)`, 
 | `report(notification, type)` | Report an interaction (`delivered`, `viewed`, `dismissed`, `clicked`). |
 | `enablePush()` | Prompt for and register web push. Returns the resulting `PushStatus`. |
 | `disablePush()` | Unregister web push for this device. |
-| `pushStatus()` | Current web-push permission — `"unsupported" \| "denied" \| "prompt" \| "granted"`. No prompt. |
+| `pushStatus()` | Current web-push permission, `"unsupported" \| "denied" \| "prompt" \| "granted"`. No prompt. |
 | `registerDevice(token, platform, appId?)` | Register a mobile device token (`platform` is `"ios"` or `"android"`). |
 | `unregisterDevice(token)` | Remove a mobile device token. |
 
@@ -225,7 +225,7 @@ Behaviour worth knowing: `delivered` is reported automatically on receipt; the s
 
 ## Web push
 
-Web push delivers an **OS-level notification when your dApp's tab is closed** — the same notifications, reaching users who've navigated away. It needs a service worker and the user's permission.
+Web push delivers an **OS-level notification when your dApp's tab is closed**, the same notifications, reaching users who've navigated away. It needs a service worker and the user's permission.
 
 <Steps>
   <Step title="Host the service worker">
@@ -242,7 +242,7 @@ Web push delivers an **OS-level notification when your dApp's tab is closed** �
   </Step>
 
   <Step title="Prompt from a user action">
-    Call `enablePush()` in response to a click — not on load — so the permission prompt has context. Gate it on `pushStatus()` so you don't re-prompt someone who already decided.
+    Call `enablePush()` in response to a click, not on load, so the permission prompt has context. Gate it on `pushStatus()` so you don't re-prompt someone who already decided.
 
     ```ts
     const client = createClient("pk_live_yourorg_xxx", {
@@ -261,7 +261,7 @@ The SDK fetches the platform VAPID key, registers the subscription with the serv
 
 ## Mobile push
 
-For a native iOS or Android app, register the device's push token after `start()`. The SDK doesn't fetch the token — obtain it with your own push library (`expo-notifications`, `@react-native-firebase/messaging`, etc.) and hand it over.
+For a native iOS or Android app, register the device's push token after `start()`. The SDK doesn't fetch the token, obtain it with your own push library (`expo-notifications`, `@react-native-firebase/messaging`, etc.) and hand it over.
 
 ```ts
 import messaging from "@react-native-firebase/messaging";
@@ -272,19 +272,19 @@ await messaging().requestPermission();
 const token = await messaging().getToken();
 await client.registerDevice(token, "android");
 
-// Keep it fresh — tokens rotate.
+// Keep it fresh; tokens rotate.
 messaging().onTokenRefresh((t) => client.registerDevice(t, "android"));
 ```
 
 Use `"ios"` for APNs. Stop delivery to one device with `unregisterDevice(token)`.
 
 <Note>
-Mobile push requires your Apple (APNs `.p8`) or Firebase (FCM service account) credentials on file — an OWNER or ADMIN uploads them once in the dashboard under organization push credentials. Without them, device tokens register but nothing is delivered.
+Mobile push requires your Apple (APNs `.p8`) or Firebase (FCM service account) credentials on file, an OWNER or ADMIN uploads them once in the dashboard under organization push credentials. Without them, device tokens register but nothing is delivered.
 </Note>
 
 ## Choosing a channel is automatic
 
-You don't pick the channel — the platform routes each notification per recipient:
+You don't pick the channel, the platform routes each notification per recipient:
 
 | Recipient state | Delivery |
 | --- | --- |
@@ -292,7 +292,7 @@ You don't pick the channel — the platform routes each notification per recipie
 | No socket, has push registered | Web and/or mobile push |
 | Neither | Held, replayed on next connect |
 
-A wallet with both a browser subscription and a phone can receive both. What never happens is a live toast and an OS push for the same notification. `deliveredNow: false` on a send is still not an error — it means the user wasn't socket-connected on the node that handled the request, and OS push or replay takes over.
+A wallet with both a browser subscription and a phone can receive both. What never happens is a live toast and an OS push for the same notification. `deliveredNow: false` on a send is still not an error. It means the user wasn't socket-connected on the node that handled the request, and OS push or replay takes over.
 
 ## Dashboard setup
 
@@ -336,7 +336,7 @@ These endpoints back your own dashboard UI and use a cookie session plus an org 
     { "origin": "https://app.example.com", "environment": "production" }
     ```
 
-    The origin is normalized to scheme + host + port — any path is stripped. Registering the same origin twice in one environment returns `400 Origin already exists for this environment`.
+    The origin is normalized to scheme + host + port, any path is stripped. Registering the same origin twice in one environment returns `400 Origin already exists for this environment`.
   </Accordion>
 
   <Accordion title="DELETE /integrations/inapp/origins/{originId}" icon="trash">
@@ -380,7 +380,7 @@ Error codes by status: `400 BAD_REQUEST`, `401 UNAUTHORIZED`, `403 FORBIDDEN`, `
 
 Use this if you're not on JavaScript or need to control the handshake yourself. Otherwise prefer the SDK above.
 
-### Step 1 — Request a challenge
+### Step 1, Request a challenge
 
 `POST /api/v1/inapp/challenge`
 
@@ -402,7 +402,7 @@ Send `x-publishable-key: pk_live_…` (or `Authorization: Bearer pk_live_…`) a
 
 The challenge is valid for **5 minutes**.
 
-### Step 2 — Sign and verify
+### Step 2, Sign and verify
 
 Sign the returned `message` with EIP-191 `personal_sign`:
 
@@ -436,7 +436,7 @@ const signature = await signer.signMessage(message);
 
 Both `/inapp/challenge` and `/inapp/verify` are rate limited to **3 requests per 10 seconds**.
 
-### Step 3 — Connect the socket
+### Step 3, Connect the socket
 
 Connect Socket.IO at path `/api/v1/inapp/register`. The token can go in `handshake.auth.token`, an `Authorization: Bearer` header, or a `?t=` query param.
 
@@ -469,7 +469,7 @@ Pending notifications are replayed automatically on connect, before any live pus
 
 #### Socket events
 
-**Server → client** — `PUSH`:
+**Server → client**, `PUSH`:
 
 ```ts
 {
@@ -496,7 +496,7 @@ Pending notifications are replayed automatically on connect, before any live pus
 `type` is one of `delivered`, `viewed`, `dismissed`, or `clicked`. Optional `metadata` is stored on the delivery record.
 
 <Warning>
-Reporting events for a wallet other than the one in your session token disconnects the socket immediately. There is no error event — it surfaces client-side as `disconnect` or `connect_error`.
+Reporting events for a wallet other than the one in your session token disconnects the socket immediately. There is no error event. It surfaces client-side as `disconnect` or `connect_error`.
 </Warning>
 
 ## Sending pushes from your backend
@@ -562,7 +562,7 @@ curl -X POST https://api.onchainsuite.com/api/v1/inapp/push \
 ```
 
 <Warning>
-`deliveredNow` is a best-effort signal meaning "a socket for this wallet is connected to the node that handled your request." A `false` does **not** mean the push failed — the user may be connected to another node, and offline users get the push replayed on reconnect. For authoritative delivery, read the `delivered` event in your analytics.
+`deliveredNow` is a best-effort signal meaning "a socket for this wallet is connected to the node that handled your request." A `false` does **not** mean the push failed; the user may be connected to another node, and offline users get the push replayed on reconnect. For authoritative delivery, read the `delivered` event in your analytics.
 </Warning>
 
 ### Templates and merge variables
@@ -578,15 +578,15 @@ Unknown placeholders are left in the text as-is rather than blanked, which makes
 
 ### Sending to many wallets
 
-There is no bulk endpoint on the secret-key API — loop `/inapp/push` per wallet. For audience-scale sends, use one of these instead:
+There is no bulk endpoint on the secret-key API, loop `/inapp/push` per wallet. For audience-scale sends, use one of these instead:
 
-- **Campaign to a segment** — `POST /api/v1/campaigns/{id}/send-inapp` resolves recipients from the campaign's segment and returns `{ campaignRunId, recipientCount, deliveredNowCount, skippedCount }`. Optional body fields `title`, `body`, `ctaLabel`, `ctaUrl` override the campaign's stored content.
-- **Automations** — add a `send_inapp` step and let the workflow resolve the audience.
+- **Campaign to a segment**, `POST /api/v1/campaigns/{id}/send-inapp` resolves recipients from the campaign's segment and returns `{ campaignRunId, recipientCount, deliveredNowCount, skippedCount }`. Optional body fields `title`, `body`, `ctaLabel`, `ctaUrl` override the campaign's stored content.
+- **Automations**, add a `send_inapp` step and let the workflow resolve the audience.
 
 To preview reach before sending, query your segment with `?reachable_on=inapp`.
 
 <Tip>
-To trigger a push from something that happens in **your product** — a signup, a deposit, a status change — send a [custom event](/integrations/custom-events) and let an automation turn it into a push. See the [end-to-end walkthrough](/integrations/custom-events#end-to-end-notify-a-user-from-an-offchain-event).
+To trigger a push from something that happens in **your product**, a signup, a deposit, a status change, send a [custom event](/integrations/custom-events) and let an automation turn it into a push. See the [end-to-end walkthrough](/integrations/custom-events#end-to-end-notify-a-user-from-an-offchain-event).
 </Tip>
 
 ## Limits and quotas
@@ -602,10 +602,10 @@ To trigger a push from something that happens in **your product** — a signup, 
 
 Expired, dismissed, and clicked notifications are pruned and never replayed.
 
-In-app pushes draw from the **same monthly message allowance as email** — they are not a separate meter. Exceeding it returns `402 PLAN_LIMIT_EXCEEDED`; warnings fire at 75% and 95% of the allowance. Exceeding the daily cap returns `429 Daily in-app push quota exceeded`.
+In-app pushes draw from the **same monthly message allowance as email**. They are not a separate meter. Exceeding it returns `402 PLAN_LIMIT_EXCEEDED`; warnings fire at 75% and 95% of the allowance. Exceeding the daily cap returns `429 Daily in-app push quota exceeded`.
 
 <Note>
-Rate-limit (429) responses from the throttler return a flat body — `{ statusCode, message, error, retryAfter, limit, remaining, resetAt, path, timestamp }` — rather than the standard error envelope, along with `X-RateLimit-Limit` and `X-RateLimit-Remaining` headers.
+Rate-limit (429) responses from the throttler return a flat body, `{ statusCode, message, error, retryAfter, limit, remaining, resetAt, path, timestamp }`, rather than the standard error envelope, along with `X-RateLimit-Limit` and `X-RateLimit-Remaining` headers.
 </Note>
 
 ## Troubleshooting
@@ -613,7 +613,7 @@ Rate-limit (429) responses from the throttler return a flat body — `{ statusCo
 <AccordionGroup>
   <Accordion title="401 Origin not allowed" icon="ban">
     - The `Origin` header must match a registered origin exactly: scheme, host, **and** port.
-    - Confirm the key environment lines up — `pk_live_*` only matches `production` origins, `pk_test_*` only matches `development`.
+    - Confirm the key environment lines up, `pk_live_*` only matches `production` origins, `pk_test_*` only matches `development`.
     - An origin saved as `staging` never matches anything. Re-register it.
   </Accordion>
 
@@ -622,7 +622,7 @@ Rate-limit (429) responses from the throttler return a flat body — `{ statusCo
   </Accordion>
 
   <Accordion title="401 Signature does not match wallet" icon="signature">
-    Sign the `message` string exactly as returned — no trimming or re-encoding — using EIP-191 `personal_sign`. Also confirm `walletAddress` in the verify call matches the signing account.
+    Sign the `message` string exactly as returned, no trimming or re-encoding, using EIP-191 `personal_sign`. Also confirm `walletAddress` in the verify call matches the signing account.
   </Accordion>
 
   <Accordion title="401 Challenge not found or expired" icon="clock">
@@ -632,7 +632,7 @@ Rate-limit (429) responses from the throttler return a flat body — `{ statusCo
   <Accordion title="Notifications never arrive" icon="wifi">
     - Confirm the socket is connected and listening for `PUSH` (not a custom event name).
     - Check the path is exactly `/api/v1/inapp/register`.
-    - Check the send response — a `402` or `429` means it was never queued.
+    - Check the send response, a `402` or `429` means it was never queued.
     - Remember that `deliveredNow: false` is normal and not an error.
   </Accordion>
 
@@ -645,6 +645,6 @@ Rate-limit (429) responses from the throttler return a flat body — `{ statusCo
   </Accordion>
 
   <Accordion title="Real-time works locally but not in production" icon="server">
-    Multi-instance deployments need `REDIS_URL` set so the Socket.IO Redis adapter can broadcast across nodes. Without it, live delivery only reaches users connected to the same instance — replay on reconnect still works, so the symptom is delayed rather than missing notifications.
+    Multi-instance deployments need `REDIS_URL` set so the Socket.IO Redis adapter can broadcast across nodes. Without it, live delivery only reaches users connected to the same instance, replay on reconnect still works, so the symptom is delayed rather than missing notifications.
   </Accordion>
 </AccordionGroup>

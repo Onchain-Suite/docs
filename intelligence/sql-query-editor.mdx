@@ -3,7 +3,7 @@ title: "SQL Query Editor"
 description: "Query wallet, contact, and campaign data directly to build precise audiences and reports."
 ---
 
-The SQL editor is for when a rule builder isn't precise enough — when the cohort you want combines on-chain behavior, audience state, and messaging history in one definition.
+The SQL editor is for when a rule builder isn't precise enough, when the cohort you want combines on-chain behavior, audience state, and messaging history in one definition.
 
 Queries run read-only against a curated schema that's already scoped to your workspace. You cannot see another organization's data, and you cannot write.
 
@@ -13,7 +13,7 @@ Eleven tables are available. The two you'll reach for most:
 
 <CardGroup cols={2}>
   <Card title="contact_360" icon="user">
-    One row per contact, already joining identity, on-chain metrics, activity, and email engagement — plus derived `churn_risk` and `days_since_last_activity`.
+    One row per contact, already joining identity, on-chain metrics, activity, and email engagement, plus derived `churn_risk` and `days_since_last_activity`.
   </Card>
   <Card title="campaign_performance" icon="chart-line">
     One row per campaign with sends, opens, clicks, and rates pre-computed.
@@ -22,7 +22,7 @@ Eleven tables are available. The two you'll reach for most:
 
 The rest: `contacts`, `delivery_events`, `audience_profiles`, `audience_segments`, `campaigns`, `user_onchain_metrics`, `wallet_activity_summary`, and `nft_holdings`. Full columns and types are in the [SQL Schema Reference](/api/sql-schema).
 
-Start with `contact_360` before hand-joining `contacts` to the metrics tables — it does that work for you and avoids row fan-out mistakes.
+Start with `contact_360` before hand-joining `contacts` to the metrics tables. It does that work for you and avoids row fan-out mistakes.
 
 ## Rules
 
@@ -37,7 +37,7 @@ No semicolons, no SQL comments, no double-quoted identifiers. Joins, subqueries,
 
 Two rules surprise people:
 
-- **Your query must start with `SELECT`.** A leading `WITH` is rejected — wrap the CTE as a subquery instead.
+- **Your query must start with `SELECT`.** A leading `WITH` is rejected, wrap the CTE as a subquery instead.
 - **The read-only check scans for keywords as plain text**, so `WHERE first_name LIKE 'do %'` trips it. See [Common gotchas](/api/sql-schema#common-gotchas).
 
 ## Questions worth asking
@@ -70,7 +70,7 @@ LIMIT 100
     Pick two or three wallets from the result and confirm they genuinely belong in the cohort.
   </Step>
   <Step title="Save as a report or segment">
-    Saving as a segment requires a wallet column in your output — `wallet_address`, `wallet`, or `address`. Without one, saving fails.
+    Saving as a segment requires a wallet column in your output, `wallet_address`, `wallet`, or `address`. Without one, saving fails.
   </Step>
   <Step title="Use it downstream">
     Feed the segment into a campaign or an automation.
@@ -79,7 +79,7 @@ LIMIT 100
 
 ## Costs and caching
 
-Running SQL is **free** — hand-written and saved queries never consume AI credits. Credits apply only when you [generate SQL from a prompt](/intelligence/generate-sql).
+Running SQL is **free**, hand-written and saved queries never consume AI credits. Credits apply only when you [generate SQL from a prompt](/intelligence/generate-sql).
 
 Identical queries re-run within 10 minutes return cached results without re-executing.
 
@@ -98,8 +98,8 @@ LIMIT 100
 Two more traps worth knowing before you write a join:
 
 - `delivery_events` has **no `campaign_id` column**. Attribute events to a campaign via `metadata->>'campaignId'`. The `campaign_run_id` column identifies a send run, not a campaign.
-- `wallet_activity_summary` is per wallet **per chain**, and `nft_holdings` is per token. Joining either to a per-wallet table multiplies rows — aggregate or filter on `chain` first.
+- `wallet_activity_summary` is per wallet **per chain**, and `nft_holdings` is per token. Joining either to a per-wallet table multiplies rows, aggregate or filter on `chain` first.
 
 ## Guardrails
 
-Treat SQL output as a draft audience until someone has reviewed it. Narrow, readable queries are easier for the whole team to trust and reuse — and much easier to debug when a campaign reaches the wrong people.
+Treat SQL output as a draft audience until someone has reviewed it. Narrow, readable queries are easier for the whole team to trust and reuse, and much easier to debug when a campaign reaches the wrong people.

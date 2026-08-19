@@ -1,17 +1,29 @@
 ---
 title: "Segments From Queries"
-description: "Turn validated SQL results into reusable audience segments."
+description: "Turn a SQL result into a reusable audience segment."
 ---
+
+The SQL editor is the most precise way to build an audience, because it can reach on-chain and messaging data the rule builder can't. Any query result can be saved as a segment and reused in a campaign or automation.
 
 ## Steps
 
-1. Run and validate the SQL result.
-2. Confirm the output maps cleanly to users or wallets.
-3. Save the result as a segment.
-4. Reuse the segment in a campaign or automation.
+<Steps>
+  <Step title="Write and run the query">
+    Build the cohort in the [SQL editor](/intelligence/sql-query-editor). Start from a [starter query](/intelligence/starter-queries) if one is close.
+  </Step>
+  <Step title="Include a wallet column">
+    The result must contain a wallet column named `wallet_address`, `wallet`, or `address`. Saving fails without one, because a segment needs someone to target.
+  </Step>
+  <Step title="Save as a segment">
+    Name it and save. It's now available anywhere a segment is.
+  </Step>
+  <Step title="Use it downstream">
+    Feed it into a campaign or an automation.
+  </Step>
+</Steps>
 
-## Important Checks
+## Checks before saving
 
-- Check for duplicate rows before saving.
-- Confirm the query returns the right identity type.
-- Decide whether the segment needs to refresh automatically.
+- **Deduplicate.** Joining a per-wallet table to a per-chain or per-token table fans out rows. Aggregate or filter first so a wallet appears once.
+- **Confirm the identity type.** A query returning contacts is different from one returning raw wallet rows; make sure it's the audience you mean.
+- **Spot-check.** Read a few rows against wallets you recognize before wiring the segment into a live send.

@@ -3,13 +3,13 @@ title: "Create a Campaign"
 description: "Build a campaign from audience definition through validation, in the app or over the API."
 ---
 
-Use a campaign for a one-time send to a defined cohort — a product update, mint reminder, rewards announcement, or ecosystem activation.
+Use a campaign for a one-time send to a defined cohort, a product update, mint reminder, rewards announcement, or ecosystem activation.
 
 ## Steps
 
 <Steps>
   <Step title="Create the campaign">
-    Name it for reporting: audience, goal, and date, e.g. "Base minters — claim reminder — Jul 2026". Campaign names are what you'll scan in analytics months later.
+    Name it for reporting: audience, goal, and date, e.g. "Base minters, claim reminder, Jul 2026". Campaign names are what you'll scan in analytics months later.
   </Step>
   <Step title="Define the audience">
     Pick contacts, segments, or both. A contact matching either is included.
@@ -21,7 +21,7 @@ Use a campaign for a one-time send to a defined cohort — a product update, min
     Choose a template or start blank, then set subject, preview text, and sender. See the [email editor](/campaigns/email-editor).
   </Step>
   <Step title="Validate">
-    Run validation and clear every error — the same checks run at launch, so anything unresolved blocks the send.
+    Run validation and clear every error, the same checks run at launch, so anything unresolved blocks the send.
   </Step>
   <Step title="Preview and test">
     Continue to [Preview and Test Send](/campaigns/preview-and-test-send).
@@ -37,7 +37,7 @@ Use a campaign for a one-time send to a defined cohort — a product update, min
 | `SUBJECT_REQUIRED` | Add a subject line |
 | `SENDER_NAME_REQUIRED` / `SENDER_EMAIL_REQUIRED` | Set a verified sender |
 | `EMAIL_BODY_EMPTY` | Body has no HTML and no text |
-| `RENDER_FIELD_MISSING` | A merge variable renders blank — add a `default` filter |
+| `RENDER_FIELD_MISSING` | A merge variable renders blank, add a `default` filter |
 | `SCHEDULE_REQUIRED` / `TIMEZONE_REQUIRED` | Complete the schedule |
 | `CHANNELS_REQUIRED` / `CHANNEL_CONTENT_REQUIRED` | Multi-channel campaign missing a channel or its content |
 
@@ -53,7 +53,7 @@ Use a campaign for a one-time send to a defined cohort — a product update, min
 
 ## Duplicating a campaign
 
-Duplicating copies content and audience but resets the status to draft and clears stats — the fastest way to run a recurring send without rebuilding it.
+Duplicating copies content and audience but resets the status to draft and clears stats, the fastest way to run a recurring send without rebuilding it.
 
 ## Goals
 
@@ -67,7 +67,7 @@ A campaign can carry conversion goals measured over an attribution window (1–9
 | `email_click` | Email clicks |
 
 <Warning>
-`email_open` and `email_click` goals always report zero — they look for recipient data under a key the send pipeline doesn't write. Use [campaign analytics](/campaigns/launch-and-monitor) for open and click rates instead, which reads the events correctly.
+`email_open` and `email_click` goals always report zero. They look for recipient data under a key the send pipeline doesn't write. Use [campaign analytics](/campaigns/launch-and-monitor) for open and click rates instead, which reads the events correctly.
 </Warning>
 
 Goal measurement covers up to 10,000 contacts and flags the result as truncated beyond that.

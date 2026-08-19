@@ -1,19 +1,42 @@
 ---
 title: "Overview"
-description: "Understand how wallet-first profiles, segments, and lifecycle health signals work together in Onchain Suite."
+description: "How wallet-first profiles, lists, segments, and lifecycle signals fit together."
 ---
 
-## What Audience Means In Onchain Suite
+Audience is where raw wallet and contact data becomes people you can understand, group, and message. Every record is wallet-first: a contact can exist with just a wallet, with just an email, or with both, and everything you know about them attaches to that one record.
 
-Audience is the operational layer that turns raw user and wallet data into people you can understand, segment, and message.
+## What lives here
 
-## What Lives Here
+<CardGroup cols={2}>
+  <Card title="Unified profiles" icon="user" href="/audience/unified-profiles">
+    Identity, channels, tags, and on-chain context on one record.
+  </Card>
+  <Card title="Wallet enrichment" icon="wand-magic-sparkles" href="/audience/wallet-enrichment">
+    Portfolio, activity, and NFT data derived from the chain.
+  </Card>
+  <Card title="Segments" icon="filter" href="/audience/segments">
+    Reusable groups behind campaigns and automations.
+  </Card>
+  <Card title="Imports and exports" icon="file-arrow-up" href="/audience/imports-and-exports">
+    Bring contacts in from CSV or JSON, and export them back out.
+  </Card>
+  <Card title="Health and churn" icon="heart-pulse" href="/audience/health-and-churn">
+    Engagement and risk signals to prioritize follow-up.
+  </Card>
+</CardGroup>
 
-- Unified profiles that combine identity, channel, and behavioral context
-- Saved segments for campaigns and automations
-- Import and export workflows
-- Health and churn signals that help prioritize follow-up
+## Lists and tags
 
-## Why It Matters
+Contacts are organized with **lists** and **tags**. Every import lands in a list so its contacts are immediately findable, and tags add cross-cutting labels on top. Both can be renamed or deleted as your taxonomy changes.
 
-In Web3, a wallet is not enough and an email list is not enough. Audience gives your team a usable operating model across both.
+## List hygiene
+
+The audience keeps itself clean automatically:
+
+- **Double opt-in** (on forms) holds a newly captured contact until they confirm by email, so only real, consenting addresses enter the audience.
+- **Suppression** removes hard bounces and spam complaints, and they're never contacted again.
+- **ONS+ verification** can clean addresses at import or capture time. See [Sender Verification](/settings/sender-verification).
+
+## Why it matters
+
+In Web3 a wallet alone isn't enough, and an email list alone isn't enough. Audience gives your team one operating model across both, so a campaign or automation can target "holds this NFT and opened the last email" without stitching systems together.

@@ -8,15 +8,15 @@ Automations reach users through three messaging nodes. Each decides **who** it s
 ## Choosing recipients
 
 <ParamField path="recipientMode" type="string">
-  `triggering_profile` (default) — send to the contact who entered the automation.
-  `wallet_list` — send to a fixed list of wallets.
+  `triggering_profile` (default), send to the contact who entered the automation.
+  `wallet_list`, send to a fixed list of wallets.
 </ParamField>
 
 <ParamField path="walletAddresses" type="string[]">
   Required when `recipientMode` is `wallet_list`. Maximum 250 per node.
 </ParamField>
 
-`triggering_profile` is what you want almost always — it's what makes the automation personal. Use `wallet_list` for announcements to a known set of wallets.
+`triggering_profile` is what you want almost always. It's what makes the automation personal. Use `wallet_list` for announcements to a known set of wallets.
 
 <Note>
 There is no segment-wide fan-out inside a flow. An automation processes **one contact per entry**. To reach a whole segment, either send a campaign to that segment directly, or have your system post one `segment_entered` event per contact.
@@ -65,7 +65,7 @@ The flow continues past a skipped node, so an automation can complete without se
 }
 ```
 
-`title` and `body` are required unless you point the node at a campaign to draw content from. Both `ctaLabel` and `ctaUrl` must be present for a button to render — a label alone is dropped.
+`title` and `body` are required unless you point the node at a campaign to draw content from. Both `ctaLabel` and `ctaUrl` must be present for a button to render, a label alone is dropped.
 
 In-app pushes reach wallets that have authenticated through the SDK. Offline users receive the push on their next connect, within the 72-hour retention window. See [In-App Notifications](/integrations/in-app-notifications) for the client setup, and note that in-app messages draw from the **same monthly allowance as email**.
 
@@ -114,7 +114,7 @@ Use this when the follow-up content is owned by the campaigns team and maintaine
   </Accordion>
 
   <Accordion title="Tag now, campaign later" icon="tag">
-    Don't message immediately — mark the contact so a campaign can pick them up.
+    Don't message immediately, mark the contact so a campaign can pick them up.
 
     `trigger → add_tag → webhook`
 
@@ -132,4 +132,4 @@ Conversion and revenue attribution are derived by pattern-matching event names a
 
 ## Keeping teams aligned
 
-Agree on the intended path before building. The recurring failure is two systems owning the same moment — an automation and a scheduled campaign both messaging the same wallets on the same trigger. Write down which system owns which moment, and who owns the audience.
+Agree on the intended path before building. The recurring failure is two systems owning the same moment, an automation and a scheduled campaign both messaging the same wallets on the same trigger. Write down which system owns which moment, and who owns the audience.

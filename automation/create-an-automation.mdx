@@ -1,6 +1,6 @@
 ---
 title: "Create an Automation"
-description: "Build, validate, and publish an automation — in the builder or over the API."
+description: "Build, validate, and publish an automation, in the builder or over the API."
 ---
 
 An automation is a trigger plus a flow graph. This page walks through building one, the node types available, and the publish step that actually makes it live.
@@ -12,7 +12,7 @@ An automation is a trigger plus a flow graph. This page walks through building o
     Forking a [built-in play](/automation/overview) gives you a working trigger and flow as a draft you own. Starting blank gives you an empty graph.
   </Step>
   <Step title="Configure the trigger">
-    Pick the event type and narrow it — chain, contract, event names, payload filters. See [Triggers and Conditions](/automation/triggers-and-conditions).
+    Pick the event type and narrow it with a chain, contract, event names, and payload filters. See [Triggers and Conditions](/automation/triggers-and-conditions).
   </Step>
   <Step title="Lay out the flow">
     Add action, wait, and branch nodes, and connect them with edges. Execution follows edges from the trigger node.
@@ -21,7 +21,7 @@ An automation is a trigger plus a flow graph. This page walks through building o
     Validation reports blocking errors and non-blocking warnings. Fix the errors.
   </Step>
   <Step title="Preview">
-    Preview estimates how many wallets currently match the trigger, with sample profiles. Run this before publishing — a trigger matching zero wallets is the most common cause of a silent automation.
+    Preview estimates how many wallets currently match the trigger, with sample profiles. Run this before publishing. A trigger matching zero wallets is the most common cause of a silent automation.
   </Step>
   <Step title="Publish">
     Publishing creates the version the runtime executes. Without it, nothing runs.
@@ -56,7 +56,7 @@ You can also use `minutes`, `hours`, or `days`, or an amount-and-unit pair:
 { "data": { "amount": 2, "unit": "hours" } }
 ```
 
-The unit defaults to **minutes** when omitted, and any delay is clamped to a minimum of one second. A waiting entry is scheduled and resumed later — it doesn't hold a worker open.
+The unit defaults to **minutes** when omitted, and any delay is clamped to a minimum of one second. A waiting entry is scheduled and resumed later, so it doesn't hold a worker open.
 
 ### Tags
 
@@ -104,10 +104,10 @@ Your endpoint receives:
 }
 ```
 
-Any response of 400 or above counts as a failure and is retried — up to 5 attempts with exponential backoff, then dead-lettered. Requests time out after 10 seconds.
+Any response of 400 or above counts as a failure and is retried up to 5 times with exponential backoff, then dead-lettered. Requests time out after 10 seconds.
 
 <Warning>
-The URL must be a **public** `https` (or `http`) endpoint. URLs pointing at private networks — `localhost`, private IP ranges, or a cloud metadata address — are rejected when you save the node, and again at send time, including via redirects. It also can't embed credentials (`user:pass@host`). This is an anti-SSRF safeguard; host your webhook on a reachable public address.
+The URL must be a **public** `https` (or `http`) endpoint. URLs pointing at private networks (`localhost`, private IP ranges, or a cloud metadata address) are rejected when you save the node, and again at send time, including via redirects. It also can't embed credentials (`user:pass@host`). This is an anti-SSRF safeguard; host your webhook on a reachable public address.
 </Warning>
 
 <Warning>
@@ -115,7 +115,7 @@ Keys in your `payload` are merged **last**, so a payload key named `organization
 </Warning>
 
 <Note>
-This node sends webhooks **out**. There is no inbound webhook trigger — to start an automation from your own system, call the ingest API described in [Contract-Based Flows](/automation/contract-based-flows).
+This node sends webhooks **out**. There is no inbound webhook trigger. To start an automation from your own system, call the ingest API described in [Contract-Based Flows](/automation/contract-based-flows).
 </Note>
 
 ## The flow graph
@@ -194,12 +194,12 @@ Blocking errors you'll encounter:
 | `INVALID_TAG_CONFIG` | Empty tag |
 | `INVALID_EDGE` | Edge references a missing node |
 
-`DISCONNECTED_NODES` is a warning, not an error — the graph still publishes, but the orphaned nodes never execute.
+`DISCONNECTED_NODES` is a warning, not an error. The graph still publishes, but the orphaned nodes never execute.
 
 ## Publish
 
 <Warning>
-**Publishing is what makes an automation run.** The runtime executes the most recent *published version* of the graph. Setting status to `active` without publishing produces an automation that matches events, creates entries, and does nothing — the hardest failure mode to spot, because the automation looks live and entry counts climb.
+**Publishing is what makes an automation run.** The runtime executes the most recent *published version* of the graph. Setting status to `active` without publishing produces an automation that matches events, creates entries, and does nothing. It's the hardest failure mode to spot, because the automation looks live and entry counts climb.
 
 Publish after every change you want live. Saving the graph is not publishing.
 </Warning>
@@ -208,12 +208,12 @@ Publish after every change you want live. Saving the graph is not publishing.
 
 Each step retries up to 3 times with exponential backoff. After the final attempt the entry is marked `failed` and recorded as a dead letter with the error.
 
-Email steps behave differently — they **skip** rather than fail when delivery is impossible: if sending reputation is blocked, or every recipient is suppressed, the node is skipped and the flow continues. Check entry events for `node_skipped` when an email step produces no sends.
+Email steps behave differently. They **skip** rather than fail when delivery is impossible: if sending reputation is blocked, or every recipient is suppressed, the node is skipped and the flow continues. Check entry events for `node_skipped` when an email step produces no sends.
 
 ## Best practices
 
 - One trigger, one outcome. Add branches only after the primary path is verified.
 - Preview before publishing so you know the trigger matches a non-zero audience.
-- Name automations after trigger plus action — "Mint → welcome series" beats "Automation 3".
+- Name automations after trigger plus action, "Mint → welcome series" beats "Automation 3".
 - Avoid overlapping automations targeting the same wallets on the same event.
 - Test with a real event, then check entry events to confirm each node fired.

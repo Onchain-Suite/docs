@@ -1,22 +1,22 @@
 ---
 title: "Overview"
-description: "How campaigns work — types, lifecycle, audiences, and what's available today."
+description: "How campaigns work: types, lifecycle, audiences, and what's available today."
 ---
 
-A campaign is a one-off send to an audience you define: a launch announcement, a governance reminder, a rewards notice. Where [automations](/automation/overview) react to individual events, campaigns go out to a whole cohort at a moment you choose.
+A campaign is a one-off send to an audience you define, such as a launch announcement, a governance reminder, or a rewards notice. Where [automations](/automation/overview) react to individual events, campaigns go out to a whole cohort at a moment you choose.
 
 ## Campaign types
 
-| Type | Channel | What it does |
+There are two channels a campaign can send on:
+
+| Type | Reaches | What it does |
 | --- | --- | --- |
-| `EMAIL_BLAST` | Email | A single email to the whole audience. The default, and the one that sends. |
-| `SMART_SENDING` | Multi-channel | In-app, Telegram, Discord, X. |
+| **Email** | Contacts with an email address | A single email to the whole audience. |
+| **In-app** | Wallet-authenticated users of your dApp | A [wallet-targeted push](/integrations/in-app-notifications) to the reachable part of the audience. |
 
-<Warning>
-`SMART_SENDING` campaigns currently mark themselves as sent without delivering anything. For in-app messaging that works now, use an [automation](/automation/overview) with a `send_inapp` step, or send in-app from a campaign via the [in-app path](#in-app-campaigns).
-</Warning>
+Email is the default. A campaign can also carry an in-app version alongside its email, so the same message reaches wallet-first users who never gave you an address. See [In-app campaigns](#in-app-campaigns).
 
-(The older drip type has been retired — a sequence is now built as an [automation](/automation/overview) with `wait` steps.)
+For a sequence of messages over time, build an [automation](/automation/overview) with `wait` steps rather than a campaign.
 
 ## Lifecycle
 
@@ -35,53 +35,53 @@ A campaign is a one-off send to an audience you define: a launch announcement, a
   </Step>
 </Steps>
 
-A campaign can only be launched from `DRAFT` or `SCHEDULED` — relaunching one that's already sending returns a conflict.
+A campaign can only be launched from **Draft** or **Scheduled**. Relaunching one that's already sending returns a conflict.
 
 <Note>
-`ARCHIVED` and `PAUSED` appear as filter options but nothing in the product moves a campaign into them today.
+`Archived` and `Paused` appear as filter options, but nothing in the product moves a campaign into them today.
 </Note>
 
 ## Audience
 
-An audience is a set of contact IDs plus a set of segment IDs. Both are combined — a contact matching either is included.
+An audience is a set of contacts plus a set of segments. Both are combined, so a contact matching either is included.
 
 Segment criteria support three filters: tags, minimum contact score, and whether a wallet address is present.
 
 Before sending, recipients are filtered by:
 
-- **Unsubscribes** — contacts who opted out of email are removed
-- **Suppression** — hard bounces and complaints are dropped, re-checked at the moment each message is dispatched, not just at launch
-- **Unconfirmed double opt-in** — contacts captured by a form who haven't clicked the confirmation link are held back
-- **Smart sending** — if enabled, anyone emailed in the last 10 hours is skipped
+- **Unsubscribes.** Contacts who opted out of email are removed.
+- **Suppression.** Hard bounces and complaints are dropped, re-checked at the moment each message is dispatched, not just at launch.
+- **Unconfirmed double opt-in.** Contacts captured by a form who haven't clicked the confirmation link are held back.
+- **Smart sending.** If enabled, anyone emailed in the last 10 hours is skipped.
 
 Use the audience estimate to see the resulting count, including how many smart sending would exclude.
 
 <Note>
-The estimate is an **upper bound**. Because suppression is re-checked at dispatch, a contact who unsubscribes or bounces after you launch is dropped from later sends — so the number actually sent can be lower than the estimate. On Pay as you go, the launch charge is reconciled against what actually went out, and the difference is refunded.
+The estimate is an **upper bound**. Because suppression is re-checked at dispatch, a contact who unsubscribes or bounces after you launch is dropped from later sends, so the number actually sent can be lower than the estimate. On Pay as you go, the launch charge is reconciled against what actually went out, and the difference is refunded.
 </Note>
 
 <Warning>
-If a campaign's audience resolves to nobody — an empty segment, or criteria that match nothing — launch does not currently fail cleanly. Always check the estimate before launching, and confirm it's a number you expect.
+If a campaign's audience resolves to nobody, such as an empty segment or criteria that match nothing, launch does not currently fail cleanly. Always check the estimate before launching, and confirm it's a number you expect.
 </Warning>
 
 ## Scheduling
 
-Schedule a campaign for a future time and it sends on its own — a scheduler checks every few minutes and launches any campaign whose scheduled time has passed, through the same validation and allowance checks as a manual launch.
+Schedule a campaign for a future time and it sends on its own. A scheduler checks every few minutes and launches any campaign whose scheduled time has passed, through the same validation and allowance checks as a manual launch.
 
 Because a scheduled launch still runs those checks, a campaign that would fail validation, or whose send wouldn't fit your allowance, won't go out at its scheduled time. Confirm it validates cleanly before you rely on the schedule.
 
 ## Tracking
 
-Open and click tracking are **on by default**; smart sending and UTM parameters are off.
+Open and click tracking are **on by default**. Smart sending and UTM parameters are off.
 
 | Setting | Default | Effect |
 | --- | --- | --- |
-| `openTracking` | On | Injects a 1×1 pixel |
-| `clickTracking` | On | Rewrites links through a redirect |
-| `trackingParameters` | Off | Appends your UTM parameters |
-| `smartSending` | Off | Skips anyone emailed in the last 10 hours |
+| Open tracking | On | Injects a 1×1 pixel |
+| Click tracking | On | Rewrites links through a redirect |
+| Tracking parameters | Off | Appends your UTM parameters |
+| Smart sending | Off | Skips anyone emailed in the last 10 hours |
 
-UTM parameters never overwrite ones already present on a link — author intent wins. Links that are anchors, `mailto:`, or `tel:` are left alone.
+UTM parameters never overwrite ones already present on a link, so author intent wins. Links that are anchors, `mailto:`, or `tel:` are left alone.
 
 <Note>
 Tracking requires a real per-recipient delivery, so **previews and test sends carry no pixel and no click wrapping**. Test-send opens will never show up in analytics.
@@ -89,7 +89,7 @@ Tracking requires a real per-recipient delivery, so **previews and test sends ca
 
 ## In-app campaigns
 
-A campaign can carry an in-app push variant alongside its email, sent to the wallet-reachable part of the same audience. Content resolves from the request, then the campaign's stored in-app content, then a linked in-app template.
+A campaign can carry an in-app version alongside its email, sent to the wallet-reachable part of the same audience. Content resolves from the request, then the campaign's stored in-app content, then a linked in-app template.
 
 Recipients are matched by wallet rather than email, honor a separate in-app opt-out, and skip the email suppression list. Anyone whose message renders empty is skipped rather than failing the send.
 
@@ -97,19 +97,19 @@ See [In-App Notifications](/integrations/in-app-notifications) for how clients r
 
 ## Limits
 
-Email and in-app share **one monthly message allowance** — they aren't metered separately.
+Email and in-app share **one monthly message allowance**. They aren't metered separately.
 
 | Plan | Messages/month | Contacts |
 | --- | --- | --- |
-| **Pay as you go** — $0 + usage | Metered — $1 per 1,000 | 1,000 |
-| **Launch** — $49/mo | 50,000 | 5,000 |
-| **Growth** — $349/mo | 250,000 | 25,000 |
-| **Pro** — $799/mo | 750,000 | 75,000 |
-| **Scale** — $2,299/mo | 1,500,000 | 150,000 |
+| **Pay as you go** ($0 + usage) | Metered at $1 per 1,000 | 1,000 |
+| **Launch** ($49/mo) | 50,000 | 5,000 |
+| **Growth** ($349/mo) | 250,000 | 25,000 |
+| **Pro** ($799/mo) | 750,000 | 75,000 |
+| **Scale** ($2,299/mo) | 1,500,000 | 150,000 |
 
 The allowance is checked at launch against your estimated recipients plus what you've already sent this calendar month, and the send is blocked if it wouldn't fit. Warnings appear at 75% and 95% of the allowance.
 
-On **Pay as you go** there's no monthly cap — email and in-app pushes are metered at $1 per 1,000 against your prepaid balance, so a launch is blocked when the balance won't cover it. Top up before a large send. See [Plans and billing](/settings/plans-and-billing) for the full model.
+On Pay as you go there's no monthly cap. Email and in-app pushes are metered at $1 per 1,000 against your prepaid balance, so a launch is blocked when the balance won't cover it. Top up before a large send. See [Plans and billing](/settings/plans-and-billing) for the full model.
 
 ## Where to go next
 

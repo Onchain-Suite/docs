@@ -7,17 +7,17 @@ Onchain Suite works from two kinds of signal: what wallets do **on-chain**, whic
 
 ## On-chain data
 
-Point Onchain Suite at a wallet and it pulls that wallet's on-chain history from [GoldRush](https://goldrush.dev) — portfolio value, transaction activity, and NFT holdings — then derives engagement and value scores. This is [wallet enrichment](/audience/wallet-enrichment), and it's what turns a bare address into something worth targeting.
+Point Onchain Suite at a wallet and it reads that wallet's on-chain history (portfolio value, transaction activity, and NFT holdings), then derives engagement and value scores. This is [wallet enrichment](/audience/wallet-enrichment), and it's what turns a bare address into something worth targeting.
 
 <Card title="Wallet enrichment" icon="wand-magic-sparkles" href="/audience/wallet-enrichment" horizontal>
   Fields, derived scores, supported chains, when it runs, and the on-demand API.
 </Card>
 
-Contract activity — mints, swaps, approvals, liquidations — is available as automation triggers, normalized into a consistent shape across chains. See [Contract-Based Flows](/automation/contract-based-flows).
+Contract activity, mints, swaps, approvals, liquidations, is available as automation triggers, normalized into a consistent shape across chains. See [Contract-Based Flows](/automation/contract-based-flows).
 
 ## Off-chain data
 
-Anything your own product knows — signups, deposits, plan changes, support events — you send in as [custom events](/integrations/custom-events). These become queryable alongside on-chain data, feed segments, and trigger automations.
+Anything your own product knows, signups, deposits, plan changes, support events. You send in as [custom events](/integrations/custom-events). These become queryable alongside on-chain data, feed segments, and trigger automations.
 
 <Card title="Custom events" icon="signal-stream" href="/integrations/custom-events" horizontal>
   Send product events, resolve them to contacts, and drive in-app or email from them.
@@ -27,7 +27,7 @@ Anything your own product knows — signups, deposits, plan changes, support eve
 
 | Signal | Source | Powers |
 | --- | --- | --- |
-| Portfolio, activity, NFTs | On-chain, enriched from GoldRush | Segments, scoring, analytics |
+| Portfolio, activity, NFTs | On-chain, read at enrichment time | Segments, scoring, analytics |
 | Contract events | On-chain, observed | Automation triggers |
 | Custom events | Your backend | Triggers, segments, SQL |
 | Identity (wallet, email, external ID) | You, on ingest | Ties every signal to one contact |

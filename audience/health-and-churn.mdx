@@ -1,18 +1,35 @@
 ---
 title: "Health and Churn"
-description: "Use engagement and risk signals to decide which users need attention, follow-up, or win-back logic."
+description: "Use engagement and risk signals to decide who needs follow-up, win-back, or a different channel."
 ---
 
-## What These Signals Help You Do
+Health and churn signals turn raw activity into prioritization: who's cooling off, who's worth a win-back, and who's healthy enough to leave alone.
 
-Health and churn views help teams move from raw activity to prioritization.
+## The signals
 
-## Typical Questions
+Enrichment and engagement data roll up into a few signals you can segment and query on:
 
-- Which users are cooling off and need follow-up?
-- Which high-value wallets should enter a win-back play?
-- Which audience should receive a campaign versus an automation branch?
+- **Engagement score** (0 to 100), a weighted blend of recent on-chain activity, active days, holdings, and portfolio value. See [Wallet Enrichment](/audience/wallet-enrichment).
+- **Churn risk**, derived from how recently a contact was active: `low` within 30 days, `medium` at 30 to 60, `high` beyond 60, plus `unknown` for wallets with no recorded activity.
+- **Days since last activity**, the raw recency behind churn risk.
+
+All three are columns on the [`contact_360`](/api/sql-schema#contact_360) view, so you can build any cohort from them in the [SQL editor](/intelligence/sql-query-editor).
+
+## Questions they answer
+
+- Which high-value wallets are cooling off and need follow-up?
+- Which contacts open emails but have gone quiet on-chain?
+- Which audience should get a campaign versus an automation branch?
+
+```sql
+-- Dormant whales worth a win-back
+SELECT email, wallet_address, portfolio_value_usd, days_since_last_activity
+FROM contact_360
+WHERE portfolio_value_usd > 10000 AND churn_risk IN ('medium', 'high')
+ORDER BY est_ltv DESC NULLS LAST
+LIMIT 100
+```
 
 ## Recommendation
 
-Use health and churn signals as prioritization inputs alongside contract behavior, campaign response, and product context rather than as isolated scores.
+Treat these as prioritization inputs alongside contract behavior, campaign response, and product context, not as isolated scores. A high churn risk on a wallet that just minted means something different from one that never engaged.

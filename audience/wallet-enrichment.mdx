@@ -1,6 +1,6 @@
 ---
 title: "Wallet Enrichment"
-description: "Turn a bare wallet address into a rich profile — portfolio value, activity, NFT holdings, and derived engagement and value scores."
+description: "Turn a bare wallet address into a rich profile, portfolio value, activity, NFT holdings, and derived engagement and value scores."
 ---
 
 Give Onchain Suite a wallet address and it fetches that wallet's on-chain history, normalizes it, and derives the metrics you actually segment and message on: portfolio value, recent activity, NFT holdings, an engagement score, and an estimated lifetime value.
@@ -55,7 +55,7 @@ Enrichment writes three datasets, all queryable in the [SQL editor](/api/sql-sch
 
 ## Derived scores
 
-Two fields are computed rather than fetched. Both are heuristics — useful for ranking and segmentation, not accounting.
+Two fields are computed rather than fetched. Both are heuristics, useful for ranking and segmentation, not accounting.
 
 ### Engagement score (0–100)
 
@@ -82,16 +82,16 @@ est_ltv = portfolio_value_usd × 0.08
 ```
 
 <Note>
-`churn_risk` is **not** an enrichment field — it's derived at query time in `contact_360` from `last_activity_at`: `low` within 30 days, `medium` at 30–60, `high` beyond 60. Enrichment supplies the activity timestamps that drive it.
+`churn_risk` is **not** an enrichment field. It's derived at query time in `contact_360` from `last_activity_at`: `low` within 30 days, `medium` at 30–60, `high` beyond 60. Enrichment supplies the activity timestamps that drive it.
 </Note>
 
 ## Supported chains
 
-Enrichment pulls from [GoldRush](https://goldrush.dev) (Covalent).
+Enrichment reads directly from the chains, so the data reflects real on-chain history.
 
 **EVM mainnets:** `eth-mainnet`, `base-mainnet`, `matic-mainnet`, `bsc-mainnet`, `arbitrum-mainnet`, `optimism-mainnet`, `sei-mainnet`. **Solana:** `solana-mainnet`. Testnets including `eth-sepolia`, `base-sepolia-testnet`, `monad-testnet`, and `solana-devnet` are also supported.
 
-A wallet is enriched per chain, so metrics reflect the chain you enriched it on. Enrich the same wallet on multiple chains to build a cross-chain picture — activity summaries are stored per chain.
+A wallet is enriched per chain, so metrics reflect the chain you enriched it on. Enrich the same wallet on multiple chains to build a cross-chain picture, activity summaries are stored per chain.
 
 ## When enrichment runs
 
@@ -107,7 +107,7 @@ A wallet is enriched per chain, so metrics reflect the chain you enriched it on.
   </Step>
 </Steps>
 
-There is no fixed re-enrichment schedule — freshness is driven by the 7-day staleness check on view. You can force a refresh at any time, which bypasses the response cache.
+There is no fixed re-enrichment schedule, freshness is driven by the 7-day staleness check on view. You can force a refresh at any time, which bypasses the response cache.
 
 ## Enriching on demand
 
@@ -119,7 +119,7 @@ Three ways to enrich beyond the automatic paths:
 | **Your contacts** | Enriches the wallets of your most recently updated contacts, up to 200 at a time. |
 | **A contract's holders** | Discovers holders of a configured contract and enriches each one. |
 
-Enrichment is asynchronous — the request returns as soon as the work is queued. Progress is visible as a live queue count, and the workspace reports itself idle once everything has drained. Each wallet's `last_enriched_at` advances when its refresh completes, so you can also tell per wallet.
+Enrichment is asynchronous, the request returns as soon as the work is queued. Progress is visible as a live queue count, and the workspace reports itself idle once everything has drained. Each wallet's `last_enriched_at` advances when its refresh completes, so you can also tell per wallet.
 
 <Note>
 Enrichment jobs are deduplicated per wallet and chain, so enqueuing the same wallet twice in quick succession won't double-spend credits.
@@ -127,19 +127,19 @@ Enrichment jobs are deduplicated per wallet and chain, so enqueuing the same wal
 
 ## Cost and limits
 
-Enrichment consumes **wallet-data credits** (GoldRush) — roughly 4 per wallet, from four data calls: balances, transactions, NFTs, and portfolio. Each paid plan includes a monthly allowance:
+Enrichment consumes **wallet-data credits**, roughly 4 per wallet, covering balances, transactions, NFTs, and portfolio. Each paid plan includes a monthly allowance:
 
 | Plan | Monthly credits | Roughly this many wallets |
 | --- | --- | --- |
-| **Pay as you go** | Metered — $10 per 10,000 credits | — |
-| **Launch** — $49/mo | 1,000 | ~250 |
-| **Growth** — $349/mo | 10,000 | ~2,500 |
-| **Pro** — $799/mo | 25,000 | ~6,000 |
-| **Scale** — $2,299/mo | 50,000 | ~12,000 |
+| **Pay as you go** | Metered, $10 per 10,000 credits |, |
+| **Launch**, $49/mo | 1,000 | ~250 |
+| **Growth**, $349/mo | 10,000 | ~2,500 |
+| **Pro**, $799/mo | 25,000 | ~6,000 |
+| **Scale**, $2,299/mo | 50,000 | ~12,000 |
 
-Once the allowance is exhausted, new enrichment is blocked — the SQL editor and your already-enriched data keep working. On Pay as you go, enrichment draws from your balance at $10 per 10,000 credits (about 4¢ a wallet) rather than a monthly allowance.
+Once the allowance is exhausted, new enrichment is blocked, though the SQL editor and your already-enriched data keep working. On Pay as you go, enrichment draws from your balance at $10 per 10,000 credits (about 4¢ a wallet) rather than a monthly allowance.
 
-Responses are cached per organization — 5 minutes for transactions, 10 for balances and portfolio, 15 for NFTs — so repeated enrichment of the same wallet within those windows is served from cache and doesn't re-spend credits (unless you pass `forceRefresh`).
+Responses are cached per organization, 5 minutes for transactions, 10 for balances and portfolio, 15 for NFTs, so repeated enrichment of the same wallet within those windows is served from cache and doesn't re-spend credits (unless you pass `forceRefresh`).
 
 ## Using enriched data
 
@@ -148,7 +148,7 @@ Responses are cached per organization — 5 minutes for transactions, 10 for bal
     `user_onchain_metrics`, `wallet_activity_summary`, `nft_holdings`, and the joined `contact_360` view.
   </Card>
   <Card title="Build audiences" icon="filter" href="/intelligence/sql-query-editor">
-    Whales, dormant holders, high-LTV wallets — save any query as a segment.
+    Whales, dormant holders, high-LTV wallets, save any query as a segment.
   </Card>
   <Card title="Score and prioritize" icon="chart-line" href="/audience/health-and-churn">
     Engagement score feeds contact health and churn signals.

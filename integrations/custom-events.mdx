@@ -3,10 +3,10 @@ title: "Custom Events"
 description: "Send product events from your own systems to trigger automations, build segments, and query behavior alongside onchain activity."
 ---
 
-Custom events let you send anything that happens in your product — a signup, a deposit, a plan upgrade, a support ticket — into Onchain Suite. Once ingested, an event can trigger an automation, feed a segment, and be queried in SQL next to onchain and messaging data.
+Custom events let you send anything that happens in your product (a signup, a deposit, a plan upgrade, a support ticket) into Onchain Suite. Once ingested, an event can trigger an automation, feed a segment, and be queried in SQL next to onchain and messaging data.
 
 <Note>
-Event names are entirely free-form. There is no schema to register and no reserved vocabulary — send `first_deposit` and it exists.
+Event names are entirely free-form. There is no schema to register and no reserved vocabulary, send `first_deposit` and it exists.
 </Note>
 
 ## Sending your first event
@@ -37,7 +37,7 @@ Returns `202 Accepted`:
 }
 ```
 
-Ingestion is asynchronous — `202` means accepted for processing, not that automations have already run.
+Ingestion is asynchronous, `202` means accepted for processing, not that automations have already run.
 
 ### Request fields
 
@@ -70,7 +70,7 @@ Ingestion is asynchronous — `202` means accepted for processing, not that auto
 </ParamField>
 
 <ParamField path="idempotencyKey" type="string">
-  Your dedup key, max 256 characters. Strongly recommended — see [Idempotency](#idempotency).
+  Your dedup key, max 256 characters. Strongly recommended, see [Idempotency](#idempotency).
 </ParamField>
 
 <ParamField path="occurredAt" type="string">
@@ -78,7 +78,7 @@ Ingestion is asynchronous — `202` means accepted for processing, not that auto
 </ParamField>
 
 <ParamField path="test" type="boolean">
-  Dry run — see [Testing safely](#testing-safely).
+  Dry run, see [Testing safely](#testing-safely).
 </ParamField>
 
 ### `attributes` vs `payload`
@@ -89,7 +89,7 @@ This distinction matters more than it looks:
 | --- | --- | --- |
 | Stored on | The **contact**, merged and persistent | The **event**, immutable |
 | Use for | Traits: `tier`, `plan`, `country` | Facts: `amountUsd`, `txHash` |
-| Overwrites | Yes — last write wins per key | No |
+| Overwrites | Yes, last write wins per key | No |
 | Size | 50 keys, 1 KB per value | 16 KB total |
 
 Put things that describe the *person* in `attributes`, and things that describe the *event* in `payload`.
@@ -122,7 +122,7 @@ Results come back in request order:
 ```
 
 <Warning>
-A batch always returns `202`, even when individual events fail. One bad event never rejects the others — **you must inspect each result**. Rate-limit rejections also surface as per-item `error` strings rather than a top-level `429`.
+A batch always returns `202`, even when individual events fail. One bad event never rejects the others. **You must inspect each result**. Rate-limit rejections also surface as per-item `error` strings rather than a top-level `429`.
 </Warning>
 
 ## Identity resolution
@@ -141,10 +141,10 @@ Each event is matched to a contact in strict priority order:
   </Step>
 </Steps>
 
-**If no contact matches, one is created.** A wallet-only contact is valid — email is not required. Any `attributes` you send are merged into the new contact's metadata, and `externalId` is backfilled onto existing contacts that lack one.
+**If no contact matches, one is created.** A wallet-only contact is valid; email is not required. Any `attributes` you send are merged into the new contact's metadata, and `externalId` is backfilled onto existing contacts that lack one.
 
 <Note>
-Because the first matching identifier wins, sending both `walletAddress` and `email` resolves on the wallet. To merge an email onto an existing wallet contact, send both — the wallet finds the record, and the email is stored on it.
+Because the first matching identifier wins, sending both `walletAddress` and `email` resolves on the wallet. To merge an email onto an existing wallet contact, send both: the wallet finds the record, and the email is stored on it.
 </Note>
 
 ## Idempotency
@@ -154,7 +154,7 @@ Every event gets an idempotency key, scoped to your organization. A repeat of th
 When you don't supply one, it's derived by hashing the event name, all three identifiers, and `occurredAt`.
 
 <Warning>
-**Retries are not deduplicated unless you send an explicit `idempotencyKey` or an explicit `occurredAt`.** The derived key includes `occurredAt`, which defaults to *now* — so the same call made twice a second apart produces two different keys and two events, which can fire an automation twice.
+**Retries are not deduplicated unless you send an explicit `idempotencyKey` or an explicit `occurredAt`.** The derived key includes `occurredAt`, which defaults to *now*, so the same call made twice a second apart produces two different keys and two events, which can fire an automation twice.
 
 Always send an `idempotencyKey` built from something stable in your system, like `deposit:<txHash>:<logIndex>`.
 </Warning>
@@ -163,7 +163,7 @@ Always send an `idempotencyKey` built from something stable in your system, like
 
 Two ways to dry-run:
 
-- Send with a **`sk_test_*` key** — everything from that key is a dry run automatically.
+- Send with a **`sk_test_*` key**. Everything from that key is a dry run automatically.
 - Send `"test": true` with a live key.
 
 A dry-run event reports how many automations it *would* have matched, but creates no automation entries, so **nothing sends**. Test events are also hidden from the event catalog and excluded from the `app_events` SQL table, so they never contaminate a segment or report.
@@ -197,11 +197,11 @@ Filters read a flat context where your `payload` keys are spread in at the top l
 
 Available alongside your payload keys: `event`, `contactId`, `walletAddress`, `email`, `externalId`. A payload key with one of those names overrides the built-in value, so avoid naming a payload field `email`.
 
-Operators are `eq`, `neq`, `in`, `contains`, and `exists` — the same set used by on-chain triggers, and all filters must pass. See [Triggers and Conditions](/automation/triggers-and-conditions) for the details, including the note that unrecognized operators are silently dropped.
+Operators are `eq`, `neq`, `in`, `contains`, and `exists`, the same set used by on-chain triggers, and all filters must pass. See [Triggers and Conditions](/automation/triggers-and-conditions) for the details, including the note that unrecognized operators are silently dropped.
 
 ## End-to-end: notify a user from an offchain event
 
-This is the most common reason to send custom events — something happens in your product, and you want the user to see an in-app notification in your dApp. Here's the whole path, and how to wire it up.
+This is the most common reason to send custom events: something happens in your product and you want the user to see an in-app notification in your dApp. Here's the whole path, and how to wire it up.
 
 ```mermaid
 flowchart LR
@@ -212,7 +212,7 @@ flowchart LR
   E --> F[SDK in your dApp<br/>PUSH event]
 ```
 
-There is **no direct event-to-push shortcut** — an automation is always the bridge. That's a feature: it means the same event can fan out to in-app, email, tags, and webhooks without your backend knowing about any of them.
+There is **no direct event-to-push shortcut**; an automation is always the bridge. That's a feature: it means the same event can fan out to in-app, email, tags, and webhooks without your backend knowing about any of them.
 
 <Steps>
   <Step title="Add the in-app SDK to your dApp">
@@ -251,7 +251,7 @@ There is **no direct event-to-push shortcut** — an automation is always the br
     }
     ```
 
-    `recipientMode: "triggering_profile"` sends to the contact the event resolved to — you don't specify a wallet on the node.
+    `recipientMode: "triggering_profile"` sends to the contact the event resolved to. You don't specify a wallet on the node.
   </Step>
 
   <Step title="Activate AND publish it">
@@ -279,12 +279,12 @@ There is **no direct event-to-push shortcut** — an automation is always the br
 The in-app SDK authenticates by **wallet**, so the push can only reach a wallet. This is the one requirement that catches people out:
 
 <Warning>
-The event must resolve to a contact **with a wallet address** — either send `contact.walletAddress` directly, or send an `email`/`externalId` that matches a contact who already has a wallet on file.
+The event must resolve to a contact **with a wallet address**, either send `contact.walletAddress` directly, or send an `email`/`externalId` that matches a contact who already has a wallet on file.
 
 If the resolved contact has no wallet, the `send_inapp` step fails for that entry (and eventually dead-letters) rather than delivering. An email-only signup, for example, can't receive an in-app push until that contact is linked to a wallet.
 </Warning>
 
-The wallet is taken from the event's `contact.walletAddress` if present, otherwise from the matched contact record. To also reach walletless contacts, branch the automation to a `send_email` step — see [Connect to Campaigns](/automation/connect-to-campaigns).
+The wallet is taken from the event's `contact.walletAddress` if present, otherwise from the matched contact record. To also reach walletless contacts, branch the automation to a `send_email` step, see [Connect to Campaigns](/automation/connect-to-campaigns).
 
 ### Offchain vs onchain triggers
 
@@ -293,10 +293,10 @@ Both drive the same actions, including `send_inapp`. The difference is where the
 | | `app_event` (offchain) | `onchain_event` |
 | --- | --- | --- |
 | Source | Your backend, via `POST /events` | Chain activity, observed for you |
-| You supply | Event name, identifiers, payload | Nothing — the chain does |
+| You supply | Event name, identifiers, payload | Nothing, the chain does |
 | Use it for | Signups, deposits, product state | Mints, swaps, approvals, liquidations |
 
-Reach for `app_event` when the thing that happened lives in your systems. Reach for `onchain_event` when it's something the chain already knows — see [Contract-Based Flows](/automation/contract-based-flows).
+Reach for `app_event` when the thing that happened lives in your systems. Reach for `onchain_event` when it's something the chain already knows, see [Contract-Based Flows](/automation/contract-based-flows).
 
 ## Querying events in SQL
 
@@ -316,7 +316,7 @@ ORDER BY created.occurred_at DESC
 LIMIT 100
 ```
 
-Use `occurred_at` for time windows — it's when the event happened in your system. `created_at` is when we received it.
+Use `occurred_at` for time windows. It's when the event happened in your system. `created_at` is when we received it.
 
 ## Discovering event names
 
@@ -342,15 +342,15 @@ Test events are excluded, and the list is capped at 200 names.
 | Payload | 16 KB |
 | Event age | 7 days back, 5 minutes forward |
 
-Ingestion itself is free and not metered against your plan — only messages sent as a result are.
+Ingestion itself is free and not metered against your plan, only messages sent as a result are.
 
 | Status | Meaning |
 | --- | --- |
 | `202` | Accepted (check `deduplicated`) |
-| `400` | Validation failure — the message names the field |
+| `400` | Validation failure, the message names the field |
 | `401` | Missing, invalid, or revoked secret key |
-| `429` | `RATE_LIMITED` — back off and retry |
-| `503` | `INGEST_UNAVAILABLE` — retry with the same `idempotencyKey` |
+| `429` | `RATE_LIMITED`, back off and retry |
+| `503` | `INGEST_UNAVAILABLE`, retry with the same `idempotencyKey` |
 
 <Note>
 `429` responses do not currently include a `Retry-After` header. Use exponential backoff, and keep the same `idempotencyKey` across retries so a late success doesn't double-fire.

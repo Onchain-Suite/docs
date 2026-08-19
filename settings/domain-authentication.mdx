@@ -1,9 +1,9 @@
 ---
 title: "Domain Authentication"
-description: "Authenticate your sending domain with SPF, DKIM, and DMARC so campaigns land in the inbox."
+description: "Authenticate your sending domain with DKIM, a mail-from subdomain, and DMARC so campaigns land in the inbox."
 ---
 
-Authenticating your domain proves Onchain Suite is allowed to send on its behalf, which is what gets your campaigns past spam filtering and into the inbox. It's a one-time DNS setup per domain.
+Authenticating your domain proves your mail is genuinely yours, which is what gets campaigns past spam filtering and into the inbox. It's a one-time DNS setup per domain.
 
 ## Setup flow
 
@@ -12,38 +12,39 @@ Authenticating your domain proves Onchain Suite is allowed to send on its behalf
     Register the domain you'll send from in domain settings.
   </Step>
   <Step title="Get the DNS records">
-    The setup shows the exact records to add — see [DNS Records](/settings/dns-records) for what each one is.
+    The setup shows the exact records to add. See [DNS Records](/settings/dns-records) for what each one is.
   </Step>
   <Step title="Add them at your DNS provider">
-    Enter them manually, or use the automatic option if your DNS provider is connected — it adds them for you.
+    Enter them manually, or use the automatic option if your DNS provider is connected, which adds them for you.
   </Step>
   <Step title="Verify">
-    Re-check after the records propagate. Verification passes once every record resolves correctly.
+    Re-check after the records propagate. Verification passes once the required records resolve.
   </Step>
 </Steps>
 
 ## What gets checked
 
-A complete setup has four kinds of record:
+A complete setup has these records:
 
-- **Ownership** — a TXT record proving you control the domain.
-- **SPF** — a TXT record (`v=spf1 …`) listing who may send for the domain.
-- **DKIM** — **two CNAME records** that let outgoing mail be cryptographically signed.
-- **DMARC** — a TXT record telling receivers what to do with mail that fails the checks.
+- **DKIM.** Three CNAME records that let outgoing mail be cryptographically signed. These are what make the domain send-ready.
+- **Mail-from.** An MX record and an SPF (TXT) record on a `bounce` subdomain, so bounces are handled on your domain and SPF aligns for DMARC.
+- **DMARC.** A TXT record telling receivers what to do with mail that fails the checks.
+
+The domain becomes send-ready once the three DKIM records verify. The mail-from and DMARC records aren't required to send, but add them for the best deliverability.
 
 ## Handling conflicts
 
 The setup inspects your existing DNS and tells you exactly what to change rather than leaving you to guess:
 
-- **An existing SPF record is merged, not replaced.** Two separate `v=spf1` records is an invalid setup, so if you already have one, you add the Onchain Suite include to it rather than adding a second record.
-- **A clashing DKIM selector** — if the CNAME host is already taken — is flagged so you can clear it.
-- **An existing DMARC record** is left as-is; you don't need a second one.
+- **A DKIM host already in use.** If a previous email provider left a CNAME at the selector, edit it to the value shown. An old TXT key at the same name should be deleted first.
+- **An existing mail-from record.** If the `bounce` subdomain already carries an MX or TXT record, the setup names exactly what to change.
+- **An existing DMARC record.** Left as-is. You don't need a second one.
 
-You'll also see advisories for weak existing policies, like an SPF ending in `~all` or a DMARC at `p=none`.
+You'll also see advisories for weak existing policies, like a DMARC at `p=none`.
 
 ## Troubleshooting
 
-- Add records to the correct host — a trailing domain doubled onto the host is the most common mistake.
+- Add records to the correct host. A domain accidentally doubled onto the host is the most common mistake.
 - Watch for stray quotes or characters copied around a value.
 - Give DNS time to propagate before re-checking.
-- If SPF won't verify, confirm you have a single merged `v=spf1` record, not two.
+- Confirm all three DKIM records resolve. Two of three is not send-ready.

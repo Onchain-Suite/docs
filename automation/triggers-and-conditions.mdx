@@ -3,31 +3,31 @@ title: "Triggers and Conditions"
 description: "The full trigger catalog, payload filter operators, and branch conditions that control entry and routing."
 ---
 
-A trigger decides **who enters** an automation. Filters narrow that entry. Branches decide **where they go** once inside. These are three different mechanisms with three different rule sets — this page covers all of them.
+A trigger decides **who enters** an automation. Filters narrow that entry. Branches decide **where they go** once inside. These are three different mechanisms with three different rule sets. This page covers all of them.
 
 ## On-chain triggers
 
 Ten on-chain trigger types are available. Nine are presets: they're the generic `onchain_event` trigger with event names and filters pre-filled for a specific business moment.
 
-On **EVM** chains these fire automatically — the platform watches the contract and turns matching on-chain activity into automation entries, with no indexer or ABI needed from you. See [Contract-Based Flows](/automation/contract-based-flows). On Solana, on-chain events are sent in through the [Automation Trigger API](/api/automation-triggers).
+On **EVM** chains these fire automatically, the platform watches the contract and turns matching on-chain activity into automation entries, with no indexer or ABI needed from you. See [Contract-Based Flows](/automation/contract-based-flows). On Solana, on-chain events are sent in through the [Automation Trigger API](/api/automation-triggers).
 
 | Type | Fires on | Built-in filter |
 | --- | --- | --- |
-| `onchain_event` | Any event you name | — |
+| `onchain_event` | Any event you name |, |
 | `holder_acquired` | `Transfer` | `from == 0x0` (mints only) |
-| `governance_activity` | `ProposalCreated`, `VoteCast` | — |
-| `swap_completed` | `Swap`, `TokenExchange` | — |
-| `liquidity_added` | `Deposit`, `Mint`, `AddLiquidity` | — |
-| `borrow_opened` | `Borrow` | — |
-| `capital_withdrawn` | `Burn`, `RemoveLiquidity`, `Withdraw` | — |
-| `liquidation_detected` | `Liquidate` | — |
-| `approval_intent` | `Approval`, `ApprovalForAll` | — |
+| `governance_activity` | `ProposalCreated`, `VoteCast` |, |
+| `swap_completed` | `Swap`, `TokenExchange` |, |
+| `liquidity_added` | `Deposit`, `Mint`, `AddLiquidity` |, |
+| `borrow_opened` | `Borrow` |, |
+| `capital_withdrawn` | `Burn`, `RemoveLiquidity`, `Withdraw` |, |
+| `liquidation_detected` | `Liquidate` |, |
+| `approval_intent` | `Approval`, `ApprovalForAll` |, |
 | `exchange_outflow` | `Transfer` | `toCategory == "exchange"` |
 
 Each accepts these fields:
 
 <ParamField path="chain" type="string" required>
-  Chain slug — `eth-mainnet`, `base-mainnet`, `arb-mainnet`, `optimism-mainnet`, `matic-mainnet`, or `solana-mainnet`.
+  Chain slug, `eth-mainnet`, `base-mainnet`, `arb-mainnet`, `optimism-mainnet`, `matic-mainnet`, or `solana-mainnet`.
 </ParamField>
 
 <ParamField path="contractAddress" type="string">
@@ -59,7 +59,7 @@ Each accepts these fields:
 </ParamField>
 
 <ParamField path="filters" type="Filter[]">
-  Payload conditions — see below.
+  Payload conditions, see below.
 </ParamField>
 
 Matching is a strict AND across everything you configure. Any field you leave unset is a wildcard, but any field you **do** set must agree with the incoming event or the automation won't fire.
@@ -94,7 +94,7 @@ Filters test values inside the event payload. Each filter is a `path`, an `opera
 All filters on a trigger must pass. Comparisons are case-insensitive and whitespace-trimmed, so wallet address casing never matters.
 
 <Warning>
-These five operators are the complete set. An unrecognized operator — `gte`, `gt`, `lt` — is **silently dropped**, and the filter simply stops applying. That makes the automation fire more often than you intended rather than erroring, so double-check operator spelling. For numeric thresholds, filter downstream with a `branch` node instead.
+These five operators are the complete set. An unrecognized operator, `gte`, `gt`, `lt`, is **silently dropped**, and the filter simply stops applying. That makes the automation fire more often than you intended rather than erroring, so double-check operator spelling. For numeric thresholds, filter downstream with a `branch` node instead.
 </Warning>
 
 ## Lifecycle triggers
@@ -130,12 +130,12 @@ Fires when a contact's health score crosses a line.
 </ParamField>
 
 <Note>
-These three triggers fire when an event is **posted to the ingest API** — the platform does not currently emit them on its own. If you want a segment-entry automation to run, your system needs to call the ingest endpoint when membership changes. See [Contract-Based Flows](/automation/contract-based-flows) for the API.
+These three triggers fire when an event is **posted to the ingest API**, the platform does not currently emit them on its own. If you want a segment-entry automation to run, your system needs to call the ingest endpoint when membership changes. See [Contract-Based Flows](/automation/contract-based-flows) for the API.
 </Note>
 
 ## Entry rules and deduplication
 
-Each matched event creates one **entry** — one contact moving through the flow. Entries are deduplicated by a key derived from the automation and the event's `sourceEventId`. A duplicate returns `duplicate: true` and does not re-enter.
+Each matched event creates one **entry**, one contact moving through the flow. Entries are deduplicated by a key derived from the automation and the event's `sourceEventId`. A duplicate returns `duplicate: true` and does not re-enter.
 
 When you don't supply a `sourceEventId`, one is derived for you:
 
@@ -150,12 +150,12 @@ When you don't supply a `sourceEventId`, one is derived for you:
 Two consequences worth planning around:
 
 - **A contact can enter a `segment_entered` automation only once, ever.** Removing and re-adding them to the segment will not re-trigger it. For repeatable entry, send an explicit `sourceEventId` that varies per occurrence.
-- **On-chain events without a `txHash` are never deduplicated** — the key falls back to random bytes, so retries create duplicate entries. Always send `txHash`.
+- **On-chain events without a `txHash` are never deduplicated**, the key falls back to random bytes, so retries create duplicate entries. Always send `txHash`.
 </Warning>
 
 ## Branch conditions
 
-A `branch` node routes an entry down different paths. Conditions here test the **rolling context** — values accumulated as the entry moves through the flow — not the original event payload.
+A `branch` node routes an entry down different paths. Conditions here test the **rolling context**, values accumulated as the entry moves through the flow, not the original event payload.
 
 ```json
 {
@@ -177,13 +177,13 @@ A `branch` node routes an entry down different paths. Conditions here test the *
 | `gte` | Greater than or equal (numeric) |
 | `lte` | Less than or equal (numeric) |
 | `contains` | Substring or array membership |
-| `eq` | Equality — also the default for any unrecognized operator |
+| `eq` | Equality, also the default for any unrecognized operator |
 
 Rules are evaluated in order and **the first match wins**. If nothing matches, the entry follows `defaultTarget`, and failing that, the first outgoing edge.
 
 Two differences from trigger filters are easy to trip over:
 
-- Branch fields are **flat keys** on the context — `walletAddress`, `email`, `contactId`, `tags`, `lastEmail`. Dot-paths are not traversed here.
+- Branch fields are **flat keys** on the context, `walletAddress`, `email`, `contactId`, `tags`, `lastEmail`. Dot-paths are not traversed here.
 - `gte` and `lte` work in branches but not in trigger filters; `in` works in trigger filters but not in branches.
 
 The context starts as `{ email, walletAddress, contactId }` and accumulates `lastEmail`, `lastInapp`, `lastWebhook`, `lastCampaignDispatch`, and `tags` as nodes execute.

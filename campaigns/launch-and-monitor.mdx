@@ -1,6 +1,6 @@
 ---
 title: "Launch and Monitor"
-description: "Launch a campaign and read the metrics — including exactly how each rate is calculated."
+description: "Launch a campaign and read the metrics, including exactly how each rate is calculated."
 ---
 
 ## Before launch
@@ -15,9 +15,9 @@ description: "Launch a campaign and read the metrics — including exactly how e
 
 Launching re-runs validation and stops if anything is outstanding. It then checks your monthly allowance against the estimated recipients plus what you've already sent this calendar month, and blocks the send if it wouldn't fit.
 
-Only draft and scheduled campaigns can be launched — one that's already sending or sent can't be launched again.
+Only draft and scheduled campaigns can be launched, one that's already sending or sent can't be launched again.
 
-You can also [schedule](/campaigns/overview#scheduling) a launch for later — the scheduler runs it for you at the set time, through the same checks.
+You can also [schedule](/campaigns/overview#scheduling) a launch for later, the scheduler runs it for you at the set time, through the same checks.
 
 Sending is asynchronous: the campaign moves to **Sending**, is delivered in batches, then moves to **Sent**. Large sends may be paced across the day rather than delivered in one burst.
 
@@ -39,7 +39,7 @@ Campaign analytics cover email and in-app separately, plus a combined total.
 | Open, click, unsubscribe rate | Over delivered, falling back to sent |
 | Click-to-open rate | Unique clicks ÷ unique opens |
 
-Delivery and bounce rate are shares of **delivery attempts** — the two add up to 100% — which matches how your email provider's console reports them. Rates are percentages rounded to two decimals, and zero when the denominator is zero.
+Delivery and bounce rate are shares of **delivery attempts**, the two add up to 100%, which matches how your email provider's console reports them. Rates are percentages rounded to two decimals, and zero when the denominator is zero.
 
 <Note>
 Open and click rates use **delivered** as the denominator only when delivery confirmations are flowing. If they aren't, delivered is zero and the denominator silently falls back to **sent**. Compare the two before reading too much into a rate.
@@ -49,7 +49,7 @@ Open and click rates use **delivered** as the denominator only when delivery con
 
 Sent, delivered, viewed, clicked, and dismissed, plus delivery, view, click, and dismiss rates.
 
-In-app has no open pixel — delivery is reported by the client when it receives the push, which makes it more reliable than an email open, not less.
+In-app has no open pixel, delivery is reported by the client when it receives the push, which makes it more reliable than an email open, not less.
 
 ## What to watch
 
@@ -59,11 +59,11 @@ In-app has no open pixel — delivery is reported by the client when it receives
   </Accordion>
 
   <Accordion title="Opens and clicks" icon="chart-line">
-    Click-to-open is the honest engagement signal — open tracking is increasingly blocked by mail clients, so open rate alone reads low and noisy.
+    Click-to-open is the honest engagement signal, open tracking is increasingly blocked by mail clients, so open rate alone reads low and noisy.
   </Accordion>
 
   <Accordion title="Unsubscribes" icon="user-minus">
-    An unsubscribe sets a flag on the contact that every future campaign honors. Watch the rate per campaign, not just the total — a spike means targeting or frequency, not content.
+    An unsubscribe sets a flag on the contact that every future campaign honors. Watch the rate per campaign, not just the total, a spike means targeting or frequency, not content.
   </Accordion>
 
   <Accordion title="Onchain response" icon="link">
@@ -73,7 +73,7 @@ In-app has no open pixel — delivery is reported by the client when it receives
 
 ## Audit trail
 
-Every campaign keeps a history — drafted, audience updated, tracking updated, test sent, scheduled, launched, sent — in order. This is the fastest way to answer "who changed the audience before this went out".
+Every campaign keeps a history, drafted, audience updated, tracking updated, test sent, scheduled, launched, sent, in order. This is the fastest way to answer "who changed the audience before this went out".
 
 ## Workspace view
 

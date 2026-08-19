@@ -7,9 +7,9 @@ Campaigns depend on dynamic wallet traits and merge variables, so most send fail
 
 ## Preview
 
-Preview renders the campaign exactly as the send pipeline would — the HTML, the plain-text version, any unresolved merge fields, and any warnings.
+Preview renders the campaign exactly as the send pipeline would, the HTML, the plain-text version, any unresolved merge fields, and any warnings.
 
-Preview as a specific contact to check how personalization resolves for a real recipient. You can also override individual fields, which lets you test edge cases — a contact with no first name, or no ENS — without creating test data.
+Preview as a specific contact to check how personalization resolves for a real recipient. You can also override individual fields, which lets you test edge cases, a contact with no first name, or no ENS, without creating test data.
 
 The **missing fields** list is what will block your launch. Treat a non-empty list as a failing check even when the preview looks fine.
 
@@ -18,7 +18,7 @@ The **missing fields** list is what will block your launch. Treat a non-empty li
 Send the rendered campaign to a single address for review. The same content overrides available in preview work here too.
 
 <Warning>
-**Test sends are invisible to analytics.** They carry no tracking pixel and no click wrapping, and record no delivery event. Opening or clicking a test email will never appear in campaign results — and can't be used to verify that tracking works.
+**Test sends are invisible to analytics.** They carry no tracking pixel and no click wrapping, and record no delivery event. Opening or clicking a test email will never appear in campaign results, and can't be used to verify that tracking works.
 </Warning>
 
 Test sends also skip the plan allowance check, so they won't consume your monthly messages.
@@ -35,11 +35,11 @@ Test sends also skip the plan allowance check, so they won't consume your monthl
 
 <AccordionGroup>
   <Accordion title="Personalization has fallbacks" icon="user">
-    Preview as a contact missing the optional fields. Every variable should degrade to something readable — `Hey there,` not `Hey ,`.
+    Preview as a contact missing the optional fields. Every variable should degrade to something readable, `Hey there,` not `Hey ,`.
   </Accordion>
 
   <Accordion title="The sender is the one you chose" icon="paper-plane">
-    The sender is resolved from **verified** identities at render time. If the test arrives from an unexpected address, your intended sender isn't verified — check the render warnings and [Sender Verification](/settings/sender-verification).
+    The sender is resolved from **verified** identities at render time. If the test arrives from an unexpected address, your intended sender isn't verified, check the render warnings and [Sender Verification](/settings/sender-verification).
   </Accordion>
 
   <Accordion title="Links resolve and carry the right parameters" icon="link">
@@ -47,7 +47,7 @@ Test sends also skip the plan allowance check, so they won't consume your monthl
   </Accordion>
 
   <Accordion title="Rendering on mobile and desktop" icon="mobile">
-    Test emails are real emails — check them in an actual client, not just the preview pane.
+    Test emails are real emails, check them in an actual client, not just the preview pane.
   </Accordion>
 
   <Accordion title="The audience is the one you meant" icon="users">

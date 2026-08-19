@@ -1,6 +1,6 @@
 ---
 title: "Imports and Exports"
-description: "Bring contacts in from CSV or JSON with automatic column mapping, wallet parsing, and capacity handling — and export them back out."
+description: "Bring contacts in from CSV or JSON with automatic column mapping, wallet parsing, and capacity handling, and export them back out."
 ---
 
 Import contacts from an existing CRM, snapshot, or partner list. Onchain Suite maps your columns automatically, parses wallet addresses across chains, and holds anything that needs attention rather than dropping it silently.
@@ -15,14 +15,14 @@ A **list is required** for every import. Contacts imported without one wouldn't 
 
 ### Column mapping
 
-You don't have to rename your headers. Common column names are recognized automatically — matching ignores case, spaces, underscores, and hyphens.
+You don't have to rename your headers. Common column names are recognized automatically, matching ignores case, spaces, underscores, and hyphens.
 
 | Field | Headers recognized (examples) |
 | --- | --- |
 | Email | `email`, `email address`, `e-mail`, `contact email`, `user email` |
 | First name | `first name`, `fname`, `given name`, `forename` |
 | Last name | `last name`, `lname`, `surname`, `family name` |
-| Full name | `name`, `full name`, `contact name` — split into first and last |
+| Full name | `name`, `full name`, `contact name`, split into first and last |
 | Wallet | `wallet`, `wallet address`, `address`, `eth address`, `public key`, `holder`, `owner`, `signer`, `solana address` |
 | Tags | `tags`, `tag`, `labels`, `groups` |
 
@@ -32,9 +32,9 @@ Anything unrecognized is kept as a contact attribute, so no column is lost. You 
 
 Wallet columns are parsed for **both EVM and Solana** addresses. A value that can't be parsed is reported with a reason rather than dropped quietly:
 
-- `empty` — no address in the cell
-- `unrecognised-format` — not a valid EVM or Solana address
-- `looks-like-ens` — an ENS name like `vitalik.eth`, which is resolvable but isn't a raw address
+- `empty`, no address in the cell
+- `unrecognised-format`, not a valid EVM or Solana address
+- `looks-like-ens`, an ENS name like `vitalik.eth`, which is resolvable but isn't a raw address
 
 Spreadsheet quirks like a leading apostrophe on a text-formatted cell are handled.
 
@@ -42,14 +42,14 @@ Spreadsheet quirks like a leading apostrophe on a text-formatted cell are handle
 
 When the import finishes, results are split:
 
-- **Errors** — the row didn't import (for example, no usable identifier).
-- **Warnings** — the row imported, but something was incomplete (for example, a wallet was supplied but couldn't be parsed).
+- **Errors**, the row didn't import (for example, no usable identifier).
+- **Warnings**, the row imported, but something was incomplete (for example, a wallet was supplied but couldn't be parsed).
 
 Both are sampled in the import status so you can see exactly what needs fixing.
 
 ### When you're over capacity
 
-If an import would push you past your plan's contact limit, the extra contacts aren't rejected — they're **quarantined**. They're stored and counted, kept out of every audience (they carry no tags or list membership), and released automatically once you add capacity. Contacts awaiting email confirmation via [double opt-in](/audience/segments) are held the same way.
+If an import would push you past your plan's contact limit, the extra contacts aren't rejected. They're **quarantined**. They're stored and counted, kept out of every audience (they carry no tags or list membership), and released automatically once you add capacity. Contacts awaiting email confirmation via [double opt-in](/audience/segments) are held the same way.
 
 ### Write behavior
 
@@ -61,7 +61,7 @@ Export a list or segment back out to a file. Exports run on the same queue and r
 
 ## Managing lists and tags
 
-Rename or delete tags and lists as your taxonomy evolves. A tag that backs a list can't be deleted out from under it — remove the list first.
+Rename or delete tags and lists as your taxonomy evolves. A tag that backs a list can't be deleted out from under it, remove the list first.
 
 To clear a workspace entirely, deleting all contacts is possible but guarded: you confirm the exact current contact count, and it's limited to OWNER and ADMIN.
 
@@ -69,5 +69,5 @@ To clear a workspace entirely, deleting all contacts is possible but guarded: yo
 
 - Decide your source of truth before a large import.
 - Import into a clearly named list so the contacts are findable immediately.
-- Review the warnings sample — a file that imports "successfully" can still have unparsed wallets.
+- Review the warnings sample, a file that imports "successfully" can still have unparsed wallets.
 - Export only the fields a workflow actually needs.
