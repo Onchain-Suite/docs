@@ -1,55 +1,122 @@
 ---
 title: "Build on Onchain Suite"
-description: "Integrate Onchain Suite into your dApp: wallet-based in-app notifications, custom events, and a server-to-server API."
+description: "Integrate Onchain Suite into your dApp: wallet-based notifications, custom events, and a server-to-server API."
+mode: "custom"
 ---
 
-Onchain Suite drops into your dApp. Most teams start in the frontend, wiring up wallet-based notifications, then send product events and read data from their backend as they grow.
+<div className="px-4 pt-16 pb-10 lg:pt-28 lg:pb-14 max-w-4xl mx-auto text-center">
+  <p className="os-eyebrow">Build on the platform</p>
 
-## Start in the frontend
+  <h1 className="os-hero-title mt-4 text-4xl lg:text-6xl font-bold tracking-tight">
+    Build on Onchain Suite
+  </h1>
 
-<CardGroup cols={2}>
-  <Card title="In-app notifications" icon="bell" href="/integrations/in-app-notifications">
-    Two lines of SDK gives your dApp wallet-authenticated in-app, web, and mobile push. This is where most integrations begin.
-  </Card>
-  <Card title="Custom events" icon="signal-stream" href="/integrations/custom-events">
-    Send what happens in your product (signups, deposits, upgrades) and trigger messaging from it.
-  </Card>
-</CardGroup>
+  <p className="mt-6 text-lg lg:text-xl text-gray-500 dark:text-zinc-400 max-w-2xl mx-auto">
+    Drop the SDK into your dApp for wallet-based notifications, send events from
+    your product, and read your data from a server-to-server API. Start in the
+    frontend, reach for the backend as you grow.
+  </p>
 
-The in-app SDK authenticates users by **wallet signature**, so you can reach someone who has never given you an email. Nothing about it requires a backend: a publishable key and the SDK are enough to start.
+  <div className="mt-8 flex flex-wrap gap-3 justify-center">
+    <a
+      href="/integrations/in-app-notifications"
+      className="inline-flex items-center rounded-lg bg-[#1727E0] px-5 py-2.5 text-sm font-semibold text-white no-underline hover:bg-[#2F94FF] transition-colors"
+    >
+      Add the SDK
+    </a>
+    <a
+      href="/api/sql-schema"
+      className="inline-flex items-center rounded-lg border border-gray-200 dark:border-zinc-700 px-5 py-2.5 text-sm font-semibold text-gray-900 dark:text-zinc-100 no-underline hover:border-[#2F94FF] transition-colors"
+    >
+      Query your data
+    </a>
+  </div>
+</div>
 
-## Then reach for the backend
+<div className="px-4 max-w-6xl mx-auto">
+  <hr className="os-hero-rule" />
+</div>
 
-When you need server-side control, a secret key unlocks a small server-to-server API.
+<div className="px-4 py-14 max-w-6xl mx-auto">
+  <h2 className="text-2xl font-semibold tracking-tight text-center">Two layers</h2>
+  <p className="mt-3 text-center text-gray-500 dark:text-zinc-400 max-w-2xl mx-auto">
+    Most integrations begin in the frontend and grow into the backend. You can
+    ship real value with only the first.
+  </p>
 
-<CardGroup cols={2}>
-  <Card title="API keys" icon="key" href="/integrations/api-keys">
-    Publishable keys for the browser, secret keys for your server. How to create, scope, and rotate them.
-  </Card>
-  <Card title="Wallet and contract data" icon="wallet" href="/integrations/wallet-and-contract-data">
-    The on-chain and off-chain signals that power audiences and automations.
-  </Card>
-  <Card title="Automation triggers" icon="bolt" href="/api/automation-triggers">
-    Feed trigger events from your own indexer or backend.
-  </Card>
-  <Card title="SQL schema" icon="table" href="/api/sql-schema">
-    Every table and column you can query.
-  </Card>
-</CardGroup>
+  <div className="mt-10">
+    <Columns cols={2}>
+      <Card title="Integrations" icon="puzzle-piece" href="/integrations/overview" horizontal>
+        The frontend SDK and the events that feed it. Wallet auth, in-app and
+        push notifications, and custom product events. No backend required to
+        start.
+      </Card>
+      <Card title="Developers" icon="code" href="/api/sql-schema" horizontal>
+        The server-to-server API. Keys, domain verification, automation
+        triggers, webhooks, and the SQL schema behind your data.
+      </Card>
+    </Columns>
+  </div>
+</div>
 
-## How keys work
+<div className="px-4 pb-8 max-w-6xl mx-auto">
+  <h2 className="text-2xl font-semibold tracking-tight text-center">Start in the frontend</h2>
+  <p className="mt-3 text-center text-gray-500 dark:text-zinc-400 max-w-2xl mx-auto">
+    Wallet-authenticated notifications in your dApp, in two lines.
+  </p>
 
-| Key | Where it lives | What it does |
-| --- | --- | --- |
-| Publishable (`pk_*`) | Browser, safe to ship | The in-app SDK's wallet auth |
-| Secret (`sk_*`) | Server only | Server-to-server API calls |
+  <div className="mt-10">
+    <Columns cols={3}>
+      <Card title="In-app notifications" icon="bell" href="/integrations/in-app-notifications">
+        Wallet auth plus in-app, web, and mobile push. Where most integrations begin.
+      </Card>
+      <Card title="Custom events" icon="signal-stream" href="/integrations/custom-events">
+        Send signups, deposits, and upgrades, and trigger messaging from them.
+      </Card>
+      <Card title="API keys" icon="key" href="/integrations/api-keys">
+        Publishable keys for the browser, secret keys for your server.
+      </Card>
+    </Columns>
+  </div>
+</div>
 
-See [API Keys](/integrations/api-keys) for the full model, including scopes and rotation.
+<div className="px-4 py-14 max-w-6xl mx-auto">
+  <h2 className="text-2xl font-semibold tracking-tight text-center">Reach for the backend</h2>
+  <p className="mt-3 text-center text-gray-500 dark:text-zinc-400 max-w-2xl mx-auto">
+    Server-to-server control when you need it.
+  </p>
 
-## The shape of an integration
+  <div className="mt-10">
+    <Columns cols={3}>
+      <Card title="Wallet and contract data" icon="wallet" href="/integrations/wallet-and-contract-data">
+        The on-chain and off-chain signals behind audiences and automations.
+      </Card>
+      <Card title="Domain verification" icon="shield-halved" href="/api/domains">
+        Authenticate your sending domain with the right DNS records.
+      </Card>
+      <Card title="Automation triggers" icon="bolt" href="/api/automation-triggers">
+        Feed trigger events from your own indexer or backend.
+      </Card>
+      <Card title="Webhooks" icon="satellite-dish" href="/api/webhooks">
+        Receive platform events at your endpoint.
+      </Card>
+      <Card title="SQL schema" icon="table" href="/api/sql-schema">
+        Every table, column, and type you can query.
+      </Card>
+      <Card title="Docs MCP server" icon="robot" href="/api/mcp">
+        Connect these docs to Claude, Cursor, or VS Code.
+      </Card>
+    </Columns>
+  </div>
+</div>
 
-Most implementations follow the same arc:
-
-1. **Add the SDK** to your dApp so wallets can receive notifications.
-2. **Send events** from your product, either from the browser through a form or from your backend with a secret key.
-3. **Let the platform work.** Campaigns, audiences, and automations operate on the normalized result, and reach users on whichever channel they're on.
+<div className="px-4 pb-24 max-w-4xl mx-auto text-center">
+  <hr className="os-hero-rule mb-12" />
+  <h2 className="text-xl font-semibold tracking-tight">The shape of an integration</h2>
+  <p className="mt-4 text-gray-500 dark:text-zinc-400">
+    Add the SDK so wallets can receive notifications. Send events from your
+    product, from the browser through a form or from your backend with a secret
+    key. Then let campaigns, audiences, and automations operate on the result and
+    reach users on whichever channel they're on.
+  </p>
+</div>

@@ -18,7 +18,7 @@
     "decoration": "gradient",
     "color": {
       "light": "#FFFFFF",
-      "dark": "#010F31"
+      "dark": "#000000"
     }
   },
   "styling": {
@@ -127,6 +127,10 @@
       },
       {
         "tab": "Build on the Platform",
+        "icon": "terminal",
+        "pages": [
+          "api/overview"
+        ],
         "groups": [
           {
             "group": "Integrations",
@@ -145,7 +149,6 @@
             "group": "Developers",
             "icon": "code",
             "pages": [
-              "api/overview",
               "api/domains",
               "api/automation-triggers",
               "api/webhooks",
@@ -154,8 +157,7 @@
               "api/mcp"
             ]
           }
-        ],
-        "icon": "terminal"
+        ]
       }
     ],
     "global": {
