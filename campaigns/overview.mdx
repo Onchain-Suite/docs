@@ -37,9 +37,7 @@ For a sequence of messages over time, build an [automation](/automation/overview
 
 A campaign can only be launched from **Draft** or **Scheduled**. Relaunching one that's already sending returns a conflict.
 
-<Note>
-`Archived` and `Paused` appear as filter options, but nothing in the product moves a campaign into them today.
-</Note>
+You can **pause** a sending campaign to stop it mid-flight, which halts its queued messages rather than just flipping a label, then **resume** it to pick up where it left off. See [Launch and Monitor](/campaigns/launch-and-monitor#pausing-a-send).
 
 ## Audience
 
@@ -97,7 +95,7 @@ See [In-App Notifications](/integrations/in-app-notifications) for how clients r
 
 ## Limits
 
-Email and in-app each have their **own monthly allowance**, so sending pushes doesn't eat into your email quota.
+Each plan includes a monthly email allowance and a monthly in-app allowance, on top of one bundled price.
 
 | Plan | Email/mo | In-app/mo | Contacts |
 | --- | --- | --- | --- |
@@ -107,7 +105,7 @@ Email and in-app each have their **own monthly allowance**, so sending pushes do
 | **Pro** ($799/mo) | 750,000 | 1,000,000 | 75,000 |
 | **Scale** ($2,299/mo) | 1,500,000 | 2,000,000 | 150,000 |
 
-Each allowance is checked at launch against your estimated recipients plus what you've already sent on that channel this calendar month, and the send is blocked if it wouldn't fit. Warnings appear at 75% and 95%.
+The allowance is checked at launch against your estimated recipients plus what you've already sent this calendar month, and the send is blocked if it wouldn't fit. Warnings appear at 75% and 95%.
 
 On Pay as you go there's no monthly cap. Email and in-app pushes are each metered at $1 per 1,000 against your prepaid balance, so a launch is blocked when the balance won't cover it. Top up before a large send. See [Plans and billing](/settings/plans-and-billing) for the full model.
 
@@ -117,8 +115,8 @@ On Pay as you go there's no monthly cap. Email and in-app pushes are each metere
   <Card title="Create a campaign" icon="plus" href="/campaigns/create-a-campaign">
     Audience, content, and the validation checklist.
   </Card>
-  <Card title="Email editor" icon="pen-to-square" href="/campaigns/email-editor">
-    Merge variables, conditionals, and filters.
+  <Card title="Template builder" icon="pen-to-square" href="/campaigns/email-editor">
+    Dynamic tags, conditionals, loops, and click-to-tag.
   </Card>
   <Card title="Preview and test" icon="eye" href="/campaigns/preview-and-test-send">
     Catch broken personalization before launch.

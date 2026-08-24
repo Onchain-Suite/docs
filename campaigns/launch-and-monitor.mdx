@@ -21,6 +21,10 @@ You can also [schedule](/campaigns/overview#scheduling) a launch for later, the 
 
 Sending is asynchronous: the campaign moves to **Sending**, is delivered in batches, then moves to **Sent**. Large sends may be paced across the day rather than delivered in one burst.
 
+## Pausing a send
+
+You can pause a campaign while it's sending. Pausing **stops its queued messages**, not just the status, so anything not yet dispatched is held. Resume to continue from where it stopped. This is the kill switch for a send that's going wrong, for example a bad link you only noticed after launch.
+
 ## Metrics
 
 Campaign analytics cover email and in-app separately, plus a combined total.
@@ -76,6 +80,8 @@ In-app has no open pixel, delivery is reported by the client when it receives th
 Every campaign keeps a history, drafted, audience updated, tracking updated, test sent, scheduled, launched, sent, in order. This is the fastest way to answer "who changed the audience before this went out".
 
 ## Workspace view
+
+The campaigns list shows each campaign's opens, clicks, and open and click rates inline, computed over its full audience, so you can scan performance without opening each one.
 
 The analytics overview aggregates across campaigns for a window of 1–90 days and shows how much of your monthly message allowance is used and remaining. On Pay as you go it shows usage without a cap.
 

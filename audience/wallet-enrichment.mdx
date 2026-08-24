@@ -127,15 +127,15 @@ Enrichment jobs are deduplicated per wallet and chain, so enqueuing the same wal
 
 ## Cost and limits
 
-Enrichment consumes **wallet-data credits**, roughly 4 per wallet, covering balances, transactions, NFTs, and portfolio. Each paid plan includes a monthly allowance:
+Enrichment consumes **wallet-data credits**, up to 4 per wallet, covering balances, transactions, NFTs, and portfolio. The portfolio call is skipped when it isn't needed, so a wallet often costs fewer. Each paid plan includes a monthly allowance:
 
 | Plan | Monthly credits | Roughly this many wallets |
 | --- | --- | --- |
-| **Pay as you go** | Metered, $10 per 10,000 credits |, |
-| **Launch**, $49/mo | 1,000 | ~250 |
-| **Growth**, $349/mo | 10,000 | ~2,500 |
-| **Pro**, $799/mo | 25,000 | ~6,000 |
-| **Scale**, $2,299/mo | 50,000 | ~12,000 |
+| **Pay as you go** ($0 + usage) | Metered, $10 per 10,000 | — |
+| **Launch** ($49/mo) | 1,000 | ~250 |
+| **Growth** ($349/mo) | 10,000 | ~2,500 |
+| **Pro** ($799/mo) | 25,000 | ~6,000 |
+| **Scale** ($2,299/mo) | 50,000 | ~12,000 |
 
 Once the allowance is exhausted, new enrichment is blocked, though the SQL editor and your already-enriched data keep working. On Pay as you go, enrichment draws from your balance at $10 per 10,000 credits (about 4¢ a wallet) rather than a monthly allowance.
 

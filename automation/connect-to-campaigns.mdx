@@ -67,7 +67,7 @@ The flow continues past a skipped node, so an automation can complete without se
 
 `title` and `body` are required unless you point the node at a campaign to draw content from. Both `ctaLabel` and `ctaUrl` must be present for a button to render, a label alone is dropped.
 
-In-app pushes reach wallets that have authenticated through the SDK. Offline users receive the push on their next connect, within the 72-hour retention window. See [In-App Notifications](/integrations/in-app-notifications) for the client setup, and note that in-app messages draw from the **same monthly allowance as email**.
+In-app pushes reach wallets that have authenticated through the SDK. Offline users receive the push on their next connect, within the 72-hour retention window. See [In-App Notifications](/integrations/in-app-notifications) for the client setup, and note that in-app has its **own monthly allowance**, separate from email.
 
 Wallets with no in-app session are skipped. To size the reachable audience ahead of time, query your segment with `?reachable_on=inapp`.
 
