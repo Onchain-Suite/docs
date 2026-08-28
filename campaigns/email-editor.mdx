@@ -21,7 +21,7 @@ Reference a value with double braces. Values come from namespaces:
 Hi {{ person.first_name }}, your wallet {{ person.wallet_short }} qualified.
 ```
 
-### `person` — the contact
+### `person`: the contact
 
 | Variable | Value |
 | --- | --- |
@@ -42,7 +42,7 @@ Field names accept `snake_case` or `camelCase`, so `person.first_name` and `pers
 Use `person.greeting_name` in salutations. It falls back through first name, ENS, short wallet, and finally the literal `there`, so `Hi {{ person.greeting_name }},` can never render as `Hi ,`. A bare `person.first_name` on a nameless contact renders blank and blocks the send (see [Missing values](#missing-values-block-sends)).
 </Tip>
 
-### `person.custom` — stored properties
+### `person.custom`: stored properties
 
 Anything you've stored on a contact, including [custom event attributes](/integrations/custom-events), is available under `person.custom`:
 
@@ -56,13 +56,13 @@ Custom property names are **case-sensitive** and matched exactly, so `LoyaltyTie
 {{ person | lookup:'Favorite Color' }}
 ```
 
-### `organization` — your workspace
+### `organization`: your workspace
 
 | Variable | Value |
 | --- | --- |
 | `organization.postalAddress` | Your mailing address, used in the compliance footer |
 
-### `event` — flow and catalog data
+### `event`: flow and catalog data
 
 `event.*` holds data supplied by a triggering event, such as cart items or recommended products. It powers [catalog loops](#loops). In a one-off campaign blast there's no event, so `event.*` is empty and any catalog loop renders its `{% empty %}` branch.
 
