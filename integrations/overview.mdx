@@ -1,20 +1,45 @@
 ---
 title: "Overview"
-description: "Connect Onchain Suite to the identity, event, and delivery systems that power Web3 lifecycle messaging."
+description: "Pick the integration you need and copy the code."
 ---
 
-## What Integrations Unlock
+Each page here is a task with the code to do it. Start with in-app notifications, then add whatever else you need.
 
-Integrations bring wallet data, contract behavior, product events, and delivery channels into one operating model so campaigns and automations can react in real time.
+## Reach users
 
-## Core Integration Areas
+<CardGroup cols={2}>
+  <Card title="In-app notifications" icon="bell" href="/integrations/in-app-notifications">
+    Wallet-authenticated in-app, web, and mobile push. Two lines of SDK.
+  </Card>
+  <Card title="Send a push from your backend" icon="server" href="/integrations/in-app-notifications#sending-pushes-from-your-backend">
+    One `POST /inapp/push` with a secret key.
+  </Card>
+</CardGroup>
 
-- Wallet and contract data sources
-- Product or backend webhooks that enrich lifecycle logic
-- Publishable and secret keys for secure client and server use
-- In-app delivery surfaces and SDK-based experiences
-- Third-party systems that support CRM, analytics, or growth operations
+## Feed data in
 
-## Recommended Adoption Pattern
+<CardGroup cols={2}>
+  <Card title="Custom events" icon="signal-stream" href="/integrations/custom-events">
+    `POST /events` when something happens in your product.
+  </Card>
+  <Card title="Capture forms" icon="pen-to-square" href="/integrations/forms">
+    Collect emails and wallets from a page and grow your audience.
+  </Card>
+  <Card title="Automation triggers" icon="bolt" href="/api/automation-triggers">
+    Feed on-chain or lifecycle events from your own indexer.
+  </Card>
+  <Card title="Wallet and contract data" icon="wallet" href="/integrations/wallet-and-contract-data">
+    Enrich a wallet with on-chain history.
+  </Card>
+</CardGroup>
 
-Start with the data and channel needed for one high-value workflow. Once that loop works, expand to additional triggers, channels, and team systems.
+## Get data out
+
+<CardGroup cols={2}>
+  <Card title="Webhooks" icon="satellite-dish" href="/api/webhooks">
+    Receive platform events at your endpoint and verify them.
+  </Card>
+  <Card title="API keys" icon="key" href="/integrations/api-keys">
+    Publishable keys for the browser, secret keys for your server.
+  </Card>
+</CardGroup>

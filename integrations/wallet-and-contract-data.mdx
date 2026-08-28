@@ -1,39 +1,34 @@
 ---
 title: "Wallet and Contract Data"
-description: "The on-chain and off-chain signals that power audiences, personalization, and Web3-native automations."
+description: "Enrich wallets with on-chain history and react to contract activity."
 ---
 
-Onchain Suite works from two kinds of signal: what wallets do **on-chain**, which the platform observes for you, and what users do **in your product**, which you send in. Together they make a wallet into a profile you can segment and message.
+Everything Onchain Suite knows about a wallet comes from two places: on-chain data it reads for you, and events you send in. Here's how to use each.
 
-## On-chain data
+## Enrich a wallet
 
-Point Onchain Suite at a wallet and it reads that wallet's on-chain history (portfolio value, transaction activity, and NFT holdings), then derives engagement and value scores. This is [wallet enrichment](/audience/wallet-enrichment), and it's what turns a bare address into something worth targeting.
+Give the platform a wallet and a chain, and it fetches that wallet's portfolio, activity, and NFT holdings, then derives an engagement score and estimated LTV. See [Wallet Enrichment](/audience/wallet-enrichment) for the on-demand API and the fields you get back.
 
-<Card title="Wallet enrichment" icon="wand-magic-sparkles" href="/audience/wallet-enrichment" horizontal>
-  Fields, derived scores, supported chains, when it runs, and the on-demand API.
-</Card>
+```bash
+curl -X POST https://api.onchainsuite.com/api/v1/intelligence/query/enrichment/wallets/enqueue \
+  -H "x-org-id: $ORG_ID" -H "Content-Type: application/json" \
+  -d '{ "walletAddress": "0xabc...", "chain": "base-mainnet" }'
+```
 
-Contract activity, mints, swaps, approvals, liquidations, is available as automation triggers, normalized into a consistent shape across chains. See [Contract-Based Flows](/automation/contract-based-flows).
+Query the results in [SQL](/api/sql-schema) once enrichment runs.
 
-## Off-chain data
+## React to contract activity
 
-Anything your own product knows, signups, deposits, plan changes, support events. You send in as [custom events](/integrations/custom-events). These become queryable alongside on-chain data, feed segments, and trigger automations.
+To message a wallet when it mints, swaps, or gets liquidated, build an automation with an on-chain trigger. For EVM contracts the platform watches the chain for you. See [Contract-Based Flows](/automation/contract-based-flows).
 
-<Card title="Custom events" icon="signal-stream" href="/integrations/custom-events" horizontal>
-  Send product events, resolve them to contacts, and drive in-app or email from them.
-</Card>
+## Send product events
 
-## How the signals combine
+For activity in your own product rather than on-chain, [send a custom event](/integrations/custom-events):
 
-| Signal | Source | Powers |
-| --- | --- | --- |
-| Portfolio, activity, NFTs | On-chain, read at enrichment time | Segments, scoring, analytics |
-| Contract events | On-chain, observed | Automation triggers |
-| Custom events | Your backend | Triggers, segments, SQL |
-| Identity (wallet, email, external ID) | You, on ingest | Ties every signal to one contact |
+```bash
+curl -X POST https://api.onchainsuite.com/api/v1/events \
+  -H "Authorization: Bearer sk_live_…" -H "Content-Type: application/json" \
+  -d '{ "event": "first_deposit", "contact": { "walletAddress": "0xabc..." } }'
+```
 
-Everything resolves to a single wallet-first contact, so a query or automation can combine "holds this NFT", "swapped last week", and "upgraded their plan yesterday" in one audience.
-
-## Where to start
-
-Start with the data for **one** high-value workflow, prove it end to end, then expand. A first useful loop is usually: enrich a set of wallets, build a segment from the result in [SQL](/intelligence/sql-query-editor), and send them a campaign or automation.
+Every signal resolves to one wallet-first contact, so a segment or automation can combine "holds this NFT," "swapped last week," and "deposited yesterday" in one audience.

@@ -18,27 +18,14 @@ Contract-based flows respond to what wallets actually do on-chain: minting, swap
 
 ## How it fires
 
-<Steps>
-  <Step title="You give it a chain and a contract">
-    Just the address. You don't paste an ABI.
-  </Step>
-  <Step title="The platform resolves the ABI">
-    It looks the contract up on Sourcify, then a block explorer, following proxies to the implementation. This tells it how to decode the contract's events.
-  </Step>
-  <Step title="Publishing registers a watch">
-    When you publish the automation, its on-chain triggers become live watches. The platform subscribes to the contract's logs, decodes each one, and turns matching logs into automation entries.
-  </Step>
-  <Step title="Events fire after finality">
-    A short delay lets the chain settle before the trigger fires, so a re-orged transaction doesn't message anyone. This is seconds on an L2, a couple of minutes on Ethereum mainnet.
-  </Step>
-</Steps>
+Give the trigger a **chain and a contract address**, then publish. That's it: no ABI to paste and no indexer to run. Matching on-chain activity starts creating automation entries, after a short finality delay so a re-orged transaction never messages anyone (seconds on an L2, a couple of minutes on Ethereum mainnet).
 
 <Warning>
-**Automatic watching is EVM-only.** Solana contract triggers, and any case where you run your own indexer, still send events in through the [Automation Trigger API](/api/automation-triggers).
+**Automatic watching is EVM-only.** For Solana contracts, or if you run your own indexer, send events in through the [Automation Trigger API](/api/automation-triggers) instead.
 </Warning>
 
 <Note>
-If a contract isn't verified on Sourcify or the explorer, the platform can't resolve its ABI. You'll be prompted to paste the ABI (or just the one event's signature) when you build the trigger. Until a trigger has a resolvable event, publishing reports it as skipped rather than silently doing nothing.
+If the contract isn't verified publicly, paste its ABI (or just the one event's signature) when you build the trigger. Until a trigger has a resolvable event, publishing reports it as skipped rather than doing nothing silently.
 </Note>
 
 ## Configuring the trigger
@@ -75,38 +62,16 @@ The platform recognizes 29 event definitions across standards, browsable in the 
 
 ## Feeding in your own events
 
-For EVM contracts you rarely need this, the platform watches the chain itself. Send events in yourself when the platform can't watch for you:
+For EVM contracts you rarely need this. Send events in yourself only for **Solana contracts** (not auto-watched) or when you **run your own indexer**. Post them through the [Automation Trigger API](/api/automation-triggers), and for product activity rather than on-chain, use [Custom Events](/integrations/custom-events).
 
-- **Solana contracts**, which aren't auto-watched.
-- **You already run an indexer** and would rather push decoded events than have the platform subscribe.
+When you ingest events yourself, two things help:
 
-Post them through the [Automation Trigger API](/api/automation-triggers). For activity that happens in your product rather than on-chain, use [Custom Events](/integrations/custom-events).
-
-## How events are normalized
-
-Before matching, every event is rewritten into a canonical shape.
-
-**Event name resolution** walks a fallback chain: the `event` field, then `payload.eventName`, then decoded names in the payload, then `instructionName`, and finally the literal `UnknownEvent`. The platform then resolves it against the catalog, preferring `topic0`, then Solana program plus instruction, then the name, and **replaces** your event name with the canonical one. Your original is preserved as `payload.rawEventName`.
-
-**Addresses are validated by chain family.** EVM addresses must match `0x` plus 40 hex characters and are lowercased; Solana addresses must be valid base58 of 32–44 characters.
+- **Set `walletAddress`** at the top level to name the wallet the automation acts on. Otherwise it's inferred from common payload fields (`to`, `owner`, `voter`, `borrower`, and so on).
+- **Every `payload` key is filterable** by its path, for example `{ "path": "amountUsd", "operator": "gte", "value": 100 }`.
 
 <Warning>
-A malformed address is discarded rather than raising an error. If your trigger scopes to a contract address, a typo means it silently never matches. Preview the trigger before publishing.
+A malformed contract address is discarded silently rather than erroring, so a typo means the trigger never matches. Preview the trigger before publishing.
 </Warning>
-
-**The subject wallet**, the wallet the automation acts on, is extracted based on event kind:
-
-| Event kind | Fields checked, in order |
-| --- | --- |
-| Transfers | `to`, `receiver`, `recipient`, `destinationOwner`, `destination`, `owner` |
-| Approvals | `owner`, `account`, `authority` |
-| `governance_vote_cast` | `voter` |
-| `governance_proposal_created` | `proposer`, `creator` |
-| `defi_borrow` | `borrower`, `user`, `onBehalfOf`, `account` |
-
-You can always set `walletAddress` explicitly at the top level to bypass extraction.
-
-Every normalized payload carries `source`, `chain`, `chainFamily`, `event`, `topic0`, `programId`, `instructionName`, `contractAddress`, `eventStandard`, and `rawEventName`, plus your original keys, all addressable from trigger `filters`.
 
 ## Testing a flow
 

@@ -1,26 +1,124 @@
 ---
 title: "Webhooks"
-description: "Use webhooks to send product events into Onchain Suite and connect external systems to lifecycle workflows."
+description: "Receive platform events at your endpoint, verify their signature, and handle them."
 ---
 
-## Why Webhooks Matter
+Register a URL and Onchain Suite will `POST` events to it as they happen: a message was clicked, a contact was created, an automation finished. This page is how to receive and verify them.
 
-Webhooks close the gap between product activity and messaging logic. They are useful when the behavior you care about happens in your app, backend, or partner system rather than directly onchain.
+<Note>
+To send events **into** the platform, use [Custom Events](/integrations/custom-events) or the [Automation Trigger API](/api/automation-triggers). This page is the other direction: events coming **out** to you.
+</Note>
 
-## Strong Webhook Use Cases
+## 1. Register an endpoint
 
-- Trigger an automation after a product milestone.
-- Update audience eligibility from backend state changes.
-- Sync outcomes from external workflows back into lifecycle logic.
-- Enrich a wallet-first profile with product behavior.
+```bash
+curl -X POST https://api.onchainsuite.com/api/v1/developer/webhooks \
+  -H "x-org-id: $ORG_ID" -H "Content-Type: application/json" \
+  -d '{
+    "url": "https://yoursite.com/hooks/onchain",
+    "events": ["message.clicked", "contact.created"]
+  }'
+```
 
-## Event Design Principles
+The `url` must be `https`. The response includes the **signing secret exactly once** — store it now, you can't retrieve it later.
 
-- Use stable, descriptive event names.
-- Include timestamps and identifiers explicitly.
-- Keep payload shapes consistent over time.
-- Make retries safe and idempotent.
+```json
+{
+  "id": "wh_...",
+  "url": "https://yoursite.com/hooks/onchain",
+  "events": ["message.clicked", "contact.created"],
+  "status": "active",
+  "secret": "whsec_..."
+}
+```
 
-## Recommendation
+## 2. Events you can subscribe to
 
-Design webhook events around business moments, not internal implementation details. That makes them easier for growth, lifecycle, and engineering teams to share.
+| Topic | Fires when |
+| --- | --- |
+| `message.delivered` | An email or in-app message is delivered |
+| `message.viewed` | A recipient opens a message (first open only) |
+| `message.clicked` | A recipient clicks a link (includes `choice` for click-to-tag) |
+| `contact.created` | A new contact is created |
+| `contact.unsubscribed` | A contact unsubscribes |
+| `automation.completed` | An automation entry finishes |
+
+## 3. What you receive
+
+Every delivery is a `POST` with this body:
+
+```json
+{
+  "id": "d3f1...",
+  "type": "message.clicked",
+  "createdAt": "2026-08-24T12:00:00.000Z",
+  "data": {
+    "channel": "email",
+    "campaignRunId": "...",
+    "deliveryId": "...",
+    "to": "user@example.com",
+    "url": "https://yoursite.com/landing",
+    "occurredAt": "2026-08-24T12:00:00.000Z"
+  }
+}
+```
+
+And these headers:
+
+| Header | Value |
+| --- | --- |
+| `X-OnChain-Event` | The topic, e.g. `message.clicked` |
+| `X-OnChain-Delivery` | A delivery ID, stable across retries |
+| `X-OnChain-Signature` | `t=<timestamp>,v1=<hmac>` |
+
+## 4. Verify the signature
+
+The signature is an **HMAC-SHA256** over `` `${timestamp}.${rawBody}` ``, keyed with your signing secret. Verify it against the **raw** request body, before parsing.
+
+```js
+import crypto from "crypto";
+
+function verify(rawBody, header, secret) {
+  const parts = Object.fromEntries(header.split(",").map((kv) => kv.split("=")));
+  const expected = crypto
+    .createHmac("sha256", secret) // "whsec_..."
+    .update(`${parts.t}.${rawBody}`)
+    .digest("hex");
+  const a = Buffer.from(expected);
+  const b = Buffer.from(parts.v1 || "");
+  return a.length === b.length && crypto.timingSafeEqual(a, b);
+}
+
+// Express, with the raw body preserved:
+app.post("/hooks/onchain", express.raw({ type: "application/json" }), (req, res) => {
+  const ok = verify(req.body.toString(), req.headers["x-onchain-signature"], SECRET);
+  if (!ok) return res.status(400).end();
+
+  const event = JSON.parse(req.body.toString());
+  // handle event.type ...
+  res.status(200).end();
+});
+```
+
+<Warning>
+Verify against the exact bytes received. Re-serializing the parsed JSON changes the body and the signature won't match. Also reject timestamps more than a few minutes old to block replays.
+</Warning>
+
+## 5. Retries and idempotency
+
+- Respond with any **2xx or 3xx** to acknowledge. A `4xx`/`5xx` or timeout is a failure.
+- Failed deliveries retry with exponential backoff for about a day (up to 12 attempts). Each request times out after 10 seconds.
+- Deduplicate on `X-OnChain-Delivery`, which is stable across retries of the same event.
+- After several consecutive failures an endpoint is marked `failing` and deliveries pause until you re-activate it. Keep your handler fast and return quickly.
+
+## Managing endpoints
+
+| Method | Path | Purpose |
+| --- | --- | --- |
+| `GET` | `/developer/webhooks` | List endpoints (secret masked) |
+| `GET` | `/developer/webhooks/events` | List subscribable topics |
+| `PATCH` | `/developer/webhooks/{id}` | Change `events`, or pause/resume with `status` |
+| `POST` | `/developer/webhooks/{id}/test` | Send a signed `ping` to your endpoint |
+| `DELETE` | `/developer/webhooks/{id}` | Remove the endpoint |
+
+Registering, changing, and deleting webhooks requires `OWNER` or `ADMIN`.

@@ -1,0 +1,122 @@
+---
+title: "Capture Forms"
+description: "Collect emails and wallets from a page and grow your audience, with an embed snippet or a direct API call."
+---
+
+A capture form turns a page visit into a contact. Create a form, drop the snippet on your site (or POST to it yourself), and submissions land in your Audience as contacts, tagged and ready for campaigns.
+
+## 1. Create a form
+
+Create the form in the dashboard, or over the API. The response gives you a **public token** (`frm_…`) and a ready-to-paste `embedCode`.
+
+```bash
+curl -X POST https://api.onchainsuite.com/api/v1/forms \
+  -H "x-org-id: $ORG_ID" -H "Content-Type: application/json" \
+  -d '{
+    "name": "Newsletter",
+    "fields": [{ "key": "email", "label": "Email", "type": "email", "required": true }],
+    "tag": "newsletter",
+    "allowedOrigins": ["https://yoursite.com"],
+    "doubleOptIn": true
+  }'
+```
+
+Only `name` is required. `allowedOrigins` restricts which sites may submit the form, and `doubleOptIn` defaults to on.
+
+## 2. Collect submissions
+
+### Embed on your site
+
+Paste the generated snippet, or write your own form that POSTs to the submit URL. No auth, no SDK. The token in the URL is safe to ship publicly.
+
+```html
+<form onsubmit="submitForm(event)">
+  <input name="email" type="email" required />
+  <!-- keep this hidden field empty; it traps bots -->
+  <input name="hp" style="display:none" tabindex="-1" autocomplete="off" />
+  <button type="submit">Subscribe</button>
+</form>
+
+<script>
+async function submitForm(e) {
+  e.preventDefault();
+  const f = e.target;
+  await fetch("https://api.onchainsuite.com/api/v1/public/forms/frm_ABC123/submit", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      email: f.email.value,
+      hp: f.hp.value,
+    }),
+  });
+  f.reset();
+}
+</script>
+```
+
+### From your backend
+
+To submit server-side, use the secret-key endpoint instead:
+
+```bash
+curl -X POST https://api.onchainsuite.com/api/v1/forms/frm_ABC123/ingest \
+  -H "Authorization: Bearer sk_live_…" -H "Content-Type: application/json" \
+  -d '{ "email": "you@example.com", "walletAddress": "0xabc..." }'
+```
+
+### Request fields
+
+<ParamField path="email" type="string">
+  Valid email, max 320 characters.
+</ParamField>
+
+<ParamField path="walletAddress" type="string">
+  Max 128 characters. At least one of `email` or `walletAddress` is required.
+</ParamField>
+
+<ParamField path="fields" type="object">
+  Extra values keyed by name (e.g. `{ "focus": "sleep" }`). Up to 20 keys; stored as contact attributes.
+</ParamField>
+
+<ParamField path="consent" type="boolean">
+  Required only if the form was created with `requireConsent`.
+</ParamField>
+
+<ParamField path="hp" type="string">
+  Honeypot. Keep it empty; a non-empty value silently drops the submission.
+</ParamField>
+
+### Response
+
+```json
+{ "ok": true, "queued": true }
+```
+
+With double opt-in, a submission that includes an email returns `"pendingConfirmation": true` instead.
+
+| Status | Meaning |
+| --- | --- |
+| `404 Form not found` | Unknown token or archived form |
+| `400 email or walletAddress is required` | No identifier supplied |
+| `400 Consent is required for this form` | `consent` missing when required |
+| `400 Origin not allowed for this form` | Submitting site isn't in `allowedOrigins` |
+
+## 3. Double opt-in
+
+When double opt-in is on (the default), a contact captured with an email is held until they confirm:
+
+- The submission returns `pendingConfirmation: true` and the contact is created but held: its form tag and list membership aren't applied yet.
+- The platform emails a branded confirmation link, valid for **14 days**.
+- Clicking it applies the tags, marks the contact confirmed, and fires the `segment_entered` automation trigger. It then redirects to your form's success URL, or shows a branded confirmation page.
+
+Wallet-only captures skip confirmation and join immediately, since there's no mailbox to confirm.
+
+You can see each submission's state (`confirmed`, `pending`, or `subscribed`) from the form's submissions list.
+
+## Where contacts land
+
+A submitted contact is deduplicated by email or wallet and tagged with the form's `tag`, any field-based tags you configured, and the form's list. If you don't set a `listId`, the platform creates a list named after the form, so every contact is findable in your Audience.
+
+## Bot protection
+
+Forms are protected out of the box: an always-on honeypot field, per-IP rate limiting, an `allowedOrigins` check, and an optional CAPTCHA challenge the embed adds automatically when enabled. The backend `/ingest` path skips these, since the secret key is its authorization.
