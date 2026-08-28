@@ -125,6 +125,53 @@ Enrichment is asynchronous, the request returns as soon as the work is queued. P
 Enrichment jobs are deduplicated per wallet and chain, so enqueuing the same wallet twice in quick succession won't double-spend credits.
 </Note>
 
+## Syncing holders
+
+Enrichment refreshes wallets you already have. **Sync** does the other half: it discovers the current holders of your configured contracts and **adds the new ones as contacts**, growing your audience from on-chain reality.
+
+```http
+POST /api/v1/audience/sync
+```
+
+Owner, Admin, or Editor. Optional body `{ "force": true }` bypasses the response cache. Returns `202` with a job you can poll at `GET /api/v1/audience/sync`.
+
+A sync runs in two phases. First it reads the current holders of every contract in your registry and, for each holder that **isn't already a contact**, creates a wallet contact and seeds that contract balance, this is where new wallets enter your audience. Then it enriches, refreshing metrics for the wallets in the run (both existing and newly discovered).
+
+The job response reports both:
+
+```json
+{
+  "jobId": "…",
+  "state": "processing",
+  "totalWallets": 1250,
+  "discoveredCount": 84,
+  "force": false,
+  "dispatch": { "state": "completed", "processedCount": 1250, "skippedCount": 0 },
+  "enrichment": { "state": "processing", "enrichedCount": 900, "pendingCount": 350 },
+  "outcome": null,
+  "createdAt": "…",
+  "finishedAt": null
+}
+```
+
+`discoveredCount` is the number of **new** wallet contacts added this run. Discovery never mutates existing contacts, and it stops adding once you reach your plan's contact limit.
+
+### Sync vs enrich: the credit difference
+
+Both read from GoldRush, but they cost very differently, and the difference is deliberate.
+
+| | **Sync** (discover) | **Enrich** (refresh) |
+| --- | --- | --- |
+| Endpoint | `POST /audience/sync` | `POST /intelligence/query/enrichment/protocol` |
+| What it does | Finds contract holders and adds new wallet contacts | Refreshes each wallet's on-chain metrics |
+| GoldRush cost | **One call per contract** (holder list), nothing per wallet | **~4 requests per wallet**, plus one per contract |
+| Metered against credits | No per-wallet cost for discovery | Yes, every wallet draws from your budget |
+| Use it for | Growing the audience cheaply | Keeping metrics current for scoring and segmentation |
+
+<Note>
+Reach for **Sync** to pull in holders you don't have yet, it's cheap because it's one holder-list call per contract. Reach for **Enrich** when you need each wallet's portfolio, activity, and scores refreshed, which is where the per-wallet credit cost lives. The discovery phase of a sync writes no per-wallet metrics; the enrich phase is what spends credits.
+</Note>
+
 ## Cost and limits
 
 Enrichment consumes **wallet-data credits**, up to 4 per wallet, covering balances, transactions, NFTs, and portfolio. The portfolio call is skipped when it isn't needed, so a wallet often costs fewer. Each paid plan includes a monthly allowance:

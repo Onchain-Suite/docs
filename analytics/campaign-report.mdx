@@ -1,0 +1,52 @@
+---
+title: "Campaign Report"
+description: "Per-campaign delivery and engagement, one row per run."
+---
+
+<Note>
+**Coming soon.** Documented from the source contract ahead of release; shapes may change. See [Analytics overview](/analytics/overview).
+</Note>
+
+The campaign report lists every campaign run with its delivery and engagement numbers, one row per run, newest first. It's the reporting view behind campaign performance.
+
+## Endpoint
+
+```http
+GET /api/v1/analytics/reports/campaign-report
+```
+
+Session-authenticated, org-scoped. Any role. No parameters. Returns up to 200 runs, ordered by start time descending.
+
+## Response
+
+```json
+{
+  "rows": [
+    {
+      "runId": "run_abc",
+      "name": "August holder update",
+      "segmentSize": 5200,
+      "sent": 5133,
+      "openRate": 0.44,
+      "clickRate": 0.09,
+      "conversions": 0,
+      "startedAt": "2026-08-20T09:00:00.000Z",
+      "completedAt": "2026-08-20T09:14:00.000Z"
+    }
+  ]
+}
+```
+
+| Field | Meaning |
+| --- | --- |
+| `runId` | The campaign run. |
+| `name` | The run's name (falls back to the automation id, then the run id). |
+| `segmentSize` | Size of the targeted audience at send time (`0` if unknown). |
+| `sent` | Emails delivered (`email.delivered` events). |
+| `openRate` / `clickRate` | Opens and clicks ÷ sent, as fractions (four decimals). These are event-based totals and can exceed 1 when a recipient opens more than once. |
+| `conversions` | Reserved for goal tracking. **Always `0` today**, not yet populated. |
+| `startedAt` / `completedAt` | Run bounds; `completedAt` is `null` while a run is in flight. |
+
+## Powers
+
+The **Campaigns** performance table on the analytics dashboard.

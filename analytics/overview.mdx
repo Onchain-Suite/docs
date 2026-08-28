@@ -1,0 +1,54 @@
+---
+title: "Analytics Reports"
+description: "Pre-built reports behind the analytics dashboard: holder distribution, retention cohorts, engagement by segment, campaign performance, and automation performance."
+---
+
+<Note>
+**Coming soon.** These reports are in active development ([tracking](https://github.com/onchainsuite/backend/pull/298)) and are not on production yet. The endpoint paths and response shapes below are documented from the source contract so you can build against them, but they may change before release. Where a metric is not yet wired, it's called out inline.
+</Note>
+
+Analytics reports turn the data already in your workspace, on-chain holdings, contacts, delivery events, and automation runs, into the cards you see on the analytics dashboard. Each report is a read-only endpoint; nothing here sends, mutates, or spends credits.
+
+## The reports
+
+<CardGroup cols={2}>
+  <Card title="Holder distribution" icon="chart-column" href="/analytics/holder-distribution">
+    How token holdings spread across wallets, the top holders, and concentration.
+  </Card>
+  <Card title="Retention cohorts" icon="table-cells" href="/analytics/retention-cohorts">
+    Weekly signup cohorts and the curve of how many stay engaged.
+  </Card>
+  <Card title="Engagement by segment" icon="users-rectangle" href="/analytics/engagement-by-segment">
+    Per-segment email sent, open, and click rates.
+  </Card>
+  <Card title="Campaign report" icon="paper-plane" href="/analytics/campaign-report">
+    Per-campaign delivery and engagement, one row per run.
+  </Card>
+  <Card title="Automation performance" icon="bolt" href="/analytics/automation-performance">
+    Per-flow enrolments, completion rate, and downstream engagement.
+  </Card>
+</CardGroup>
+
+## Access model
+
+Every report lives under the base path `https://api.onchainsuite.com/api/v1/analytics/reports` and is **session-authenticated**, the same cookie session your dashboard uses, scoped to your active organization. They are read-only, so **every role, including Viewer, can run them**.
+
+<Note>
+These are dashboard reports, not part of the `sk_` server-to-server surface. They authenticate with your dashboard session and the active-organization context, not a secret key. For programmatic access to your data from a backend, use the [SQL schema](/api/sql-schema) and the [server-to-server API](/integrations/api-keys).
+</Note>
+
+## Response format
+
+Like the rest of the platform, each response is wrapped in the standard envelope; the report body is the contents of `data`.
+
+```json
+{
+  "success": true,
+  "message": "Request processed successfully",
+  "data": { },
+  "timestamp": "2026-08-28T12:00:00.000Z",
+  "requestId": "…"
+}
+```
+
+A request with no active organization selected returns `400 No active organization selected`.

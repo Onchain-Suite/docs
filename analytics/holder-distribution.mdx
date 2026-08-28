@@ -1,0 +1,62 @@
+---
+title: "Holder Distribution"
+description: "How token holdings spread across wallets, the largest holders, and concentration metrics."
+---
+
+<Note>
+**Coming soon.** Documented from the source contract ahead of release; shapes may change. See [Analytics overview](/analytics/overview).
+</Note>
+
+Holder distribution buckets your holders by balance, surfaces the largest wallets, and measures how concentrated ownership is. It reads from the on-chain holdings that [wallet sync](/audience/wallet-enrichment#syncing-holders) discovers, so it's empty until holders have been synced.
+
+## Endpoint
+
+```http
+GET /api/v1/analytics/reports/holder-distribution
+```
+
+Session-authenticated, org-scoped. Any role.
+
+### Query parameters
+
+<ParamField query="token" type="string">
+  Filter to a single contract address. Omit to include every holdings row in the workspace.
+</ParamField>
+
+<ParamField query="limit" type="integer" default="20">
+  How many top holders to return. Clamped to the range 1–200.
+</ParamField>
+
+## Response
+
+```json
+{
+  "buckets": [
+    { "range": "0–1", "wallets": 1204, "pctSupply": 0.8421 },
+    { "range": "1–10", "wallets": 812, "pctSupply": 4.11 },
+    { "range": "10–100", "wallets": 430, "pctSupply": 12.34 },
+    { "range": "100–1K", "wallets": 96, "pctSupply": 22.5 },
+    { "range": "1K–10K", "wallets": 18, "pctSupply": 31.2 },
+    { "range": "10K+", "wallets": 4, "pctSupply": 28.99 }
+  ],
+  "topHolders": [
+    { "wallet": "0xabc…", "balance": 1250000, "pctSupply": 12.5 }
+  ],
+  "concentration": { "top10Pct": 61.4, "hhi": 842.17 },
+  "totalHolders": 2564,
+  "totalSupply": 10000000
+}
+```
+
+| Field | Meaning |
+| --- | --- |
+| `buckets[]` | Fixed balance ranges (`0–1`, `1–10`, `10–100`, `100–1K`, `1K–10K`, `10K+`). `wallets` is the count in the band; `pctSupply` is that band's share of supply as a percentage (0–100). |
+| `topHolders[]` | Up to `limit` wallets by balance, each with its `pctSupply`. |
+| `concentration.top10Pct` | Percentage of supply held by the ten largest wallets. |
+| `concentration.hhi` | Herfindahl-Hirschman Index, a standard concentration measure scaled 0–10,000. Higher means more concentrated. |
+| `totalHolders` | Distinct holding wallets. |
+| `totalSupply` | Summed balance across all holders in scope. |
+
+## Powers
+
+The **Holder distribution** card on the analytics dashboard, the bucketed bar chart, the top-holders table, and the concentration read-out.
