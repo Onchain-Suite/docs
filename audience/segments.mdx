@@ -17,6 +17,10 @@ There are three ways to define one:
 Lists and segments share the same backing. A list is just a segment you import into, so a list can be reused anywhere a segment can.
 </Note>
 
+<Note>
+[Capture forms](/audience/capture-forms#binding-to-a-list) create lists too. A form that isn't bound to a list gets one **auto-created and named after the form** (backed by a tag of the same name), so confirmed subscribers show up here under a matching list and tag without any manual wiring.
+</Note>
+
 ## How the rules combine
 
 A rule-based segment supports three criteria, and they're combined with **AND**: a contact is in the segment only if it meets every criterion you set.
@@ -42,6 +46,10 @@ For anything the three criteria can't express, such as on-chain value, activity 
 - High-value cohorts with declining engagement
 - Holders of a specific contract or collection
 - Query-built audiences ready for follow-up
+
+<Note>
+A holder-based segment is only as complete as your contact list. Running [wallet sync](/audience/wallet-enrichment#syncing-holders) discovers the current holders of your configured contracts and adds the new ones as contacts, so a "holders of contract X" segment grows as sync brings in wallets you didn't have yet, without spending per-wallet enrichment credits to find them.
+</Note>
 
 ## Best practices
 

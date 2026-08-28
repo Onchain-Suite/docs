@@ -1,20 +1,52 @@
 ---
 title: "Overview"
-description: "Connect Onchain Suite to the identity, event, and delivery systems that power Web3 lifecycle messaging."
+description: "Three ways to connect your product to Onchain Suite: notify users in-app, react to platform events, and call the API from your backend."
 ---
 
-## What Integrations Unlock
+Connecting to Onchain Suite is three independent moves. Most integrations start with one and add the others as they grow, none of them requires the others.
 
-Integrations bring wallet data, contract behavior, product events, and delivery channels into one operating model so campaigns and automations can react in real time.
+## Connect in-app, react to events, call the API
 
-## Core Integration Areas
+<CardGroup cols={3}>
+  <Card title="In-app notifications" icon="bell" href="/integrations/in-app-notifications">
+    **Client-side.** Drop the SDK into your dApp, authenticate the wallet (EVM or Solana), and show live notifications. The fastest path to a visible result, about ten minutes.
+  </Card>
+  <Card title="Webhooks" icon="satellite-dish" href="/api/webhooks">
+    **Server-side, receive.** Subscribe your endpoint to platform events, delivered, viewed, contact created, and verify the signature. React from your backend without polling.
+  </Card>
+  <Card title="Server-side API" icon="server" href="/integrations/server-api">
+    **Server-side, send.** Authenticate with a secret key and call the API: register wallets, ingest consented captures, send pushes, launch campaigns.
+  </Card>
+</CardGroup>
 
-- Wallet and contract data sources
-- Product or backend webhooks that enrich lifecycle logic
-- Publishable and secret keys for secure client and server use
-- In-app delivery surfaces and SDK-based experiences
-- Third-party systems that support CRM, analytics, or growth operations
+## Which one do I need?
 
-## Recommended Adoption Pattern
+| You want to… | Reach for | Credential |
+| --- | --- | --- |
+| Notify users inside your dApp | [In-app SDK](/integrations/in-app-notifications) | Publishable key (`pk_…`, public) |
+| Know when a message is delivered or a contact unsubscribes | [Webhooks](/api/webhooks) | Webhook secret (`whsec_…`, verify only) |
+| Send events, contacts, or pushes from your backend | [Server-side API](/integrations/server-api) | Secret key (`sk_…`, server-only) |
+| Collect email, with consent | [Capture forms](/audience/capture-forms) | Public form, or `sk_…` ingest |
 
-Start with the data and channel needed for one high-value workflow. Once that loop works, expand to additional triggers, channels, and team systems.
+<Note>
+The two credentials are not interchangeable. A **publishable** key (`pk_…`) is safe in the browser and only runs wallet auth. A **secret** key (`sk_…`) is server-only and grants full API access. Never ship a secret key to a client. See [API keys](/integrations/api-keys).
+</Note>
+
+## A typical build order
+
+<Steps>
+  <Step title="Add the SDK">
+    Wallet-authenticated notifications in your dApp, in two lines. Start [here](/integrations/in-app-notifications).
+  </Step>
+  <Step title="Send events from your product">
+    Push signups, deposits, and upgrades with a secret key, and let automations turn them into messages. See [custom events](/integrations/custom-events).
+  </Step>
+  <Step title="Collect email, with consent">
+    Bind a [capture form](/audience/capture-forms) to a list so wallet-first contacts become email-reachable.
+  </Step>
+  <Step title="Close the loop with webhooks">
+    Receive platform events at your endpoint and react. See [webhooks](/api/webhooks).
+  </Step>
+</Steps>
+
+Start with the data and channel behind one high-value workflow. Once that loop works, expand to more triggers, channels, and team systems.

@@ -1,0 +1,49 @@
+---
+title: "Automation Performance"
+description: "Per-flow enrolments, completion rate, and downstream engagement."
+---
+
+Automation performance reports on each [automation](/automation/overview): how many contacts entered, how many completed, and how the emails that flow sent performed. One row per automation, newest first.
+
+## Endpoint
+
+```http
+GET /api/v1/analytics/reports/automation-performance
+```
+
+Session-authenticated, org-scoped. Any role. No parameters. Returns up to 200 automations, ordered by creation time descending.
+
+## Response
+
+```json
+{
+  "rows": [
+    {
+      "automationId": "auto_abc",
+      "name": "Welcome series",
+      "status": "active",
+      "entered": 1840,
+      "completed": 1502,
+      "completionRate": 0.8163,
+      "sent": 3600,
+      "openRate": 0.51,
+      "clickRate": 0.12,
+      "conversions": 0
+    }
+  ]
+}
+```
+
+| Field | Meaning |
+| --- | --- |
+| `automationId` / `name` / `status` | The automation and its current state. |
+| `entered` | Contacts enrolled into the flow. |
+| `completed` | Enrolments that reached the end (`completed_at` set). |
+| `completionRate` | `completed` ÷ `entered`, as a fraction (four decimals). |
+| `sent` | Emails delivered across the flow's campaign runs. |
+| `openRate` / `clickRate` | Opens and clicks ÷ sent, as fractions. |
+| `conversions` | Reserved for goal tracking. **Always `0` today**, not yet populated. |
+
+## Powers
+
+The **Automations** performance table on the analytics dashboard.

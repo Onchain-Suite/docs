@@ -28,7 +28,7 @@ The SDK gives you all three plus wallet auth and a styled toast UI; a server-to-
     Register your frontend's origin in the dashboard. Requests from anywhere else are rejected.
   </Step>
   <Step title="Wallet authenticates">
-    The browser requests a challenge with your **publishable key**, the wallet signs it, and the server returns a short-lived session token.
+    The browser requests a challenge with your **publishable key**, the wallet signs it, and the server returns a short-lived session token. The wallet can be **EVM or Solana**, the server verifies both.
   </Step>
   <Step title="Client connects">
     The client opens a Socket.IO connection with that token and joins a room scoped to its org + wallet. Optionally it also registers for web or mobile push.
@@ -37,6 +37,32 @@ The SDK gives you all three plus wallet auth and a styled toast UI; a server-to-
     From your backend (secret key), a campaign, or an automation. The platform routes each one to a live socket if the user is connected, otherwise to web or mobile push, otherwise it's held and replayed on reconnect.
   </Step>
 </Steps>
+
+```mermaid
+sequenceDiagram
+    participant U as Wallet (EVM / Solana)
+    participant C as Your dApp (SDK)
+    participant P as OnchainSuite API
+    participant S as Socket.IO
+
+    C->>P: POST /inapp/challenge (pk_… + Origin)
+    P-->>C: nonce + message
+    C->>U: sign message
+    U-->>C: signature
+    C->>P: POST /inapp/verify (address + signature)
+    P-->>C: session JWT + wsUrl
+    C->>S: connect(JWT) + REGISTER
+    S-->>C: pending replayed, then live PUSH
+```
+
+### Wallets it works with
+
+The SDK **auto-discovers** the wallets installed in the browser and authenticates whichever the user picks:
+
+- **EVM** wallets are discovered via [EIP-6963](https://eips.ethereum.org/EIPS/eip-6963) multi-wallet announcement, with a `window.ethereum` fallback. Signing uses EIP-191 `personal_sign`.
+- **Solana** wallets (Phantom, Solflare, Backpack, Glow, Coinbase) are discovered by scanning their standard injection points. Signing uses ed25519, and the signature is sent base58-encoded.
+
+The server verifies both. Which scheme runs is chosen from the address shape (`0x…` → EVM, otherwise Solana), so you don't configure a chain. To take over signing entirely, for either chain, pass a [`signMessage` override](#bring-your-own-signer).
 
 <Note>
 The platform never sends a live in-app toast **and** an OS push for the same notification. If the wallet has an open socket, only the toast fires. When the socket is closed, web and mobile push take over. Cross-channel duplicates are collapsed by delivery ID, so tapping an OS push and then opening your dApp won't show the same notification twice.
@@ -68,14 +94,23 @@ The fastest path is the official browser SDK. It handles the challenge/verify ha
 
 <CodeGroup>
 ```bash npm
-npm i @onchainsuite/sdk
+npm i @onchainsuite/sdk@latest
 ```
 
-```html CDN
-<!-- On the CDN path, load socket.io-client first so the SDK finds window.io -->
+```html CDN loader
+<!-- inapp.js bundles socket.io and auto-starts from data-* attributes -->
+<script
+  src="https://cdn.jsdelivr.net/npm/@onchainsuite/sdk@latest/dist/inapp.js"
+  data-key="pk_live_yourorg_xxx"
+  data-api="https://api.onchainsuite.com"
+  data-autostart></script>
+```
+
+```html CDN (ESM)
+<!-- ESM import: load socket.io-client first so the SDK finds window.io -->
 <script src="https://cdn.socket.io/4.8.3/socket.io.min.js"></script>
 <script type="module">
-  import { OnchainSuite } from "https://esm.sh/@onchainsuite/sdk";
+  import { OnchainSuite } from "https://esm.sh/@onchainsuite/sdk@latest";
 
   const os = new OnchainSuite("pk_live_yourorg_xxx", {
     apiBaseUrl: "https://api.onchainsuite.com",
@@ -86,7 +121,11 @@ npm i @onchainsuite/sdk
 </CodeGroup>
 
 <Note>
-The two paths differ: on the **npm/bundler path** the bundled `socket.io-client` is pulled in automatically. Nothing else to install. On the **CDN script-tag path** a raw `esm.sh` import can't provide the bundled copy, so you still load `socket.io-client` first (the SDK finds it on `window.io`). You can also inject your own client with the `ioClient` option.
+Three ways in, pick one:
+
+- **npm / bundler** — `import { OnchainSuite } from "@onchainsuite/sdk"`. The bundled `socket.io-client` is pulled in automatically, nothing else to install.
+- **CDN loader (`inapp.js`)** — a self-contained IIFE bundle (socket.io included). Add `data-key` and it constructs a client on `window.onchainsuite`; add `data-autostart` and it calls `start()` for you. Optional `data-api` sets the API base (defaults to `https://api.onchainsuite.com`). No import, no build step. Only ever put a **`pk_…`** key here, never `sk_…`.
+- **CDN (ESM)** — a raw `esm.sh` import can't supply the bundled socket.io, so load `socket.io-client` first (the SDK finds it on `window.io`), or inject your own with the `ioClient` option.
 </Note>
 
 The SDK is ESM-only and tree-shakeable.
@@ -103,9 +142,9 @@ const os = new OnchainSuite("pk_live_yourorg_xxx", {
 await os.start(); // prompts window.ethereum to connect + sign
 ```
 
-That's the whole integration. `start()` discovers the connected wallet via `eth_requestAccounts`, runs the signature handshake, connects the socket, and begins rendering notifications.
+That's the whole integration. `start()` auto-discovers the browser's installed wallet, EVM via EIP-6963 (falling back to `window.ethereum`), or Solana via its standard injection, runs the signature handshake, connects the socket, and begins rendering notifications. Pass an address to `start(walletAddress)` to pin a specific account.
 
-### Bring your own signer (wagmi / viem / ethers)
+### Bring your own signer
 
 If your app already manages wallet connection, pass a signer and the address explicitly so the user isn't prompted twice.
 
@@ -117,6 +156,8 @@ const os = new OnchainSuite("pk_live_yourorg_xxx", {
 
 await os.start(walletAddress);
 ```
+
+`signMessage` is the **universal override**: `(message, walletAddress) => Promise<string>`. When you supply it, the SDK never touches the wallet itself, so it works for **any** wallet on **either** chain, an EVM signer from wagmi/viem/ethers, or a Solana wallet's `signMessage`. Return the signature your wallet produces (hex for EVM, base58 for Solana). Without the override, the SDK signs with the discovered wallet automatically.
 
 ### React
 
@@ -404,7 +445,7 @@ The challenge is valid for **5 minutes**.
 
 ### Step 2, Sign and verify
 
-Sign the returned `message` with EIP-191 `personal_sign`:
+For an **EVM** wallet, sign the returned `message` with EIP-191 `personal_sign`:
 
 ```ts
 import { BrowserProvider } from "ethers";
@@ -413,6 +454,19 @@ const provider = new BrowserProvider(window.ethereum);
 const signer = await provider.getSigner();
 const signature = await signer.signMessage(message);
 ```
+
+For a **Solana** wallet, sign the UTF-8 bytes of the same `message` with ed25519 and send the signature **base58-encoded**:
+
+```ts
+import bs58 from "bs58";
+
+const { signature } = await window.solana.signMessage(
+  new TextEncoder().encode(message),
+);
+const signatureB58 = bs58.encode(signature);
+```
+
+The server picks the verification scheme from the address shape (`0x…` → EVM, otherwise Solana), so send the address and signature exactly as your wallet produced them.
 
 `POST /api/v1/inapp/verify` with the same headers:
 

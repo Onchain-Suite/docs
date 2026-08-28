@@ -1,0 +1,45 @@
+---
+title: "Engagement by Segment"
+description: "Per-segment email sent, open, and click rates."
+---
+
+Engagement by segment compares how each of your [segments](/audience/segments) responds to email, one row per segment, with sent volume and open and click rates. It's the fastest way to see which audiences are worth more of your sending.
+
+## Endpoint
+
+```http
+GET /api/v1/analytics/reports/engagement-by-segment
+```
+
+Session-authenticated, org-scoped. Any role. No parameters.
+
+## Response
+
+```json
+{
+  "rows": [
+    {
+      "segmentId": "seg_abc",
+      "name": "Active holders",
+      "sent": 4210,
+      "openRate": 0.4123,
+      "clickRate": 0.0871,
+      "pushViewRate": 0
+    }
+  ]
+}
+```
+
+| Field | Meaning |
+| --- | --- |
+| `segmentId` / `name` | The segment. |
+| `sent` | Emails delivered to the segment (`email.delivered` events). |
+| `openRate` | Opens ÷ sent, as a fraction (0–1, four decimal places). `0` when nothing was sent. |
+| `clickRate` | Clicks ÷ sent, as a fraction. |
+| `pushViewRate` | Reserved for in-app view rate. **Always `0` today**, not yet wired. |
+
+Rates are computed per segment by joining [delivery events](/campaigns/launch-and-monitor) to the segment's tag-backed membership.
+
+## Powers
+
+The **Engagement by segment** table on the analytics dashboard.

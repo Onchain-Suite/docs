@@ -43,7 +43,9 @@ If a contract isn't verified on Sourcify or the explorer, the platform can't res
 
 ## Configuring the trigger
 
-At minimum, set a chain. Add a contract address to scope it to your protocol, without one, the trigger matches the event on **any** contract.
+In the builder, a **preset needs one input, your token or contract**. The event and filters that define the moment are filled in for you, so you pick the contract and publish. See [pick your token, done](/automation/triggers-and-conditions#business-presets-pick-your-token-done). Adding a contract address scopes the trigger to your protocol; leaving it empty matches the moment on **any** contract on the chain.
+
+Under the hood, that same trigger is a small piece of JSON, which is also what you'd set directly when building over the API. For a preset the `eventNames` and `filters` are seeded from the preset; you don't type them in the builder:
 
 ```json
 {

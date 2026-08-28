@@ -72,6 +72,7 @@
               "audience/unified-profiles",
               "audience/wallet-enrichment",
               "audience/segments",
+              "audience/capture-forms",
               "audience/imports-and-exports",
               "audience/health-and-churn",
               "audience/privacy"
@@ -87,6 +88,18 @@
               "intelligence/generate-sql",
               "intelligence/saved-reports",
               "intelligence/segments-from-queries"
+            ]
+          },
+          {
+            "group": "Analytics",
+            "icon": "chart-column",
+            "pages": [
+              "analytics/overview",
+              "analytics/holder-distribution",
+              "analytics/retention-cohorts",
+              "analytics/engagement-by-segment",
+              "analytics/campaign-report",
+              "analytics/automation-performance"
             ]
           },
           {
@@ -139,6 +152,7 @@
               "integrations/overview",
               "integrations/in-app-notifications",
               "integrations/custom-events",
+              "integrations/server-api",
               "integrations/api-keys",
               "integrations/webhook-events",
               "integrations/wallet-and-contract-data",

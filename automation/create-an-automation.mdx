@@ -12,7 +12,7 @@ An automation is a trigger plus a flow graph. This page walks through building o
     Forking a [built-in play](/automation/overview) gives you a working trigger and flow as a draft you own. Starting blank gives you an empty graph.
   </Step>
   <Step title="Configure the trigger">
-    Pick the event type and narrow it with a chain, contract, event names, and payload filters. See [Triggers and Conditions](/automation/triggers-and-conditions).
+    For a business preset (**Token acquired**, **Swap completed**, **Liquidity added**, and the rest), you supply just one thing, the **token or contract** to watch. The on-chain event and filters are set for you. Only the generic **On-chain event** trigger asks you to name a raw event. See [Triggers and Conditions](/automation/triggers-and-conditions).
   </Step>
   <Step title="Lay out the flow">
     Add action, wait, and branch nodes, and connect them with edges. Execution follows edges from the trigger node.
