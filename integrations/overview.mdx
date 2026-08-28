@@ -1,45 +1,52 @@
 ---
 title: "Overview"
-description: "Pick the integration you need and copy the code."
+description: "Three ways to connect your product to Onchain Suite: notify users in-app, react to platform events, and call the API from your backend."
 ---
 
-Each page here is a task with the code to do it. Start with in-app notifications, then add whatever else you need.
+Connecting to Onchain Suite is three independent moves. Most integrations start with one and add the others as they grow, none of them requires the others.
 
-## Reach users
+## Connect in-app, react to events, call the API
 
-<CardGroup cols={2}>
+<CardGroup cols={3}>
   <Card title="In-app notifications" icon="bell" href="/integrations/in-app-notifications">
-    Wallet-authenticated in-app, web, and mobile push. Two lines of SDK.
+    **Client-side.** Drop the SDK into your dApp, authenticate the wallet (EVM or Solana), and show live notifications. The fastest path to a visible result, about ten minutes.
   </Card>
-  <Card title="Send a push from your backend" icon="server" href="/integrations/in-app-notifications#sending-pushes-from-your-backend">
-    One `POST /inapp/push` with a secret key.
-  </Card>
-</CardGroup>
-
-## Feed data in
-
-<CardGroup cols={2}>
-  <Card title="Custom events" icon="signal-stream" href="/integrations/custom-events">
-    `POST /events` when something happens in your product.
-  </Card>
-  <Card title="Capture forms" icon="pen-to-square" href="/integrations/forms">
-    Collect emails and wallets from a page and grow your audience.
-  </Card>
-  <Card title="Automation triggers" icon="bolt" href="/api/automation-triggers">
-    Feed on-chain or lifecycle events from your own indexer.
-  </Card>
-  <Card title="Wallet and contract data" icon="wallet" href="/integrations/wallet-and-contract-data">
-    Enrich a wallet with on-chain history.
-  </Card>
-</CardGroup>
-
-## Get data out
-
-<CardGroup cols={2}>
   <Card title="Webhooks" icon="satellite-dish" href="/api/webhooks">
-    Receive platform events at your endpoint and verify them.
+    **Server-side, receive.** Subscribe your endpoint to platform events, delivered, viewed, contact created, and verify the signature. React from your backend without polling.
   </Card>
-  <Card title="API keys" icon="key" href="/integrations/api-keys">
-    Publishable keys for the browser, secret keys for your server.
+  <Card title="Server-side API" icon="server" href="/integrations/server-api">
+    **Server-side, send.** Authenticate with a secret key and call the API: register wallets, ingest consented captures, send pushes, launch campaigns.
   </Card>
 </CardGroup>
+
+## Which one do I need?
+
+| You want to… | Reach for | Credential |
+| --- | --- | --- |
+| Notify users inside your dApp | [In-app SDK](/integrations/in-app-notifications) | Publishable key (`pk_…`, public) |
+| Know when a message is delivered or a contact unsubscribes | [Webhooks](/api/webhooks) | Webhook secret (`whsec_…`, verify only) |
+| Send events, contacts, or pushes from your backend | [Server-side API](/integrations/server-api) | Secret key (`sk_…`, server-only) |
+| Collect email, with consent | [Capture forms](/audience/capture-forms) | Public form, or `sk_…` ingest |
+
+<Note>
+The two credentials are not interchangeable. A **publishable** key (`pk_…`) is safe in the browser and only runs wallet auth. A **secret** key (`sk_…`) is server-only and grants full API access. Never ship a secret key to a client. See [API keys](/integrations/api-keys).
+</Note>
+
+## A typical build order
+
+<Steps>
+  <Step title="Add the SDK">
+    Wallet-authenticated notifications in your dApp, in two lines. Start [here](/integrations/in-app-notifications).
+  </Step>
+  <Step title="Send events from your product">
+    Push signups, deposits, and upgrades with a secret key, and let automations turn them into messages. See [custom events](/integrations/custom-events).
+  </Step>
+  <Step title="Collect email, with consent">
+    Bind a [capture form](/audience/capture-forms) to a list so wallet-first contacts become email-reachable.
+  </Step>
+  <Step title="Close the loop with webhooks">
+    Receive platform events at your endpoint and react. See [webhooks](/api/webhooks).
+  </Step>
+</Steps>
+
+Start with the data and channel behind one high-value workflow. Once that loop works, expand to more triggers, channels, and team systems.

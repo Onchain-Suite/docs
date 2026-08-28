@@ -12,6 +12,20 @@ Branding settings keep everything your users see, from emails to hosted pages, r
 - **Default sender**: the verified sender identity new campaigns start from. See [Sender Verification](/settings/sender-verification).
 - **Subdomain**: a workspace subdomain for hosted pages. Availability is checked as you type, and it's restricted to DNS-safe characters.
 
+## Branding on transactional emails
+
+Your logo and accent color don't just style campaigns, they carry into the **transactional** emails the platform sends on your behalf: teammate invites, email verification, password resets, and double opt-in [capture form](/audience/capture-forms) confirmations. Each renders in a consistent, email-client-safe layout:
+
+- **Your logo** sits at the top of the card when one is set; without a logo, your workspace name stands in as text.
+- **Your accent color** drives the header rule and the call-to-action button. Only valid hex colors (`#rgb` or `#rrggbb`) are used; anything else falls back to the platform default.
+- Every one of these emails carries a **"Powered by OnchainSuite"** line in the footer, alongside your own "Sent by \<your brand\>". "OnchainSuite" is a link to [onchainsuite.com](https://onchainsuite.com).
+
+<Note>
+Double opt-in [capture form](/audience/capture-forms) confirmation emails use this same branded layout, your logo and accent, and are sent from your **verified sender** so they route on your own sending domain. The confirmation link opens a hosted confirmation page that carries the same branding. This keeps confirmations on the same rails, and the same look, as the rest of your mail.
+</Note>
+
+Set the logo and accent once and every transactional surface inherits them, there's nothing to configure per email.
+
 ## Recommendations
 
 - Match branding to the live product users already recognize.

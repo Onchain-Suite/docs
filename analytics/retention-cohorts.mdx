@@ -1,0 +1,51 @@
+---
+title: "Retention Cohorts"
+description: "Weekly signup cohorts and the curve of how many stay engaged over time."
+---
+
+Retention cohorts group your contacts by the week they signed up, then track how many of each week's cohort are still engaging in the weeks that follow. It's the classic triangle chart for spotting whether newer cohorts stick around better or worse than older ones.
+
+## Endpoint
+
+```http
+GET /api/v1/analytics/reports/retention-cohorts
+```
+
+Session-authenticated, org-scoped. Any role.
+
+### Query parameters
+
+<ParamField query="weeks" type="integer" default="12">
+  How many weeks of the retention curve to compute per cohort. Clamped to 1–26.
+</ParamField>
+
+## Response
+
+```json
+{
+  "cohorts": [
+    {
+      "cohortWeek": "2026-06-01",
+      "size": 320,
+      "retained": [320, 214, 168, 141, 120]
+    },
+    {
+      "cohortWeek": "2026-06-08",
+      "size": 288,
+      "retained": [288, 205, 170, 149]
+    }
+  ]
+}
+```
+
+| Field | Meaning |
+| --- | --- |
+| `cohortWeek` | Start of the signup week (`YYYY-MM-DD`), the cohort's identity. |
+| `size` | Number of contacts that signed up that week. |
+| `retained[]` | Retained count at week 0, 1, 2, …; index 0 always equals `size`. The value at index _k_ counts contacts still engaged in week _k_ or later, so the curve is monotonically non-increasing. Length is capped at `weeks + 1`. |
+
+Cohorts are derived from each contact's signup week (`created_at`) versus its last engagement (`last_engaged_at`).
+
+## Powers
+
+The **Retention** cohort triangle on the analytics dashboard, each row a signup week, each column a week-offset retention percentage.
