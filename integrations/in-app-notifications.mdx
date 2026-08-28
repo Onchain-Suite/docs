@@ -94,13 +94,13 @@ The fastest path is the official browser SDK. It handles the challenge/verify ha
 
 <CodeGroup>
 ```bash npm
-npm i @onchainsuite/sdk
+npm i @onchainsuite/sdk@latest
 ```
 
 ```html CDN loader
 <!-- inapp.js bundles socket.io and auto-starts from data-* attributes -->
 <script
-  src="https://cdn.jsdelivr.net/npm/@onchainsuite/sdk/dist/inapp.js"
+  src="https://cdn.jsdelivr.net/npm/@onchainsuite/sdk@latest/dist/inapp.js"
   data-key="pk_live_yourorg_xxx"
   data-api="https://api.onchainsuite.com"
   data-autostart></script>
@@ -110,7 +110,7 @@ npm i @onchainsuite/sdk
 <!-- ESM import: load socket.io-client first so the SDK finds window.io -->
 <script src="https://cdn.socket.io/4.8.3/socket.io.min.js"></script>
 <script type="module">
-  import { OnchainSuite } from "https://esm.sh/@onchainsuite/sdk";
+  import { OnchainSuite } from "https://esm.sh/@onchainsuite/sdk@latest";
 
   const os = new OnchainSuite("pk_live_yourorg_xxx", {
     apiBaseUrl: "https://api.onchainsuite.com",

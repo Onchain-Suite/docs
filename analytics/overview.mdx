@@ -4,7 +4,7 @@ description: "Pre-built reports behind the analytics dashboard: holder distribut
 ---
 
 <Note>
-**Coming soon.** These reports are in active development ([tracking](https://github.com/onchainsuite/backend/pull/298)) and are not on production yet. The endpoint paths and response shapes below are documented from the source contract so you can build against them, but they may change before release. Where a metric is not yet wired, it's called out inline.
+**Live.** These reports are shipped and available in your workspace. The endpoint paths and response shapes below match the current API. A few individual metrics aren't wired to a data source yet and return a constant `0` (for example `pushViewRate` and `conversions`); each is called out inline where it appears.
 </Note>
 
 Analytics reports turn the data already in your workspace, on-chain holdings, contacts, delivery events, and automation runs, into the cards you see on the analytics dashboard. Each report is a read-only endpoint; nothing here sends, mutates, or spends credits.

@@ -11,7 +11,7 @@ Every automation has exactly two parts:
 
 <CardGroup cols={2}>
   <Card title="A trigger" icon="bolt">
-    One event type plus its matching rules, which chain, which contract, which event names, which payload filters.
+    What starts the flow. For a business preset like **Token acquired** or **Swap completed**, you pick your token or contract and the platform fills in the on-chain event for you.
   </Card>
   <Card title="A flow graph" icon="diagram-project">
     Nodes and edges. Each node is an action, a wait, or a branch. Execution follows the edges from the trigger node.

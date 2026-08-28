@@ -158,13 +158,13 @@ The job response reports both:
 
 ### Sync vs enrich: the credit difference
 
-Both read from GoldRush, but they cost very differently, and the difference is deliberate.
+Both pull from indexed on-chain data, but they cost very differently, and the difference is deliberate.
 
 | | **Sync** (discover) | **Enrich** (refresh) |
 | --- | --- | --- |
 | Endpoint | `POST /audience/sync` | `POST /intelligence/query/enrichment/protocol` |
 | What it does | Finds contract holders and adds new wallet contacts | Refreshes each wallet's on-chain metrics |
-| GoldRush cost | **One call per contract** (holder list), nothing per wallet | **~4 requests per wallet**, plus one per contract |
+| On-chain data cost | **One call per contract** (holder list), nothing per wallet | **~4 requests per wallet**, plus one per contract |
 | Metered against credits | No per-wallet cost for discovery | Yes, every wallet draws from your budget |
 | Use it for | Growing the audience cheaply | Keeping metrics current for scoring and segmentation |
 
