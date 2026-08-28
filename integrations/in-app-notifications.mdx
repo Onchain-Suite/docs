@@ -81,6 +81,10 @@ Your publishable key's environment decides which allowed origins apply:
 - `pk_test_*` matches origins registered as **`development`**
 
 <Warning>
+**The number-one integration failure is a key-to-origin mismatch.** A `pk_live_*` key on an origin you registered as `development` fails even though the key is valid and the origin is saved, which reads as "the product is broken." Register your production domain as `production`, and add `http://localhost:3000` as `development` while you build. The allowlist is fail-closed: until an origin is saved, the SDK can't connect at all.
+</Warning>
+
+<Warning>
 The origins API also accepts `staging`, but no publishable key ever resolves to it. An origin registered as `staging` will never match any key, use `production` or `development`.
 </Warning>
 
@@ -159,50 +163,90 @@ await os.start(walletAddress);
 
 `signMessage` is the **universal override**: `(message, walletAddress) => Promise<string>`. When you supply it, the SDK never touches the wallet itself, so it works for **any** wallet on **either** chain, an EVM signer from wagmi/viem/ethers, or a Solana wallet's `signMessage`. Return the signature your wallet produces (hex for EVM, base58 for Solana). Without the override, the SDK signs with the discovered wallet automatically.
 
-### React
+### React (production shape)
+
+Mount one component high in the tree, keyed on the connected wallet. This is the shape running in production.
 
 ```tsx
+// components/OnchainInApp.tsx
+"use client";
 import { useEffect } from "react";
 import { OnchainSuite } from "@onchainsuite/sdk";
+import { useSignMessage } from "wagmi";
 
-useEffect(() => {
-  if (!address) return;
+export function OnchainInApp({ wallet }: { wallet: string | null }) {
+  const { signMessageAsync } = useSignMessage();
 
-  const os = new OnchainSuite("pk_live_yourorg_xxx", {
-    apiBaseUrl: "https://api.onchainsuite.com",
-    signMessage: async (message) => signMessageAsync({ message }),
-  });
+  useEffect(() => {
+    if (!wallet) return; // push needs a connected wallet
 
-  os.start(address);
-  return () => os.stop(); // always clean up on unmount / disconnect
-}, [address]);
+    const os = new OnchainSuite(process.env.NEXT_PUBLIC_ONCHAIN_PK!, {
+      apiBaseUrl: "https://api.onchainsuite.com",
+      // Bridge signing to your wallet library so WalletConnect and mobile
+      // wallets work, not just injected ones.
+      signMessage: (message) => signMessageAsync({ message }),
+    });
+
+    os.on("connected", () => console.log("onchain: connected"));
+    os.on("notification", (n) => {/* render your toast or inbox */});
+    os.start(wallet);
+
+    return () => os.stop(); // clean up on unmount or wallet change
+  }, [wallet]);
+
+  return null;
+}
+```
+
+Render it once, for example inside your wallet provider:
+
+```tsx
+const { address } = useAccount();
+return <>{address && <OnchainInApp wallet={address} />}</>;
 ```
 
 ### Custom rendering
 
-Return `false` from `onNotification` to suppress the built-in toast while keeping delivery analytics intact, then render the notification however you like.
+Turn the built-in toast off with `display: false` and render notifications with your own design system. The `actions` argument reports interactions for you, so analytics stay accurate.
 
 ```ts
-const os = new OnchainSuite("pk_live_yourorg_xxx", {
+const os = new OnchainSuite(process.env.NEXT_PUBLIC_ONCHAIN_PK!, {
   apiBaseUrl: "https://api.onchainsuite.com",
-  display: false, // disable built-in UI entirely
-  onNotification: (n) => {
-    myToastLibrary.show({ title: n.title, body: n.body, href: n.cta?.url });
-    return false;
+  display: false, // your UI, not the built-in toast
+  onNotification: (n, actions) => {
+    actions.report("viewed"); // it's about to be shown
+    showToast({
+      title: n.title,
+      body: n.body,
+      cta: n.cta, // { label, url } | undefined
+      onClickCta: () => actions.click(), // reports "clicked" and opens the url
+      onClose: () => actions.dismiss(), // reports "dismissed"
+    });
+    return false; // suppress the built-in toast
   },
 });
 
-os.on("connected", () => console.log("live"));
-os.on("error", (e) => console.warn(e));
-
-await os.start();
+await os.start(wallet);
 ```
 
-Report interactions yourself when you render your own UI, so click and view analytics stay accurate:
+The notification and its actions:
 
 ```ts
-os.report(notification, "clicked");
+interface Notification {
+  deliveryId: string; // stable id, use it to dedupe
+  title: string;
+  body: string;
+  cta?: { label: string; url: string };
+}
+
+interface NotificationActions {
+  report: (type: "delivered" | "viewed" | "dismissed" | "clicked") => void;
+  click: () => void;   // reports "clicked" and opens cta.url
+  dismiss: () => void; // reports "dismissed"
+}
 ```
+
+Reporting maps to analytics and [webhooks](/api/webhooks): arrival is `message.delivered`, `report("viewed")` is `message.viewed`, and `click()` is `message.clicked`.
 
 ### SDK reference
 

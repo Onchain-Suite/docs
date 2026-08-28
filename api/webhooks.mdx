@@ -86,6 +86,42 @@ def hook():
     # Dedupe on event["id"] before doing work.
     return "ok", 200
 ```
+
+```ts Next.js (App Router)
+// app/api/webhooks/onchain/route.ts
+import { NextRequest, NextResponse } from "next/server";
+import crypto from "crypto";
+
+export const runtime = "nodejs";        // Node crypto + raw body, not the edge runtime
+export const dynamic = "force-dynamic"; // never cache a webhook
+
+const SECRET = process.env.ONCHAIN_WEBHOOK_SECRET!; // whsec_…
+
+function verify(header: string | null, raw: string): boolean {
+  if (!header) return false;
+  const parts = Object.fromEntries(header.split(",").map((kv) => kv.split("=")));
+  if (!parts.t || !parts.v1) return false;
+  const expected = crypto.createHmac("sha256", SECRET).update(`${parts.t}.${raw}`).digest("hex");
+  const a = Buffer.from(expected), b = Buffer.from(parts.v1);
+  return a.length === b.length && crypto.timingSafeEqual(a, b);
+}
+
+export async function POST(req: NextRequest) {
+  const raw = await req.text(); // RAW body, verify against this exact string
+  if (!verify(req.headers.get("x-onchain-signature"), raw))
+    return new NextResponse("bad signature", { status: 401 });
+
+  const evt = JSON.parse(raw); // { id, type, createdAt, data }
+  switch (evt.type) {
+    case "contact.created": /* upsert the user, start a welcome flow */ break;
+    case "contact.unsubscribed": /* flip a suppression flag */ break;
+    case "message.clicked": /* record analytics */ break;
+    case "automation.completed": /* downstream fulfilment */ break;
+    default: /* ignore unknown types; new ones can appear later */ break;
+  }
+  return NextResponse.json({ received: true }); // 2xx fast, slow work afterward
+}
+```
 </CodeGroup>
 
 <Warning>

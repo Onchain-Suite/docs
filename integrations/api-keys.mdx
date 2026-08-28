@@ -38,7 +38,32 @@ Treat a secret key like a password. Keep it in server-side configuration or a se
 
 ## Publishable keys
 
-Publishable keys are embedded in your dApp's page source on purpose. They only permit the wallet challenge/verify handshake, scoped to your allowed origins. They can be rotated too (production, test, or both at once); since they live in public source there's no grace period. See [In-App Notifications](/integrations/in-app-notifications).
+Publishable keys are embedded in your dApp's page source on purpose. They only permit the wallet challenge/verify handshake, scoped to your allowed origins. They're protected by your origin allowlist, not by secrecy, so shipping one is fine. Put a publishable key in `NEXT_PUBLIC_ONCHAIN_PK` (or your framework's public-env equivalent); never put a secret key there.
+
+The key environment maps to an origin bucket, and they have to match:
+
+| Key prefix | Origin bucket | Example |
+| --- | --- | --- |
+| `pk_live_*` | `production` | `https://app.example.com` |
+| `pk_test_*` | `development` | `http://localhost:3000` |
+
+### Getting and rotating a publishable key
+
+Your keys are shown in the dashboard, and can also be read over the API. Unlike a secret key, a publishable key is shown in full every time; it isn't secret.
+
+```bash
+# Read your publishable keys (and current origins)
+curl https://api.onchainsuite.com/api/v1/integrations/inapp/status \
+  -H "x-org-id: $ORG_ID"
+# → { "publishableKeys": { "production": "pk_live_…", "test": "pk_test_…" }, ... }
+
+# Rotate (mode: "production", "test", or "both")
+curl -X POST https://api.onchainsuite.com/api/v1/integrations/inapp/keys/roll \
+  -H "x-org-id: $ORG_ID" -H "Content-Type: application/json" \
+  -d '{ "mode": "production" }'
+```
+
+Rotating a publishable key has **no grace period**: because it lives in your page source, clients pick up the new key on their next deploy. See [In-App Notifications](/integrations/in-app-notifications) for how it's used.
 
 ## Server-to-server endpoints
 

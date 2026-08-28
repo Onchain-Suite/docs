@@ -112,6 +112,60 @@ A secret key unlocks a small, deliberate set of endpoints. Reads never expose th
 Email can't be set through `POST /identify`, by design. The only consent-first path for an address is a [capture form](/audience/capture-forms), embedded or ingested server-side with the endpoint above.
 </Note>
 
+A few semantics worth knowing before you wire these up:
+
+- **`POST /identify`** is idempotent on the wallet, lower-cases the address, and rejects any personal identifier (`email`, `phone`, `name`) with `400 PERSONAL_IDENTIFIER_REJECTED`. To attach traits, send a custom event instead.
+- **`POST /campaigns/{id}/send`** takes a **prepared campaign id**, not the `campaignRunId` returned by `/inapp/push`. It can't compose or retarget; it launches what's already in the dashboard.
+- **`GET /events/catalog`** is a dashboard (session) route, not a secret-key one, so a `sk_` key gets `401` there.
+
+## Wrap it once
+
+Keep the secret key in one server-only module and expose your own thin routes, so the key never reaches the browser.
+
+```ts
+// lib/onchain.server.ts (SERVER ONLY). Never import into a "use client" file.
+const OCS = "https://api.onchainsuite.com/api/v1";
+const SK = process.env.ONCHAIN_SECRET_KEY!; // sk_live_… (server env, not NEXT_PUBLIC)
+
+async function ocs(path: string, body?: unknown, method = "POST") {
+  const res = await fetch(OCS + path, {
+    method,
+    headers: { Authorization: `Bearer ${SK}`, "Content-Type": "application/json" },
+    body: body ? JSON.stringify(body) : undefined,
+    cache: "no-store",
+  });
+  const json = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(`OCS ${res.status} ${JSON.stringify(json)}`);
+  return json;
+}
+
+// event: ^[a-z0-9_.:-]{1,64}$ ; contact needs >= 1 of walletAddress / email / externalId
+export const identify = (walletAddress: string) => ocs("/identify", { walletAddress });
+export const track = (event: string, walletAddress: string, payload?: object) =>
+  ocs("/events", { event, contact: { walletAddress }, payload });
+export const pushInApp = (walletAddress: string, title: string, body: string) =>
+  ocs("/inapp/push", { walletAddress, title, body });
+```
+
+Call it from your own endpoint so the browser only ever talks to your server:
+
+```ts
+// app/api/track/route.ts
+import { NextRequest, NextResponse } from "next/server";
+import { track } from "@/lib/onchain.server";
+
+export const runtime = "nodejs";
+
+export async function POST(req: NextRequest) {
+  const { event, walletAddress, payload } = await req.json();
+  try {
+    return NextResponse.json(await track(event, walletAddress, payload));
+  } catch (e) {
+    return NextResponse.json({ error: String(e) }, { status: 502 });
+  }
+}
+```
+
 ## The shape of a backend integration
 
 ```mermaid
