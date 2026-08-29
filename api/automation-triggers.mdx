@@ -3,12 +3,12 @@ title: "Automation Trigger API"
 description: "Push trigger events into Onchain Suite from your own indexer or backend to start automations."
 ---
 
-Onchain Suite observes on-chain activity for you, but when you run your own indexer, or you need to trigger automations from something the platform can't see. You can post trigger events directly.
+Onchain Suite watches on-chain activity for you automatically. This API is for the cases it can't cover: when you run your own indexer, or you need to start automations from something the platform can't see. In those cases, you post the trigger events yourself.
 
-Each request is matched against your active, published automations. Every automation whose trigger spec matches creates an entry and starts running.
+Each request is checked against your live automations, and every one whose trigger matches creates an entry and starts running.
 
 <Note>
-For product events from your own application (signups, deposits, plan changes), use [Custom Events](/integrations/custom-events) instead. That path resolves contacts for you and is the right tool for off-chain behavior. This API is for feeding **trigger events** (chain activity and lifecycle signals) straight into the automation runtime.
+**When you need this.** Most teams never do, EVM contract watching is automatic once an automation is published. Reach for this API only for Solana contracts, your own indexer, or lifecycle signals your systems know about. For product activity (signups, deposits, upgrades), use [Custom Events](/integrations/custom-events) instead, which resolves the contact for you and is the right tool for off-chain behavior.
 </Note>
 
 ## Authentication

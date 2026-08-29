@@ -21,6 +21,10 @@ One send reaches the user through whichever channel they're reachable on:
 
 The SDK gives you all three plus wallet auth and a styled toast UI; a server-to-server API sends pushes from your backend with a secret key.
 
+<Note>
+**In plain terms.** You add a small script (the SDK) to your dApp. It asks a visitor's wallet to sign a one-time message to prove the wallet is theirs, then keeps a live connection open so your notifications can pop up on their screen. You don't build any of the wallet or connection plumbing, the SDK handles it. The rest of this page is the setup, from a two-line copy-paste to full control over how each notification looks.
+</Note>
+
 ## How it works
 
 <Steps>
@@ -37,23 +41,6 @@ The SDK gives you all three plus wallet auth and a styled toast UI; a server-to-
     From your backend (secret key), a campaign, or an automation. The platform routes each one to a live socket if the user is connected, otherwise to web or mobile push, otherwise it's held and replayed on reconnect.
   </Step>
 </Steps>
-
-```mermaid
-sequenceDiagram
-    participant U as Wallet (EVM / Solana)
-    participant C as Your dApp (SDK)
-    participant P as OnchainSuite API
-    participant S as Socket.IO
-
-    C->>P: POST /inapp/challenge (pk_… + Origin)
-    P-->>C: nonce + message
-    C->>U: sign message
-    U-->>C: signature
-    C->>P: POST /inapp/verify (address + signature)
-    P-->>C: session JWT + wsUrl
-    C->>S: connect(JWT) + REGISTER
-    S-->>C: pending replayed, then live PUSH
-```
 
 ### Wallets it works with
 
@@ -132,7 +119,15 @@ Three ways in, pick one:
 - **CDN (ESM).** A raw `esm.sh` import can't supply the bundled socket.io, so load `socket.io-client` first (the SDK finds it on `window.io`), or inject your own with the `ioClient` option.
 </Note>
 
-The SDK is ESM-only and tree-shakeable.
+The SDK is lightweight and adds only the parts you actually use to your site.
+
+<Note>
+**Which snippet do I use?**
+- Just trying it out, or your app doesn't manage the wallet connection itself, use **Simplest integration**.
+- Your app already connects the wallet (wagmi, viem, ethers, or a Solana adapter), use **Bring your own signer** so the user isn't asked to sign twice.
+- You're on React or Next.js and want the shape that's running in production, use **React (production shape)**.
+- You want notifications to match your own design instead of the built-in toast, use **Custom rendering**.
+</Note>
 
 ### Simplest integration
 
@@ -146,7 +141,7 @@ const os = new OnchainSuite("pk_live_yourorg_xxx", {
 await os.start(); // prompts window.ethereum to connect + sign
 ```
 
-That's the whole integration. `start()` auto-discovers the browser's installed wallet, EVM via EIP-6963 (falling back to `window.ethereum`), or Solana via its standard injection, runs the signature handshake, connects the socket, and begins rendering notifications. Pass an address to `start(walletAddress)` to pin a specific account.
+That's the whole integration. `start()` finds the wallet the visitor has installed (both EVM and Solana wallets are detected automatically), asks it to sign the one-time login message, opens the live connection, and starts showing notifications. Pass an address to `start(walletAddress)` to pin a specific account.
 
 ### Bring your own signer
 
@@ -381,59 +376,12 @@ A wallet with both a browser subscription and a phone can receive both. What nev
 
 ## Dashboard setup
 
-These endpoints back your own dashboard UI and use a cookie session plus an org role. Base path: `https://api.onchainsuite.com/api/v1`.
+Everything above runs on two things you set once in the dashboard: your keys and your allowed origins. You manage both under the in-app integration settings, no code required.
 
-<AccordionGroup>
-  <Accordion title="GET /integrations/inapp/status" icon="circle-info">
-    Requires `OWNER` or `ADMIN`. Returns publishable keys, secret key metadata, live session count, daily usage, and origin count.
-
-    ```json
-    {
-      "active": true,
-      "protocolId": "<organizationId>",
-      "publishableKeys": { "production": "pk_live_…", "test": "pk_test_…" },
-      "secretKeys": [
-        { "id": "…", "environment": "live", "name": "backend", "createdAt": "…",
-          "lastUsedAt": "…", "revokedAt": null, "prefix": "sk_live_…" }
-      ],
-      "activeSessions": 12,
-      "dailyUsage": { "used": 431, "limit": 50000, "percentage": 0.86, "resetsAt": "…" },
-      "allowedOriginsCount": 2
-    }
-    ```
-  </Accordion>
-
-  <Accordion title="GET /integrations/inapp/origins" icon="list">
-    Requires `OWNER` or `ADMIN`.
-
-    ```json
-    [
-      { "id": "…", "origin": "https://app.example.com",
-        "environment": "production", "createdAt": "…" }
-    ]
-    ```
-  </Accordion>
-
-  <Accordion title="POST /integrations/inapp/origins" icon="plus">
-    Requires `OWNER` or `ADMIN`. Both fields required; `environment` must be `production`, `staging`, or `development`.
-
-    ```json
-    { "origin": "https://app.example.com", "environment": "production" }
-    ```
-
-    The origin is normalized to scheme + host + port, any path is stripped. Registering the same origin twice in one environment returns `400 Origin already exists for this environment`.
-  </Accordion>
-
-  <Accordion title="DELETE /integrations/inapp/origins/{originId}" icon="trash">
-    Requires `OWNER` or `ADMIN`. Returns `{ "deleted": true }`.
-  </Accordion>
-
-  <Accordion title="POST /integrations/inapp/test-push" icon="paper-plane">
-    Requires `OWNER`, `ADMIN`, or `EDITOR`. `walletAddress`, `title`, and `body` are required; `ctaLabel` and `ctaUrl` optional.
-
-    Test pushes don't count against your plan's message allowance, but they **do** count toward the daily in-app quota.
-  </Accordion>
-</AccordionGroup>
+- **Allowed origins.** Add the web addresses your dApp runs on, one for production (matched by your `pk_live_…` key) and one for local development (matched by `pk_test_…`). A request from any address you haven't listed is rejected. Owner or Admin can add or remove origins.
+- **Your keys.** See your publishable keys (safe to ship in the browser) and the details of your secret keys, the name, when each was last used, and whether it's been revoked. More in [API keys](/integrations/api-keys).
+- **Live usage.** Watch how many wallets are connected right now and how much of your daily in-app allowance you've used.
+- **Send a test push.** Fire a one-off notification to a wallet to check your setup end to end. Owner, Admin, or Editor can send one. Test pushes don't count against your plan's message allowance, but they do count toward the daily in-app quota.
 
 ## Response format
 

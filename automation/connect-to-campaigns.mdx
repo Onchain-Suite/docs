@@ -1,90 +1,40 @@
 ---
 title: "Connect to Campaigns"
-description: "Hand entries from automation logic into email, in-app, and campaign-style follow-up."
+description: "Hand entries from an automation into email, in-app, and campaign follow-up."
 ---
 
-Automations reach users through three messaging nodes. Each decides **who** it sends to using the same `recipientMode` setting, so the patterns below apply to all of them.
+Automations reach people through three messaging blocks: **send email**, **send in-app**, and **launch campaign**. Each one decides *who* it sends to the same way, so the patterns below apply to all three.
 
-## Choosing recipients
+## Choosing who a step sends to
 
-<ParamField path="recipientMode" type="string">
-  `triggering_profile` (default) sends to the contact who entered the automation.
-  `wallet_list` sends to a fixed list of wallets.
-</ParamField>
-
-<ParamField path="walletAddresses" type="string[]">
-  Required when `recipientMode` is `wallet_list`. Maximum 250 per node.
-</ParamField>
-
-`triggering_profile` is what you want almost always. It's what makes the automation personal. Use `wallet_list` for announcements to a known set of wallets.
+By default, a messaging block sends to **the contact who triggered the flow**, that's what makes an automation feel personal. You can also point it at a **fixed list of wallets** (up to 250) for a targeted announcement.
 
 <Note>
-There is no segment-wide fan-out inside a flow. An automation processes **one contact per entry**. To reach a whole segment, either send a campaign to that segment directly, or have your system post one `segment_entered` event per contact.
+An automation handles **one contact per entry**, there's no "send to the whole segment" step inside a flow. To reach an entire segment, send a [campaign](/campaigns/overview) to that segment directly, or have your system send one "entered a segment" event per contact.
 </Note>
 
 ## Send an email
 
-```json
-{
-  "id": "email_welcome",
-  "type": "send_email",
-  "data": {
-    "templateId": "tpl_welcome",
-    "subject": "Welcome to the community",
-    "recipientMode": "triggering_profile"
-  }
-}
-```
+Point the step at a saved template, and optionally override the subject. Email steps **skip rather than fail** when they can't send, and the flow simply moves on:
 
-`templateId` is required. `subject` overrides the template's own subject when present.
-
-Email steps **skip rather than fail** when delivery isn't possible:
-
-| Situation | Result |
+| Situation | What happens |
 | --- | --- |
-| Every recipient suppressed | Node skipped, reason `all_suppressed` |
-| Sending reputation blocked | Node skipped, reason `reputation_blocked` |
-| Some sends succeed | Node succeeds |
-| Zero sends succeed for another reason | Node fails and retries |
+| Every recipient is suppressed | Step skipped |
+| Your sending is paused | Step skipped |
+| Some sends succeed | Step succeeds |
+| Recipients exist but every send errors | Step fails and retries |
 
-The flow continues past a skipped node, so an automation can complete without sending anything. If an email step produced no messages, check entry events for `node_skipped` before assuming the trigger is broken.
+Because a skipped step doesn't stop the flow, an automation can finish without sending anything. If an email step produced nothing, check the entry's history for a skip reason before assuming the trigger is broken.
 
 ## Send an in-app push
 
-```json
-{
-  "id": "inapp_welcome",
-  "type": "send_inapp",
-  "data": {
-    "title": "Welcome onchain",
-    "body": "Thanks for minting. Here's what to do next.",
-    "ctaLabel": "Explore",
-    "ctaUrl": "https://app.example.com/start",
-    "recipientMode": "triggering_profile"
-  }
-}
-```
+Give the step a title and body, and optionally a button (it needs both a label and a link to appear). In-app pushes reach wallets that have signed in through the SDK; someone offline gets the push the next time they connect, within a 72-hour window. See [In-App Notifications](/integrations/in-app-notifications) for the setup, and note that in-app has its **own monthly allowance**, separate from email.
 
-`title` and `body` are required unless you point the node at a campaign to draw content from. Both `ctaLabel` and `ctaUrl` must be present for a button to render, a label alone is dropped.
+Wallets with no in-app session are quietly skipped. You can size the reachable audience ahead of time from your segment view.
 
-In-app pushes reach wallets that have authenticated through the SDK. Offline users receive the push on their next connect, within the 72-hour retention window. See [In-App Notifications](/integrations/in-app-notifications) for the client setup, and note that in-app has its **own monthly allowance**, separate from email.
+## Launch a campaign
 
-Wallets with no in-app session are skipped. To size the reachable audience ahead of time, query your segment with `?reachable_on=inapp`.
-
-## Dispatch a campaign
-
-```json
-{
-  "id": "handoff",
-  "type": "dispatch_campaign",
-  "data": {
-    "campaignId": "cmp_q3_winback",
-    "recipientMode": "triggering_profile"
-  }
-}
-```
-
-Use this when the follow-up content is owned by the campaigns team and maintained on their schedule, rather than embedded in your flow.
+Hand the contact off to a campaign you've already prepared. Reach for this when the follow-up content is owned by the campaigns team and kept on their schedule, rather than written into the flow itself.
 
 ## Handoff patterns
 
@@ -92,7 +42,7 @@ Use this when the follow-up content is owned by the campaigns team and maintaine
   <Accordion title="Immediate in-app, delayed email" icon="bolt">
     Acknowledge on-chain instantly where the user already is, then follow with email once the moment has passed.
 
-    `trigger → send_inapp → wait 1h → send_email`
+    `trigger → send in-app → wait 1h → send email`
 
     This is the shape of the built-in **Mint Welcome** play.
   </Accordion>
@@ -100,15 +50,15 @@ Use this when the follow-up content is owned by the campaigns team and maintaine
   <Accordion title="Channel fallback" icon="code-branch">
     Prefer in-app, fall back to email when the wallet has no session.
 
-    `trigger → branch (walletAddress exists → send_inapp | else → send_email)`
+    `trigger → branch (has wallet → send in-app | else → send email)`
 
-    Branch conditions read the rolling context, so `walletAddress` and `email` are both available. See [Triggers and Conditions](/automation/triggers-and-conditions).
+    A branch can see both the wallet and the email on the entry. See [Triggers and Conditions](/automation/triggers-and-conditions).
   </Accordion>
 
   <Accordion title="Nudge after intent" icon="clock">
     Someone approved a token but never swapped. Wait, then prompt.
 
-    `trigger (approval_intent) → wait 30m → send_email → send_inapp`
+    `trigger (approval intent) → wait 30m → send email → send in-app`
 
     The built-in **Approval Abandoned Cart** play.
   </Accordion>
@@ -116,7 +66,7 @@ Use this when the follow-up content is owned by the campaigns team and maintaine
   <Accordion title="Tag now, campaign later" icon="tag">
     Don't message immediately, mark the contact so a campaign can pick them up.
 
-    `trigger → add_tag → webhook`
+    `trigger → add tag → call a webhook`
 
     Useful when send timing belongs to the campaigns team rather than the trigger.
   </Accordion>
@@ -127,7 +77,7 @@ Use this when the follow-up content is owned by the campaigns team and maintaine
 Automation stats report entries, conversions, conversion rate, and revenue, with time-series and per-path breakdowns.
 
 <Warning>
-Conversion and revenue attribution are derived by pattern-matching event names and scanning delivery metadata for revenue-shaped keys. They're directional indicators, not an accounting source. Reconcile against your own analytics before reporting numbers externally.
+Conversion and revenue are inferred from event names and delivery metadata. They're directional indicators, not an accounting source, so reconcile against your own analytics before reporting numbers externally.
 </Warning>
 
 ## Keeping teams aligned

@@ -1,266 +1,95 @@
 ---
 title: "Create an Automation"
-description: "Build, validate, and publish an automation, in the builder or over the API."
+description: "Build, validate, and publish an automation in the visual builder."
 ---
 
-An automation is a trigger plus a flow graph. This page walks through building one, the node types available, and the publish step that actually makes it live.
+An automation is a **trigger** (the thing that starts it) plus a **flow** (what happens next). You build both on a visual canvas: drag in blocks, connect them, and publish. This page walks through building one, the blocks you can use, and the publish step that actually makes it live.
 
 ## Build it
 
 <Steps>
   <Step title="Start from a play, or from scratch">
-    Forking a [built-in play](/automation/overview) gives you a working trigger and flow as a draft you own. Starting blank gives you an empty graph.
+    Forking a [built-in play](/automation/overview) gives you a working trigger and flow as a draft you own. Starting blank gives you an empty canvas.
   </Step>
   <Step title="Configure the trigger">
-    For a business preset (**Token acquired**, **Swap completed**, **Liquidity added**, and the rest), you supply just one thing, the **token or contract** to watch. The on-chain event and filters are set for you. Only the generic **On-chain event** trigger asks you to name a raw event. See [Triggers and Conditions](/automation/triggers-and-conditions).
+    For a business preset (**Token acquired**, **Swap completed**, **Liquidity added**, and the rest), you supply just one thing: the **token or contract** to watch. The on-chain detail is set for you. Only the generic **On-chain event** trigger asks you to name a raw event. See [Triggers and Conditions](/automation/triggers-and-conditions).
   </Step>
   <Step title="Lay out the flow">
-    Add action, wait, and branch nodes, and connect them with edges. Execution follows edges from the trigger node.
+    Add action, wait, and branch blocks and connect them in order. The flow runs left to right, following the connections out of the trigger.
   </Step>
   <Step title="Validate">
-    Validation reports blocking errors and non-blocking warnings. Fix the errors.
+    Validation flags blocking errors, which you must fix, and softer warnings, which you can leave. It won't let you publish something broken.
   </Step>
   <Step title="Preview">
-    Preview estimates how many wallets currently match the trigger, with sample profiles. Run this before publishing. A trigger matching zero wallets is the most common cause of a silent automation.
+    Preview estimates how many wallets currently match the trigger, with sample profiles. Run this before publishing. **A trigger matching zero wallets is the most common cause of a silent automation.**
   </Step>
   <Step title="Publish">
-    Publishing creates the version the runtime executes. Without it, nothing runs.
+    Publishing creates the live version. Without it, nothing runs (more on this below).
   </Step>
 </Steps>
 
-## Node types
+## The building blocks
 
-Seven node types are available. Each node's config lives in its `data` object.
+Seven blocks make up a flow:
 
-| Type | Category | What it does |
-| --- | --- | --- |
-| `send_email` | Messaging | Send an email to the recipient |
-| `send_inapp` | Messaging | Send an in-app push to the recipient |
-| `dispatch_campaign` | Messaging | Launch a prepared campaign at the recipient |
-| `wait` | Flow control | Pause the flow for a delay |
-| `branch` | Flow control | Route the entry down different paths |
-| `add_tag` | Audience | Tag the contact |
-| `webhook` | Integrations | Call your endpoint |
+| Block | What it does |
+| --- | --- |
+| **Send email** | Email the contact |
+| **Send in-app** | Send an in-app push to the contact's wallet |
+| **Launch campaign** | Fire a campaign you've already prepared |
+| **Wait** | Pause the flow for a while |
+| **Branch** | Split the flow down different paths |
+| **Add tag** | Tag the contact |
+| **Call a webhook** | Ping your own system (for developers) |
 
-<Note>
-When the visual builder saves a node, the canonical type is in `data.actionType` while `node.type` holds the builder's own renderer key (like `"inapp"`). The runtime reads `data.actionType` first, so in hand-authored JSON either set `data.actionType` to the type in the table above, or set `node.type` to it directly, as the examples here do.
-</Note>
+### The messaging blocks
 
-### Messaging nodes
+The three messaging blocks (send email, send in-app, launch campaign) send to **the contact who triggered the flow** by default, or to a specific list of wallets you name. Content is personalized per recipient, so an in-app push supports the same merge variables as email, like `{{ greeting_name }}`.
 
-All three messaging nodes choose recipients with `recipientMode` (`triggering_profile`, the default, or `wallet_list` with a `walletAddresses` array). Content is merge-rendered per recipient, so `send_inapp` supports the same variables as email, such as `{{ greeting_name }}` and `{{ wallet_short }}`.
+- **Send email** uses a saved template, or a subject and body you type in. It needs at least one of those.
+- **Send in-app** uses a title and body, with an optional button (give it both a label and a link for the button to show).
+- **Launch campaign** kicks off a campaign you've already built, aimed at the recipient.
 
-**`send_email`** reads `templateId` (loads a template) or inline `subject` and `body`, plus an optional `senderEmail` override. It needs a template, a subject, or a body; with none it fails validation.
+### Wait
 
-**`send_inapp`** reads `title` and `body` (defaulting to generic text if absent), and optional `ctaLabel` and `ctaUrl`. The button renders only when both CTA fields are present. It can also draw content from a `campaignId`.
+Pause the flow before the next step: a number of seconds, minutes, hours, or days, or "until 9:00am in this timezone." Waiting contacts are parked and picked back up when the time comes, so a long wait costs you nothing while it sits.
 
-**`dispatch_campaign`** reads `campaignId` and launches that prepared campaign at the recipient.
+### Add tag
 
-### Waits
+Tag the contact, one tag or several at once. Useful for marking who's been through a flow so you can segment or suppress on it later. (There's no "remove tag" step.)
 
-The simplest form is `seconds`:
+### Call a webhook (for developers)
 
-```json
-{ "id": "wait_30m", "type": "wait", "data": { "seconds": 1800 } }
-```
-
-You can also use `minutes`, `hours`, or `days`, or an amount-and-unit pair:
-
-```json
-{ "data": { "amount": 2, "unit": "hours" } }
-```
-
-Two more forms are available:
-
-```json
-// Wait until the next occurrence of a local wall-clock time
-{ "data": { "until": "09:00", "timezone": "Africa/Lagos" } }
-
-// Explicit milliseconds
-{ "data": { "delayMs": 90000 } }
-```
-
-The unit defaults to **minutes** when omitted, and any delay is clamped to a minimum of one second. A waiting entry is scheduled and resumed later, so it doesn't hold a worker open, and a stranded resume is recovered if the queue restarts.
-
-### Tags
-
-```json
-{ "id": "tag_minter", "type": "add_tag", "data": { "tag": "minted-2026" } }
-```
-
-A `tags` array is also accepted for applying several at once.
-
-<Note>
-There is no `remove_tag` action. A graph containing one fails validation with `UNSUPPORTED_NODE_TYPE`.
-</Note>
-
-### Outbound webhooks
-
-The `webhook` node posts to your endpoint mid-flow. Method may be `POST` (default), `PUT`, or `PATCH`.
-
-```json
-{
-  "id": "notify_backend",
-  "type": "webhook",
-  "data": {
-    "url": "https://api.example.com/hooks/onchain-suite",
-    "method": "POST",
-    "headers": { "X-Api-Key": "..." },
-    "payload": { "source": "automation" }
-  }
-}
-```
-
-Your endpoint receives:
-
-```json
-{
-  "organizationId": "...",
-  "automationId": "...",
-  "entryId": "...",
-  "context": {
-    "email": "user@example.com",
-    "walletAddress": "0xabc...",
-    "contactId": "...",
-    "lastInapp": { }
-  },
-  "source": "automation"
-}
-```
-
-Any response of 400 or above counts as a failure and is retried up to 5 times with exponential backoff, then dead-lettered. Requests time out after 10 seconds.
-
-<Warning>
-The URL must be a **public** `https` (or `http`) endpoint. URLs pointing at private networks (`localhost`, private IP ranges, or a cloud metadata address) are rejected when you save the node, and again at send time, including via redirects. It also can't embed credentials (`user:pass@host`). This is an anti-SSRF safeguard; host your webhook on a reachable public address.
-</Warning>
-
-<Warning>
-Keys in your `payload` are merged **last**, so a payload key named `organizationId`, `automationId`, `entryId`, or `context` will overwrite the platform's own value. Namespace your custom fields.
-</Warning>
-
-<Note>
-This node sends webhooks **out**. There is no inbound webhook trigger. To start an automation from your own system, call the ingest API described in [Contract-Based Flows](/automation/contract-based-flows).
-</Note>
-
-## The flow graph
-
-The graph is plain JSON: a list of nodes and a list of edges.
-
-```json
-{
-  "nodes": [
-    {
-      "id": "trigger_holder_acquired",
-      "type": "holder_acquired",
-      "position": { "x": 120, "y": 140 },
-      "data": {
-        "chain": "base-mainnet",
-        "contractAddress": "0xYourCollection",
-        "eventNames": ["Transfer"],
-        "filters": [
-          { "path": "from", "operator": "eq", "value": "0x0000000000000000000000000000000000000000" }
-        ]
-      }
-    },
-    {
-      "id": "inapp_welcome",
-      "type": "send_inapp",
-      "position": { "x": 420, "y": 140 },
-      "data": {
-        "title": "Welcome onchain",
-        "body": "Thanks for minting. Here's what to do next.",
-        "recipientMode": "triggering_profile"
-      }
-    },
-    {
-      "id": "wait_1h",
-      "type": "wait",
-      "position": { "x": 720, "y": 140 },
-      "data": { "seconds": 3600 }
-    },
-    {
-      "id": "email_welcome",
-      "type": "send_email",
-      "position": { "x": 1020, "y": 140 },
-      "data": {
-        "templateId": "tpl_welcome",
-        "subject": "Welcome to the community",
-        "recipientMode": "triggering_profile"
-      }
-    }
-  ],
-  "edges": [
-    { "id": "e1", "source": "trigger_holder_acquired", "target": "inapp_welcome" },
-    { "id": "e2", "source": "inapp_welcome", "target": "wait_1h" },
-    { "id": "e3", "source": "wait_1h", "target": "email_welcome" }
-  ]
-}
-```
-
-Edges pointing at nodes that don't exist are dropped silently on save.
+The webhook block pings one of your own endpoints partway through a flow, so your systems can react to what happened. It's the one developer-flavored block: it needs a public `https` URL, and it hands your endpoint the contact's context. The full detail, payload shape, retries, and the security rules, is in [Webhooks](/api/webhooks). This block sends **out**; to start an automation from your own system, see [Contract-Based Flows](/automation/contract-based-flows).
 
 ## Drafts and validation
 
-The builder keeps a **draft graph** and a **saved graph** separately. Draft saves are unvalidated, so you can leave a node half-configured and come back to it. Saving to the main graph validates first.
-
-Blocking errors you'll encounter:
-
-| Code | Meaning |
-| --- | --- |
-| `EMPTY_FLOW` | No nodes |
-| `MISSING_TRIGGER` | No trigger node |
-| `UNSUPPORTED_NODE_TYPE` | Node type isn't one of the seven |
-| `INVALID_EMAIL_CONFIG` | `send_email` has no template |
-| `INVALID_INAPP_RECIPIENTS` | Wallet-list mode with no wallets |
-| `INVALID_WAIT_CONFIG` | Missing or non-positive duration |
-| `INVALID_BRANCH_CONFIG` | Fewer than two outgoing edges |
-| `INVALID_WEBHOOK_CONFIG` | Missing, malformed, or private/blocked URL |
-| `INVALID_TAG_CONFIG` | Empty tag |
-| `INVALID_EDGE` | Edge references a missing node |
-
-`DISCONNECTED_NODES` is a warning, not an error. The graph still publishes, but the orphaned nodes never execute.
+The builder keeps your **work-in-progress draft** separate from the **saved flow**, so you can leave a block half-finished and come back to it. Saving to the main flow validates first, and a few things block a save: an empty flow, no trigger, an email step with nothing to send, a wait with no duration, or a branch with only one path out. A block that isn't connected to anything is a warning, not an error, the flow still publishes, but that block never runs.
 
 ## Publish
 
 <Warning>
-**Publishing is what makes an automation run.** The runtime executes the most recent *published version* of the graph. Setting status to `active` without publishing produces an automation that matches events, creates entries, and does nothing. It's the hardest failure mode to spot, because the automation looks live and entry counts climb.
+**Publishing is what makes an automation run.** The runtime executes the most recent *published* version of your flow. Setting an automation to `active` without publishing produces one that matches events, creates entries, and does nothing, the hardest failure to spot, because it looks live and the entry count climbs.
 
-Publish after every change you want live. Saving the graph is not publishing.
+Publish after every change you want live. Saving the flow is not the same as publishing.
 </Warning>
 
-## Retries and failures
+## When a step has trouble
 
-Each step retries up to 3 times with exponential backoff. After the final attempt the entry is marked `failed` and recorded as a dead letter with the error.
+Steps retry automatically a few times before giving up, and each step only re-runs the one that failed, not the ones before it, so nobody gets a duplicate email on a retry. Different steps handle trouble differently:
 
-Each side-effecting node claims itself before it runs, so a retried entry re-runs only the node that failed, not the ones that already succeeded. This gives you effectively exactly-once delivery per node even across retries.
-
-Nodes fail in different ways:
-
-| Node | On trouble |
-| --- | --- |
-| `send_email` | **Skips** (flow continues) if sending reputation is blocked or every recipient is suppressed. Fails and retries only if some recipients exist but every send errors. |
-| `send_inapp` | Wallets with no in-app session are filtered out. Fails only if there are zero wallet recipients. |
-| `webhook`, `add_tag`, `dispatch_campaign` | Fail and retry, then dead-letter. |
+- **Send email** skips, and the flow moves on, if your sending is paused or every recipient is suppressed. It only retries when some recipients exist but the sends error out.
+- **Send in-app** quietly drops wallets with no in-app session. It only fails if there's nobody left to send to.
+- **Launch campaign, add tag, and webhook** retry, then give up if they keep failing.
 
 ## Watching an entry
 
-Every contact that enters an automation is an **entry**, and each entry records events as it moves through the flow. This is how you answer "did this fire, and where did it stop."
+Every contact that enters an automation is an **entry**, and each entry records what happened as it moved through the flow. This is how you answer "did this fire, and where did it stop." An entry is running, waiting (paused on a wait), completed, or failed, and its history shows when it was created, which steps it reached, which ran, and which were skipped and why (for example "sending paused" or "everyone suppressed").
 
-An entry is `running`, `waiting` (paused on a `wait`), `completed`, or `failed`. Its events include:
-
-| Event | Meaning |
-| --- | --- |
-| `trigger_received` | The entry was created from a matching event. |
-| `node_entered` | Execution reached a node. |
-| `action_executed` | A node ran, with detail like recipient count and delivery IDs. |
-| `node_skipped` | A node was reachable but declined to run, with a reason such as `reputation_blocked` or `all_suppressed`. |
-| `wait_scheduled` | A `wait` node scheduled a resume. |
-| `dead_lettered` | The entry failed terminally after retries. |
-
-When an email step produces no sends, look for `node_skipped` and its reason before assuming the trigger is broken. When an automation completes, it also emits a public `automation.completed` [webhook event](/api/webhooks) you can subscribe to.
+When an email step sent nothing, check for a skip reason before assuming the trigger is broken. When an automation finishes, it also emits an `automation.completed` [webhook event](/api/webhooks) your systems can subscribe to.
 
 <Note>
-Automation stats (entries, conversions, revenue, time-series, paths) are derived from send and delivery records, so "entries" counts trigger matches. Conversion and revenue are inferred from event names and metadata, so treat them as directional rather than as an accounting source.
+Automation stats (entries, conversions, revenue) are derived from send and delivery records. "Entries" counts trigger matches; conversion and revenue are inferred from event names and metadata, so treat them as directional rather than as an accounting source.
 </Note>
 
 ## Best practices
@@ -269,4 +98,4 @@ Automation stats (entries, conversions, revenue, time-series, paths) are derived
 - Preview before publishing so you know the trigger matches a non-zero audience.
 - Name automations after trigger plus action, "Mint → welcome series" beats "Automation 3".
 - Avoid overlapping automations targeting the same wallets on the same event.
-- Test with a real event, then check entry events to confirm each node fired.
+- Test with a real event, then check the entry's history to confirm each step fired.

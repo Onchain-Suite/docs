@@ -12,6 +12,10 @@ Onchain Suite uses two kinds of key.
 
 The `live` / `test` segment is the environment. Publishable keys only authenticate the SDK's challenge/verify flow; everything that sends or reads data uses a secret key.
 
+<Note>
+**The quick mental model.** A **publishable** key is like your street address, fine for anyone to see; it only lets a browser start the wallet sign-in. A **secret** key is like your house key: it opens everything, so it lives only on your server and never ships to a browser or a public repo.
+</Note>
+
 ## Secret keys
 
 A secret key looks like `sk_live_<keyId>.<verifier>`. Only a hash of the verifier is stored; the full key is shown **once**, at creation, and can't be retrieved afterward. If you lose it, roll it.

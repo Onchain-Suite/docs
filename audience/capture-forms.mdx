@@ -6,7 +6,7 @@ description: "Collect email with consent via double opt-in, bind submissions to 
 Capture forms are how email enters your workspace. A wallet-first audience has no email until someone gives it to you, with consent, and a capture form is the consent-first path: the subscriber supplies their own address, confirms it, and joins a list you've bound the form to.
 
 <Note>
-This is deliberate. The server-to-server [`POST /identify`](/integrations/api-keys#server-to-server-endpoints) refuses email and every other personal identifier, a protocol asserting "wallet 0xABC is alice@example.com" is exactly the wallet-to-identity link the privacy model prevents. Email arrives through a form, from the subscriber, or not at all.
+This is deliberate. The [server-to-server API](/integrations/server-api) refuses to accept an email attached to a wallet, a protocol asserting "wallet 0xABC is alice@example.com" is exactly the wallet-to-identity link the privacy model prevents. Email arrives through a form, from the subscriber, or not at all.
 </Note>
 
 ## Double opt-in
@@ -73,88 +73,25 @@ Binding a list explicitly still works exactly as before and takes precedence, th
 
 ## Submitting a form
 
-Forms can be embedded on your site (the browser posts to the public submit endpoint) or fed server-side from your own backend.
+There are two ways a submission reaches you:
 
-<Tabs>
-  <Tab title="Public (browser)">
-    ```http
-    POST /api/v1/public/forms/{token}/submit
-    ```
+- **Embedded on your site.** Drop the form onto your page and visitors fill it in themselves. Submissions are protected from spam and bots automatically, nothing to configure.
+- **Fed from your backend.** If you already collect email somewhere else, a developer on your team can hand those submissions to the same form from your server. See the [server-side guide](/integrations/server-api#quickstart-ingest-a-capture) for the code.
 
-    Unauthenticated, protected by rate limiting, a honeypot field, and a Turnstile challenge. `{token}` is the form's public token. Body:
-
-    ```json
-    {
-      "email": "alice@example.com",
-      "walletAddress": "0xabc...",
-      "fields": { "referral": "twitter" },
-      "consent": true,
-      "consentText": "I agree to receive product updates."
-    }
-    ```
-
-    The submitter's `origin` is read from the request headers, not the body. A tripped honeypot returns `{ "ok": true }` silently.
-  </Tab>
-  <Tab title="Server-side (secret key)">
-    ```http
-    POST /api/v1/forms/{token}/ingest
-    ```
-
-    Authenticated with a **secret key** (`Authorization: Bearer sk_live_…` or `x-secret-key: sk_live_…`). The key's organization must own the form. Same body as the public submit, minus the honeypot and Turnstile. See the [server-side integration guide](/integrations/server-api#quickstart-ingest-a-capture).
-  </Tab>
-</Tabs>
-
-Both return `{ "ok": true, ... }`; when confirmation is required the response indicates a pending confirmation rather than an immediate join.
+Either way, the subscriber supplies their email and consent (and optionally a wallet address and custom fields). When the form requires confirmation, the submission is held as pending until they click the link.
 
 ## Reading submissions
 
-Back your own dashboard with the paginated submissions endpoint.
+You can view and page through a form's submissions in the dashboard. Every role can read them. Each row shows:
 
-```http
-GET /api/v1/forms/{id}/submissions
-```
-
-Session-authenticated, org-scoped. Any role (Owner, Admin, Editor, Viewer).
-
-<ParamField query="page" type="integer" default="1">
-  1-based page number.
-</ParamField>
-
-<ParamField query="limit" type="integer" default="25">
-  Rows per page, clamped to 1–100.
-</ParamField>
-
-Response:
-
-```json
-{
-  "items": [
-    {
-      "id": "sub_abc",
-      "walletAddress": "0xabc...",
-      "walletVerified": false,
-      "values": { "referral": "twitter" },
-      "source": "public",
-      "consent": true,
-      "status": "confirmed",
-      "zkProtected": true,
-      "createdAt": "2026-08-28T12:00:00.000Z"
-    }
-  ],
-  "total": 1240,
-  "page": 1,
-  "limit": 25
-}
-```
-
-| Field | Meaning |
+| What you see | Meaning |
 | --- | --- |
-| `status` | `pending` (confirmation sent, not yet clicked), `confirmed` (double opt-in complete), or `subscribed` (single opt-in). |
-| `values` | The submitted custom fields, with email keys stripped out. |
-| `walletVerified` | Always `false`, a submitted wallet address is self-reported, not a signed proof. |
-| `zkProtected` | Whether the submission was stored under the workspace's privacy protection. |
-| `source` | Where it came from (`public`, `api`, …). |
+| Status | `pending` (confirmation sent, not yet clicked), `confirmed` (double opt-in complete), or `subscribed` (single opt-in). |
+| Custom fields | Whatever extra fields the form collected. |
+| Wallet | A submitted wallet address, marked unverified because it's self-reported rather than a signed proof. |
+| Source | Where it came from, your site or your backend. |
+| Consent | Whether the subscriber agreed, and when. |
 
 <Note>
-The email address itself is never returned in the submissions list. Reachability and consent are reported; the address stays protected. To collect an address you can message, that's what the confirmed list membership is for.
+The email address itself is never shown in the submissions list. You can see that someone is reachable and that they consented; the address stays protected. To actually message them, that's what their confirmed list membership is for.
 </Note>

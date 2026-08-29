@@ -6,12 +6,16 @@ description: "Send product events from your own systems to trigger automations, 
 Custom events let you send anything that happens in your product (a signup, a deposit, a plan upgrade, a support ticket) into Onchain Suite. Once ingested, an event can trigger an automation, feed a segment, and be queried in SQL next to onchain and messaging data.
 
 <Note>
+**In plain terms.** If you've used a product-analytics or email tool, this is the familiar "track an event" idea: you tell Onchain Suite "this person just did this thing," and then you can message or segment on it. Because it uses your secret key, a developer wires this into your backend once, and marketing builds the automations on top.
+</Note>
+
+<Note>
 Event names are entirely free-form. There is no schema to register and no reserved vocabulary, send `first_deposit` and it exists.
 </Note>
 
 ## Sending your first event
 
-Ingestion is authenticated with a **secret key**, so it happens server-side. The organization is derived from the key.
+Sending an event is one request that says *who* did *what*. It's authenticated with a **secret key**, so it runs from your server (never the browser), and the workspace is worked out from the key.
 
 ```bash
 curl -X POST https://api.onchainsuite.com/api/v1/events \
@@ -148,6 +152,8 @@ Because the first matching identifier wins, sending both `walletAddress` and `em
 </Note>
 
 ## Idempotency
+
+Idempotency is a long word for a simple safety net: it stops the same event being counted (and acted on) twice when a request gets retried.
 
 Every event gets an idempotency key, scoped to your organization. A repeat of the same key is accepted but not reprocessed, and returns `deduplicated: true`.
 

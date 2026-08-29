@@ -22,52 +22,24 @@ The exact record values are unique to your domain and are returned in the API re
 
 ## The flow
 
-1. **Register.** `POST /domain` with your domain. The response includes the complete `dns` record set immediately, so you can add everything in one DNS session.
-2. **Add the records** at your DNS provider.
-3. **Verify.** `POST /domain/{id}/verify`, or watch `GET /domain/{id}/dns` update live as records propagate.
-4. **Done.** On completion, a `noreply@yourdomain` sender is created automatically and campaigns can send from your domain.
+<Steps>
+  <Step title="Register your domain">
+    Add your sending domain in the dashboard (or `POST /domain` over the API). You immediately get the full set of DNS records to add, so you can do them all in one sitting.
+  </Step>
+  <Step title="Add the records at your DNS provider">
+    Copy each record exactly as shown into your domain's DNS settings.
+  </Step>
+  <Step title="Verify">
+    Trigger a check. The status of each record updates live as it propagates.
+  </Step>
+  <Step title="Done">
+    Once the three DKIM records verify, a `noreply@yourdomain` sender is created automatically and your campaigns can send from your domain.
+  </Step>
+</Steps>
 
 ## Live status for every record
 
-`GET /domain/{id}/dns` returns each record with its live verification state:
-
-```json
-{
-  "sendReady": false,
-  "verificationStates": {
-    "dkim1": "Verified",
-    "dkim2": "NotStarted",
-    "dkim3": "VerificationFailed",
-    "mailFromMx": "NotStarted",
-    "mailFromSpf": "NotStarted",
-    "dmarc": "NotStarted"
-  },
-  "records": [
-    {
-      "type": "CNAME",
-      "host": "<token3>._domainkey",
-      "value": "<dkim-target-3>",
-      "verification": "VerificationFailed",
-      "conflict": {
-        "reason": "A CNAME already exists at this host pointing to \"selector.mailprovider.example\" (likely a previous email provider).",
-        "resolution": "Edit ONLY this CNAME to the value shown, and change nothing else.",
-        "actions": [
-          {
-            "action": "edit",
-            "type": "CNAME",
-            "host": "<token3>._domainkey",
-            "currentValue": "selector.mailprovider.example",
-            "newValue": "<dkim-target-3>"
-          }
-        ]
-      }
-    }
-  ],
-  "fixes": [
-    "DKIM record 3: edit ONLY the CNAME at this host to the value shown, and change nothing else."
-  ]
-}
-```
+The verification view shows every record with its live state, verified, not started, or failed, and a top-line "send-ready" flag that flips to true once the three DKIM records pass. When a record won't verify because something already sits at that name, it tells you exactly what to change, quoting the current value and the value to set it to.
 
 ## Conflict detection: when a record won't verify
 

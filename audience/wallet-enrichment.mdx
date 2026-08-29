@@ -107,7 +107,7 @@ A wallet is enriched per chain, so metrics reflect the chain you enriched it on.
   </Step>
 </Steps>
 
-There is no fixed re-enrichment schedule, freshness is driven by the 7-day staleness check on view. You can force a refresh at any time, which bypasses the response cache.
+There is no fixed re-enrichment schedule, freshness is driven by the 7-day staleness check on view. You can force a refresh at any time to pull the latest numbers on demand.
 
 ## Enriching on demand
 
@@ -127,34 +127,11 @@ Enrichment jobs are deduplicated per wallet and chain, so enqueuing the same wal
 
 ## Syncing holders
 
-Enrichment refreshes wallets you already have. **Sync** does the other half: it discovers the current holders of your configured contracts and **adds the new ones as contacts**, growing your audience from on-chain reality.
+Enrichment refreshes wallets you already have. **Sync** does the other half: it discovers the current holders of your configured contracts and **adds the new ones as contacts**, growing your audience from on-chain reality. Run it from the dashboard whenever you want to pull in holders you don't have yet. Owner, Admin, or Editor can start a sync.
 
-```http
-POST /api/v1/audience/sync
-```
+A sync runs in two phases. First it reads the current holders of every contract you've configured and, for each holder that **isn't already a contact**, adds a wallet contact and records that contract balance, this is where new wallets enter your audience. Then it enriches, refreshing metrics for the wallets in the run, both the ones you already had and the ones just discovered.
 
-Owner, Admin, or Editor. Optional body `{ "force": true }` bypasses the response cache. Returns `202` with a job you can poll at `GET /api/v1/audience/sync`.
-
-A sync runs in two phases. First it reads the current holders of every contract in your registry and, for each holder that **isn't already a contact**, creates a wallet contact and seeds that contract balance, this is where new wallets enter your audience. Then it enriches, refreshing metrics for the wallets in the run (both existing and newly discovered).
-
-The job response reports both:
-
-```json
-{
-  "jobId": "…",
-  "state": "processing",
-  "totalWallets": 1250,
-  "discoveredCount": 84,
-  "force": false,
-  "dispatch": { "state": "completed", "processedCount": 1250, "skippedCount": 0 },
-  "enrichment": { "state": "processing", "enrichedCount": 900, "pendingCount": 350 },
-  "outcome": null,
-  "createdAt": "…",
-  "finishedAt": null
-}
-```
-
-`discoveredCount` is the number of **new** wallet contacts added this run. Discovery never mutates existing contacts, and it stops adding once you reach your plan's contact limit.
+While it runs you can watch two live counts: how many wallets are being processed, and how many brand-new contacts have been discovered and added. Discovery never changes existing contacts, and it stops adding once you reach your plan's contact limit.
 
 ### Sync vs enrich: the credit difference
 
@@ -162,14 +139,12 @@ Both pull from indexed on-chain data, but they cost very differently, and the di
 
 | | **Sync** (discover) | **Enrich** (refresh) |
 | --- | --- | --- |
-| Endpoint | `POST /audience/sync` | `POST /intelligence/query/enrichment/protocol` |
 | What it does | Finds contract holders and adds new wallet contacts | Refreshes each wallet's on-chain metrics |
-| On-chain data cost | **One call per contract** (holder list), nothing per wallet | **~4 requests per wallet**, plus one per contract |
-| Metered against credits | No per-wallet cost for discovery | Yes, every wallet draws from your budget |
+| What it costs | Cheap: one holder-list lookup per contract, nothing per wallet | Metered: every wallet draws from your credit budget |
 | Use it for | Growing the audience cheaply | Keeping metrics current for scoring and segmentation |
 
 <Note>
-Reach for **Sync** to pull in holders you don't have yet, it's cheap because it's one holder-list call per contract. Reach for **Enrich** when you need each wallet's portfolio, activity, and scores refreshed, which is where the per-wallet credit cost lives. The discovery phase of a sync writes no per-wallet metrics; the enrich phase is what spends credits.
+Reach for **Sync** to pull in holders you don't have yet, it's cheap because it looks up the holder list once per contract. Reach for **Enrich** when you need each wallet's portfolio, activity, and scores refreshed, which is where the per-wallet credit cost lives. Discovery adds contacts without spending per-wallet credits; the enrich phase is what draws down your budget.
 </Note>
 
 ## Cost and limits
@@ -179,14 +154,13 @@ Enrichment consumes **wallet-data credits**, up to 4 per wallet, covering balanc
 | Plan | Monthly credits | Roughly this many wallets |
 | --- | --- | --- |
 | **Pay as you go** ($0 + usage) | Metered, $10 per 10,000 | varies |
-| **Launch** ($49/mo) | 1,000 | ~250 |
+| **Launch** ($39/mo) | 1,000 | ~250 |
 | **Growth** ($349/mo) | 10,000 | ~2,500 |
-| **Pro** ($799/mo) | 25,000 | ~6,000 |
-| **Scale** ($2,299/mo) | 50,000 | ~12,000 |
+| **Pro** ($1,622/mo) | 25,000 | ~6,000 |
 
 Once the allowance is exhausted, new enrichment is blocked, though the SQL editor and your already-enriched data keep working. On Pay as you go, enrichment draws from your balance at $10 per 10,000 credits (about 4¢ a wallet) rather than a monthly allowance.
 
-Responses are cached per organization, 5 minutes for transactions, 10 for balances and portfolio, 15 for NFTs, so repeated enrichment of the same wallet within those windows is served from cache and doesn't re-spend credits (unless you pass `forceRefresh`).
+Recent results are held briefly, a few minutes for transactions, a little longer for balances, portfolio, and NFTs, so re-enriching the same wallet within those windows reuses the fresh data and doesn't re-spend credits, unless you explicitly force a refresh.
 
 ## Using enriched data
 

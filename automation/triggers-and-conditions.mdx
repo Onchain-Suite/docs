@@ -1,243 +1,84 @@
 ---
 title: "Triggers and Conditions"
-description: "The full trigger catalog, payload filter operators, and branch conditions that control entry and routing."
+description: "What can start an automation, how to narrow who enters, and how to route them once inside."
 ---
 
-A trigger decides **who enters** an automation. Filters narrow that entry. Branches decide **where they go** once inside. These are three different mechanisms with three different rule sets. This page covers all of them.
+Three things shape who flows through an automation:
+
+- A **trigger** decides who *enters*.
+- **Filters** narrow that entry to the ones you care about.
+- **Branches** decide where they go once inside.
+
+This page covers all three in plain terms.
 
 ## On-chain triggers
 
-Ten on-chain trigger types are available. Nine are **business presets**, each built around a moment that matters: **Token acquired**, **Swap completed**, **Liquidity added**, and so on. The tenth is the generic **On-chain event** trigger, for anything a preset doesn't cover.
+These start a flow from something that happens on-chain. Nine are **business presets**, each built around a moment that matters, and one is a generic catch-all for anything the presets don't cover.
 
-On **EVM** chains these fire automatically, the platform watches the contract and turns matching on-chain activity into automation entries, with no indexer or ABI needed from you. See [Contract-Based Flows](/automation/contract-based-flows). On Solana, on-chain events are sent in through the [Automation Trigger API](/api/automation-triggers).
+On EVM chains they fire automatically: the platform watches the contract for you and turns matching activity into automation entries, with nothing to index or configure. See [Contract-Based Flows](/automation/contract-based-flows). On Solana, on-chain events are sent in through the [Automation Trigger API](/api/automation-triggers), a developer task.
 
 ### Business presets: pick your token, done
 
-For a preset you supply **one thing, the token or contract to watch**. The on-chain event and any filters that define the moment are chosen for you, so there's no event to pick, no signature to paste, and no standard to select. Each preset maps to the right event(s) automatically:
+For a preset you supply **one thing: the token or contract to watch.** The rest, which on-chain moment to look for, is chosen for you. No event to pick, no signature to paste.
 
-| Preset | Business moment | Watches for you (automatic) |
-| --- | --- | --- |
-| **Token acquired** (`holder_acquired`) | A new wallet mints in | `Transfer` where `from == 0x0` (mints only) |
-| **Governance activity** (`governance_activity`) | A proposal or vote | `ProposalCreated`, `VoteCast` |
-| **Swap completed** (`swap_completed`) | A DEX trade | `Swap`, `TokenExchange` |
-| **Liquidity added** (`liquidity_added`) | A deposit into your protocol | `Deposit`, `Mint`, `AddLiquidity` |
-| **Borrow opened** (`borrow_opened`) | A borrow position opens | `Borrow` |
-| **Capital withdrawn** (`capital_withdrawn`) | Liquidity or capital pulled out | `Burn`, `RemoveLiquidity`, `Withdraw` |
-| **Liquidation detected** (`liquidation_detected`) | A wallet is liquidated | `Liquidate` |
-| **Approval intent** (`approval_intent`) | A contract approval | `Approval`, `ApprovalForAll` |
-| **Exchange outflow** (`exchange_outflow`) | Tokens heading to an exchange | `Transfer` where `toCategory == "exchange"` |
+| Preset | Fires when |
+| --- | --- |
+| **Token acquired** | A new wallet mints in |
+| **Governance activity** | A proposal is created or a vote is cast |
+| **Swap completed** | A wallet makes a DEX trade |
+| **Liquidity added** | A wallet deposits into your protocol |
+| **Borrow opened** | A borrow position opens |
+| **Capital withdrawn** | Liquidity or capital is pulled out |
+| **Liquidation detected** | A wallet is liquidated |
+| **Approval intent** | A wallet approves your contract |
+| **Exchange outflow** | Tokens head to an exchange |
 
-The only fields you set on a preset:
+You also pick the **chain** to watch, though it's usually filled in from your project settings. That's the whole setup: pick your token, publish.
 
-<ParamField path="contractAddress" type="string">
-  The token or contract to watch. This is the one input a preset needs. Leave it empty only if you really do want to match the moment on **any** contract across the chain.
-</ParamField>
+### Generic on-chain event
 
-<ParamField path="chain" type="string">
-  Chain slug, `eth-mainnet`, `base-mainnet`, `arb-mainnet`, `optimism-mainnet`, `matic-mainnet`, or `solana-mainnet`. Often auto-filled from your project settings; defaults to `eth-mainnet`.
-</ParamField>
+When no preset fits the moment, the generic **On-chain event** trigger lets you name the event yourself. It's the escape hatch, and the one on-chain trigger where a developer may need to help you match the right event. Everything you set has to agree with the incoming event for the flow to fire.
 
-That's the whole setup, pick your token, publish. The builder doesn't ask you for the event, because the preset already knows it.
+## Filters: narrow who enters
 
-### Generic On-chain event: choose the event
+A trigger can be narrowed with **filters**, simple conditions on the details of the event, so only the entries you care about get in. For example: only mints (a transfer *from* the zero address), or only events where a certain field is present.
 
-The generic `onchain_event` trigger is the escape hatch for a moment no preset covers. Here you name the event yourself. It takes the same `contractAddress` and `chain` as a preset, plus:
-
-<ParamField path="event" type="string">
-  Single event name to match. Defaults to `Transfer`.
-</ParamField>
-
-<ParamField path="eventNames" type="string[]">
-  Match any of several event names.
-</ParamField>
-
-<ParamField path="eventStandard" type="string">
-  Narrow to a standard: `erc20`, `erc721`, `erc1155`, `erc4626`, `governance`, `defi`, `spl-token`, `solana-nft`, `solana-dex`, `anchor`.
-</ParamField>
-
-<ParamField path="topic0" type="string">
-  Match by EVM event signature hash instead of by name.
-</ParamField>
-
-<ParamField path="programId" type="string">
-  Solana program to watch.
-</ParamField>
-
-<ParamField path="instructionName" type="string">
-  Solana instruction to match.
-</ParamField>
-
-<ParamField path="filters" type="Filter[]">
-  Payload conditions, see below.
-</ParamField>
-
-Matching is a strict AND across everything you configure. Any field you leave unset is a wildcard, but any field you **do** set must agree with the incoming event or the automation won't fire.
+Filters check for things like "equals," "is not," "is one of a list," "contains," and "is present." Every filter you add has to pass. Comparisons ignore case and spacing, so wallet-address capitalization never trips you up.
 
 <Note>
-These fields are also what a **hand-authored** automation (built over the API as raw graph JSON) sets directly, including on a preset node, since a preset is really the generic trigger with its event names and filters pre-filled. In the visual builder you never touch them for a preset; the builder seeds them from the preset you chose.
+For a numeric threshold, "more than $100," say, use a **branch** later in the flow rather than a trigger filter. Trigger filters don't do greater-than or less-than comparisons.
 </Note>
-
-<Warning>
-`topic0` and `programId` are matched strictly. If you configure either one and an incoming event doesn't carry it, the event is rejected rather than falling back to name matching. Set them only when you're sure your event source populates them.
-</Warning>
-
-## Payload filters
-
-Filters test values inside the event payload. Each filter is a `path`, an `operator`, and usually a `value`.
-
-```json
-{
-  "filters": [
-    { "path": "from", "operator": "eq", "value": "0x0000000000000000000000000000000000000000" },
-    { "path": "toCategory", "operator": "exists" }
-  ]
-}
-```
-
-`path` is a dot-path into the payload, so nested values work: `"path": "token.symbol"`.
-
-| Operator | Behaviour |
-| --- | --- |
-| `eq` | Equals |
-| `neq` | Not equal |
-| `in` | Value appears in the supplied array |
-| `contains` | Substring match on strings, membership on arrays |
-| `exists` | Path is present and non-empty (no `value` needed) |
-
-All filters on a trigger must pass. Comparisons are case-insensitive and whitespace-trimmed, so wallet address casing never matters.
-
-<Warning>
-These five operators are the complete set. An unrecognized operator, `gte`, `gt`, `lt`, is **silently dropped**, and the filter simply stops applying. That makes the automation fire more often than you intended rather than erroring, so double-check operator spelling. For numeric thresholds, filter downstream with a `branch` node instead.
-</Warning>
 
 ## Custom event triggers
 
-Anything your product does can be a trigger. Send a [custom event](/integrations/custom-events) and match it with the `app_event` trigger type (aliases `custom_event`, `custom-event`, `appevent` also work).
-
-```json
-{
-  "type": "app_event",
-  "eventNames": ["first_deposit"],
-  "filters": [{ "path": "amountUsd", "operator": "gte", "value": 100 }]
-}
-```
-
-An empty event-name list is a wildcard that matches every custom event, so always name the events you want. Filters read the event payload the same way on-chain filters do. The full flow, from firing the event to receiving an in-app push, is in [Custom Events](/integrations/custom-events#end-to-end-notify-a-user-from-an-offchain-event).
+Anything your product does can start a flow. Send a [custom event](/integrations/custom-events), a signup, a deposit, a plan upgrade, and match it by name. Always name the events you want to match; leaving it blank matches *every* custom event. The full path, from firing the event to the user seeing an in-app push, is in [Custom Events](/integrations/custom-events#end-to-end-notify-a-user-from-an-offchain-event).
 
 ## Lifecycle triggers
 
-Three lifecycle triggers are available.
+Three triggers fire on things that happen inside your audience:
 
-### `segment_entered`
-
-Fires when a contact enters a segment.
-
-<ParamField path="segmentId" type="string" required>
-  The segment to watch.
-</ParamField>
-
-### `email_opened`
-
-Fires when a recipient opens a campaign email.
-
-<ParamField path="campaignId" type="string">
-  Restrict to a single campaign. Omit to match any.
-</ParamField>
-
-### `health_threshold`
-
-Fires when a contact's health score crosses a line.
-
-<ParamField path="direction" type="string">
-  `gte` or `lte`. Defaults to `gte`.
-</ParamField>
-
-<ParamField path="score" type="number">
-  The threshold. Defaults to 50.
-</ParamField>
+- **Entered a segment.** A contact joins a segment you're watching.
+- **Opened an email.** A recipient opens a campaign email (optionally, one specific campaign).
+- **Health score crossed a line.** A contact's health score rises above, or falls below, a number you set.
 
 <Note>
-These lifecycle triggers, and custom events, fire when an event is **sent to the ingest API**. The platform does not emit them on its own, so your system calls the ingest endpoint when the thing happens. See the [Automation Trigger API](/api/automation-triggers).
+These, and custom events, fire when your system tells the platform they happened, through the [Automation Trigger API](/api/automation-triggers). The platform doesn't invent them on its own.
 </Note>
 
-## Entry rules and deduplication
+## One entry per event
 
-Each matched event creates one **entry**, one contact moving through the flow. Entries are deduplicated by a key derived from the automation and the event's `sourceEventId`. A duplicate returns `duplicate: true` and does not re-enter.
-
-When you don't supply a `sourceEventId`, one is derived for you:
-
-| Trigger | Derived key |
-| --- | --- |
-| `segment_entered` | `segment:<segmentId>:<contact>` |
-| `onchain_event` | `onchain:<chain>:<txHash>` |
-| `email_opened` | `email_opened:<campaignId>:<delivery>` |
-| `health_threshold` | `health_threshold:<contact>:<score>` |
+Each matching event creates **one entry**, one contact moving through the flow, and duplicates of the same event don't re-enter. One consequence worth planning around:
 
 <Warning>
-Two consequences worth planning around:
-
-- **A contact can enter a `segment_entered` automation only once, ever.** Removing and re-adding them to the segment will not re-trigger it. For repeatable entry, send an explicit `sourceEventId` that varies per occurrence.
-- **On-chain events without a `txHash` are never deduplicated**, the key falls back to random bytes, so retries create duplicate entries. Always send `txHash`.
+**A contact enters an "entered a segment" automation only once, ever.** Removing and re-adding them to the segment won't re-trigger it. If you need a flow people can go through more than once, use a different trigger, or have your system send a fresh event each time.
 </Warning>
 
-## Branch conditions
+## Branches: route entries down different paths
 
-A `branch` node routes an entry down different paths. Conditions here test the **rolling context**, values accumulated as the entry moves through the flow, not the original event payload.
+A **branch** splits the flow so different contacts take different routes, for example, send an in-app push to anyone with a connected wallet, and an email to everyone else.
 
-```json
-{
-  "type": "branch",
-  "data": {
-    "branches": [
-      { "field": "walletAddress", "operator": "exists", "target": "inapp_node" },
-      { "field": "email", "operator": "exists", "target": "email_node" }
-    ],
-    "defaultTarget": "tag_node"
-  }
-}
-```
-
-| Operator | Behaviour |
-| --- | --- |
-| `exists` | Value present and non-empty |
-| `neq` | Not equal |
-| `gte` | Greater than or equal (numeric) |
-| `lte` | Less than or equal (numeric) |
-| `contains` | Substring or array membership |
-| `eq` | Equality, also the default for any unrecognized operator |
-
-Rules are evaluated in order and **the first match wins**. If nothing matches, the entry follows the default target, and failing that, the first outgoing edge.
-
-### The rolling context
-
-Each entry carries a context that grows as it runs. Branch fields read flat keys on it (no dot-paths). It starts as:
-
-```json
-{ "email": "...", "walletAddress": "0x...", "contactId": "..." }
-```
-
-and each node that runs adds to it:
-
-| After node | Adds |
-| --- | --- |
-| `send_email` | `lastEmail` (to, subject, templateId, recipient count) |
-| `send_inapp` | `lastInapp` (delivery IDs, delivered-now), and sets `walletAddress` |
-| `webhook` | `lastWebhook` (url, status) |
-| `add_tag` | `tags` (the contact's full tag list) |
-| `dispatch_campaign` | `lastCampaignDispatch` (campaign and run IDs) |
-
-So a branch after a `send_inapp` can route on `lastInapp`, and a branch after `add_tag` can test `tags` with `contains`.
-
-### Differences from trigger filters
-
-- Branch comparisons are **case-sensitive**, while trigger filters are case-insensitive. `email eq "A@x.com"` will not match `a@x.com` in a branch.
-- `gte` and `lte` work in branches but not in trigger filters; `in` works in trigger filters but not in branches.
-- Branch fields are flat context keys; trigger filters use dot-paths into the payload.
+A branch tests what's known about the entry *so far*, and that grows as the flow runs. After a send-in-app step, a branch can check whether the push was delivered; after an add-tag step, it can check the contact's tags. Rules are checked top to bottom and the **first match wins**; anything that matches nothing follows the default path.
 
 <Note>
-Rules are read tolerantly. A branch rule accepts `field`, `path`, or `condition` for the field; `operator` or `op`; and `target`, `targetNodeId`, `to`, or `nodeId` for the destination. The default can be `defaultTarget`, `default`, `elseTarget`, or `fallbackTarget`. Both a `rules` array and a `branches` array are read and combined.
-</Note>
-
-<Note>
-Publishing requires a branch node to have at least two outgoing edges. Draw the edges in the builder even when you've selected targets by node id, or validation will reject the graph with `INVALID_BRANCH_CONFIG`.
+Branches can compare numbers (greater or less than) that trigger filters can't, and they read the contact's live context rather than the original event. A branch needs at least two paths out, so draw both connections in the builder.
 </Note>

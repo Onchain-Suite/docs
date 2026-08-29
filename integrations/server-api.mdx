@@ -5,6 +5,10 @@ description: "Authenticate your backend with a secret key and call the server-to
 
 The server-side API is HTTP from **your backend**, authenticated with a secret (`sk_…`) key. Use it to register wallets as contacts, ingest form submissions, send pushes, and launch campaigns, everything that reads or writes data.
 
+<Note>
+**In plain terms.** This is the toolkit your backend uses to talk to Onchain Suite directly, no dashboard, no browser. A developer keeps one secret key on the server and calls these to register wallets, pull in consented emails, send a push, or kick off a campaign. If all you want is notifications inside your dApp, you don't need this, use the [in-app SDK](/integrations/in-app-notifications) instead.
+</Note>
+
 <Warning>
 Secret keys are **server-only**. They grant full server-to-server access to your workspace, so never ship one to a browser, a mobile app, a repo, or any client. Client code uses a publishable (`pk_…`) key, which can only run the [wallet auth handshake](/integrations/in-app-notifications). If a secret key is ever exposed, [roll it](/integrations/api-keys#rolling-a-key) with zero grace immediately.
 </Warning>

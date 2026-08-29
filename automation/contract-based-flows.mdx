@@ -1,91 +1,60 @@
 ---
 title: "Contract-Based Flows"
-description: "React to normalized smart contract activity, configure on-chain triggers that fire on mints, swaps, approvals, and liquidations."
+description: "React to on-chain activity, automations that fire on mints, swaps, approvals, and liquidations."
 ---
 
-Contract-based flows respond to what wallets actually do on-chain: minting, swapping, borrowing, approving, getting liquidated. For **EVM contracts, the platform watches the chain for you**, publish an automation with an on-chain trigger and it starts firing on real activity, no indexer to run and no ABI to paste.
+Contract-based flows respond to what wallets actually do on-chain: minting, swapping, borrowing, approving, getting liquidated. For **EVM contracts, the platform watches the chain for you**, publish an automation with an on-chain trigger and it starts firing on real activity, with no indexer to run and no contract details to paste.
 
 ## Scenarios worth building
 
 | Moment | Trigger | Follow-up |
 | --- | --- | --- |
-| First mint | `holder_acquired` | Welcome series |
-| Approval granted, no swap | `approval_intent` | Wait, then nudge |
-| Tokens moved to an exchange | `exchange_outflow` | Retention message |
-| Position liquidated | `liquidation_detected` | Recovery guidance |
-| Liquidity withdrawn | `capital_withdrawn` | Win-back |
-| Proposal opened | `governance_activity` | Voting reminder |
+| First mint | Token acquired | Welcome series |
+| Approval granted, no swap | Approval intent | Wait, then nudge |
+| Tokens moved to an exchange | Exchange outflow | Retention message |
+| Position liquidated | Liquidation detected | Recovery guidance |
+| Liquidity withdrawn | Capital withdrawn | Win-back |
+| Proposal opened | Governance activity | Voting reminder |
 
 ## How it fires
 
-Give the trigger a **chain and a contract address**, then publish. That's it: no ABI to paste and no indexer to run. Matching on-chain activity starts creating automation entries, after a short finality delay so a re-orged transaction never messages anyone (seconds on an L2, a couple of minutes on Ethereum mainnet).
+Give the trigger a **chain and a contract address**, then publish. That's it. Matching on-chain activity starts creating automation entries after a short delay for finality, so a reversed or re-orged transaction never messages anyone (seconds on an L2, a couple of minutes on Ethereum mainnet).
 
 <Warning>
-**Automatic watching is EVM-only.** For Solana contracts, or if you run your own indexer, send events in through the [Automation Trigger API](/api/automation-triggers) instead.
+**Automatic watching is EVM-only.** For Solana contracts, or if you run your own indexer, send events in through the [Automation Trigger API](/api/automation-triggers) instead, a developer task.
 </Warning>
 
 <Note>
-If the contract isn't verified publicly, paste its ABI (or just the one event's signature) when you build the trigger. Until a trigger has a resolvable event, publishing reports it as skipped rather than doing nothing silently.
+If the contract isn't verified publicly, a developer may need to supply the event's signature when the trigger is built. Until a trigger has an event it can resolve, publishing reports it as skipped rather than failing silently.
 </Note>
 
 ## Configuring the trigger
 
-In the builder, a **preset needs one input, your token or contract**. The event and filters that define the moment are filled in for you, so you pick the contract and publish. See [pick your token, done](/automation/triggers-and-conditions#business-presets-pick-your-token-done). Adding a contract address scopes the trigger to your protocol; leaving it empty matches the moment on **any** contract on the chain.
+In the builder, a **preset needs one input: your token or contract.** The event and filters that define the moment are filled in for you, so you pick the contract and publish. See [pick your token, done](/automation/triggers-and-conditions#business-presets-pick-your-token-done). Adding a contract address scopes the trigger to your protocol; leaving it empty matches the moment on **any** contract on the chain, which is almost never what you want.
 
-Under the hood, that same trigger is a small piece of JSON, which is also what you'd set directly when building over the API. For a preset the `eventNames` and `filters` are seeded from the preset; you don't type them in the builder:
+### Where it works
 
-```json
-{
-  "type": "swap_completed",
-  "chain": "base-mainnet",
-  "contractAddress": "0xYourPool",
-  "eventNames": ["Swap", "TokenExchange"],
-  "filters": [
-    { "path": "amountUsd", "operator": "exists" }
-  ]
-}
-```
+Automatic watching covers the major EVM chains, Ethereum, Base, Arbitrum, Optimism, and Polygon, plus Solana through the trigger API. Chain and contract are often filled in from your project settings.
 
-Chain and contract can be auto-filled from your project settings, pass `"useProjectSettings": true` when creating, and blank fields inherit your primary chain and first configured contract.
+### What it can watch for
 
-### Supported chains
-
-EVM: `eth-mainnet`, `base-mainnet`, `arb-mainnet`, `optimism-mainnet`, `matic-mainnet`. Solana: `solana-mainnet`.
-
-Common aliases are normalized for you, `ethereum`, `eth`, and `1` all become `eth-mainnet`; `arbitrum` becomes `arb-mainnet`; `polygon` and `matic` become `matic-mainnet`; `sol` becomes `solana-mainnet`. An empty chain defaults to `eth-mainnet`.
-
-### Event catalog
-
-The platform recognizes 29 event definitions across standards, browsable in the trigger picker when you build an automation.
-
-**EVM**, ERC-20 (`erc20_transfer`, `erc20_approval`), ERC-721 (`erc721_transfer`, `erc721_approval`, `erc721_approval_for_all`), ERC-1155 (`erc1155_transfer_single`, `erc1155_transfer_batch`, `erc1155_approval_for_all`), ERC-4626 (`erc4626_deposit`, `erc4626_withdraw`), governance (`governance_proposal_created`, `governance_vote_cast`), and DeFi (`defi_swap`, `defi_mint`, `defi_burn`, `defi_deposit`, `defi_withdraw`, `defi_borrow`, `defi_repay`, `defi_liquidation`, `defi_claim_rewards`).
-
-**Solana**, `solana_spl_transfer`, `solana_nft_mint`, `solana_nft_transfer`, `solana_dex_swap`, `solana_deposit`, `solana_withdraw`, `solana_anchor_event`.
+The platform recognizes the common events across token standards (ERC-20, ERC-721, ERC-1155, ERC-4626), governance, and DeFi (swaps, deposits, withdrawals, borrows, repayments, liquidations, and more), with Solana equivalents. You browse and pick them in the trigger picker, no need to know their technical names.
 
 ## Feeding in your own events
 
-For EVM contracts you rarely need this. Send events in yourself only for **Solana contracts** (not auto-watched) or when you **run your own indexer**. Post them through the [Automation Trigger API](/api/automation-triggers), and for product activity rather than on-chain, use [Custom Events](/integrations/custom-events).
-
-When you ingest events yourself, two things help:
-
-- **Set `walletAddress`** at the top level to name the wallet the automation acts on. Otherwise it's inferred from common payload fields (`to`, `owner`, `voter`, `borrower`, and so on).
-- **Every `payload` key is filterable** by its path, for example `{ "path": "amountUsd", "operator": "gte", "value": 100 }`.
-
-<Warning>
-A malformed contract address is discarded silently rather than erroring, so a typo means the trigger never matches. Preview the trigger before publishing.
-</Warning>
+For EVM contracts you rarely need this. Send events in yourself only for **Solana contracts** (not auto-watched) or when you **run your own indexer**. That's a developer task, through the [Automation Trigger API](/api/automation-triggers). For product activity rather than on-chain moments, use [Custom Events](/integrations/custom-events).
 
 ## Testing a flow
 
 <Steps>
   <Step title="Preview the trigger">
-    Preview returns how many wallets match, plus sample profiles. Zero matches means the trigger is wrong, usually the contract address or chain slug.
+    Preview returns how many wallets match, plus sample profiles. Zero matches means the trigger is wrong, usually the contract address or the chain.
   </Step>
   <Step title="Do the thing on-chain">
-    Perform the activity with a wallet you control, then wait out the finality delay (seconds on an L2, ~2 minutes on Ethereum mainnet) and confirm the automation registered an entry.
+    Perform the activity with a wallet you control, wait out the finality delay (seconds on an L2, about two minutes on Ethereum mainnet), and confirm the automation registered an entry.
   </Step>
-  <Step title="Confirm each node fired">
-    Check the automation's entries. A `node_skipped` event means the step was reachable but declined to run, suppressed recipients or blocked sending reputation.
+  <Step title="Confirm each step fired">
+    Check the automation's entries. A skipped step means it was reachable but declined to run, usually suppressed recipients or paused sending.
   </Step>
   <Step title="Widen the audience">
     Only after a single wallet completes the flow correctly.
@@ -99,6 +68,6 @@ Don't expect an instant notification when testing. The finality delay means an o
 ## Best practices
 
 - Scope to a contract address. A chain-wide trigger will match far more than you expect.
-- Start from a preset rather than `onchain_event`, the event names and filters are already correct.
-- Verify the event mapping with one real transaction before publishing.
+- Start from a preset rather than the generic on-chain event trigger, its event and filters are already correct.
+- Verify the mapping with one real transaction before publishing.
 - Pair every trigger with a clear outcome; if you can't state what should change, the automation isn't ready.

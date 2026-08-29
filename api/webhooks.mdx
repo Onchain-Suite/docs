@@ -6,6 +6,10 @@ description: "Receive platform events at your endpoint, verify the signature, an
 Webhooks push platform events to your server the moment they happen, a message is delivered, a contact is created, an automation completes, so your backend can react without polling. This guide is the **receive** side: subscribe, verify the signature, return `200`.
 
 <Note>
+**In plain terms.** Instead of your server constantly asking "anything new?", Onchain Suite calls your server the moment something happens, more like a doorbell than checking the door every minute. Your job is to answer, confirm it's really us (the signature check), and reply `200`.
+</Note>
+
+<Note>
 This is the inverse of [custom events](/integrations/custom-events). Custom events go **from** your product **into** the platform; webhooks come **from** the platform **to** your endpoint.
 </Note>
 
