@@ -31,19 +31,9 @@ Campaign analytics cover email and in-app separately, plus a combined total.
 
 ### Email
 
-| Metric | Definition |
-| --- | --- |
-| Sent | Queued plus sent |
-| Delivered | Confirmed by the provider |
-| Unique opens | Distinct recipients who opened |
-| Total / unique clicks | All clicks, and distinct recipients |
-| Bounces, complaints, unsubscribes, suppressed, failed | Negative outcomes |
-| Delivery rate | Delivered ÷ (delivered + bounces) |
-| Bounce rate | Bounces ÷ (delivered + bounces) |
-| Open, click, unsubscribe rate | Over delivered, falling back to sent |
-| Click-to-open rate | Unique clicks ÷ unique opens |
+Sent and delivered counts, unique opens, total and unique clicks, the negative outcomes (bounces, complaints, unsubscribes, suppressed, and failed), and the rates that matter: delivery, bounce, open, click, unsubscribe, and click-to-open.
 
-Delivery and bounce rate are shares of **delivery attempts**, the two add up to 100%, which matches how your email provider's console reports them. Rates are percentages rounded to two decimals, and zero when the denominator is zero.
+Delivery and bounce rate are two shares of the same **delivery attempts**, so they add up to 100%, which matches how your email provider reports them.
 
 <Note>
 Open and click rates use **delivered** as the denominator only when delivery confirmations are flowing. If they aren't, delivered is zero and the denominator silently falls back to **sent**. Compare the two before reading too much into a rate.

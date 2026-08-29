@@ -9,7 +9,7 @@ One send reaches the user through whichever channel they're reachable on:
 
 <CardGroup cols={3}>
   <Card title="In-app" icon="bell">
-    A live toast in your dApp while the page is open, over a Socket.IO connection.
+    A live toast in your dApp while the page is open, over a secure real-time connection.
   </Card>
   <Card title="Web push" icon="browser">
     An OS notification when the tab is closed, via a service worker.
@@ -35,7 +35,7 @@ The SDK gives you all three plus wallet auth and a styled toast UI; a server-to-
     The browser requests a challenge with your **publishable key**, the wallet signs it, and the server returns a short-lived session token. The wallet can be **EVM or Solana**, the server verifies both.
   </Step>
   <Step title="Client connects">
-    The client opens a Socket.IO connection with that token and joins a room scoped to its org + wallet. Optionally it also registers for web or mobile push.
+    The client opens a secure real-time connection with that token, scoped to its own org and wallet. Optionally it also registers for web or mobile push.
   </Step>
   <Step title="You send pushes">
     From your backend (secret key), a campaign, or an automation. The platform routes each one to a live socket if the user is connected, otherwise to web or mobile push, otherwise it's held and replayed on reconnect.
@@ -85,11 +85,11 @@ The fastest path is the official browser SDK. It handles the challenge/verify ha
 
 <CodeGroup>
 ```bash npm
-npm i @onchainsuite/sdk@latest
+npm i @onchainsuite/sdk
 ```
 
 ```html CDN loader
-<!-- inapp.js bundles socket.io and auto-starts from data-* attributes -->
+<!-- inapp.js bundles everything it needs and auto-starts from data-* attributes -->
 <script
   src="https://cdn.jsdelivr.net/npm/@onchainsuite/sdk@latest/dist/inapp.js"
   data-key="pk_live_yourorg_xxx"
@@ -98,7 +98,7 @@ npm i @onchainsuite/sdk@latest
 ```
 
 ```html CDN (ESM)
-<!-- ESM import: load socket.io-client first so the SDK finds window.io -->
+<!-- ESM import: load the real-time client first so the SDK can find it on window.io -->
 <script src="https://cdn.socket.io/4.8.3/socket.io.min.js"></script>
 <script type="module">
   import { OnchainSuite } from "https://esm.sh/@onchainsuite/sdk@latest";
@@ -114,9 +114,9 @@ npm i @onchainsuite/sdk@latest
 <Note>
 Three ways in, pick one:
 
-- **npm / bundler.** `import { OnchainSuite } from "@onchainsuite/sdk"`. The bundled `socket.io-client` is pulled in automatically, nothing else to install.
-- **CDN loader (`inapp.js`).** A self-contained IIFE bundle (socket.io included). Add `data-key` and it constructs a client on `window.onchainsuite`; add `data-autostart` and it calls `start()` for you. Optional `data-api` sets the API base (defaults to `https://api.onchainsuite.com`). No import, no build step. Only ever put a **`pk_…`** key here, never `sk_…`.
-- **CDN (ESM).** A raw `esm.sh` import can't supply the bundled socket.io, so load `socket.io-client` first (the SDK finds it on `window.io`), or inject your own with the `ioClient` option.
+- **npm / bundler.** `import { OnchainSuite } from "@onchainsuite/sdk"`. The real-time connection library is bundled in automatically, nothing else to install.
+- **CDN loader (`inapp.js`).** A single self-contained script (the real-time library included). Add `data-key` and it constructs a client on `window.onchainsuite`; add `data-autostart` and it calls `start()` for you. Optional `data-api` sets the API base (defaults to `https://api.onchainsuite.com`). No import, no build step. Only ever put a **`pk_…`** key here, never `sk_…`.
+- **CDN (ESM).** A raw `esm.sh` import can't include the bundled real-time library, so load it first (the SDK finds it on `window.io`), or inject your own with the `ioClient` option.
 </Note>
 
 The SDK is lightweight and adds only the parts you actually use to your site.
@@ -125,7 +125,7 @@ The SDK is lightweight and adds only the parts you actually use to your site.
 **Which snippet do I use?**
 - Just trying it out, or your app doesn't manage the wallet connection itself, use **Simplest integration**.
 - Your app already connects the wallet (wagmi, viem, ethers, or a Solana adapter), use **Bring your own signer** so the user isn't asked to sign twice.
-- You're on React or Next.js and want the shape that's running in production, use **React (production shape)**.
+- You're on React or Next.js, use **React**.
 - You want notifications to match your own design instead of the built-in toast, use **Custom rendering**.
 </Note>
 
@@ -158,9 +158,9 @@ await os.start(walletAddress);
 
 `signMessage` is the **universal override**: `(message, walletAddress) => Promise<string>`. When you supply it, the SDK never touches the wallet itself, so it works for **any** wallet on **either** chain, an EVM signer from wagmi/viem/ethers, or a Solana wallet's `signMessage`. Return the signature your wallet produces (hex for EVM, base58 for Solana). Without the override, the SDK signs with the discovered wallet automatically.
 
-### React (production shape)
+### React
 
-Mount one component high in the tree, keyed on the connected wallet. This is the shape running in production.
+Mount one component high in the tree, keyed on the connected wallet.
 
 ```tsx
 // components/OnchainInApp.tsx
@@ -270,7 +270,7 @@ Reporting maps to analytics and [webhooks](/api/webhooks): arrival is `message.d
 </ParamField>
 
 <ParamField path="options.ioClient" type="io factory">
-  Inject your own `socket.io-client` instead of the bundled one, useful on the CDN path or to pin a version.
+  Inject your own real-time client instead of the bundled one, useful on the CDN path or to pin a version.
 </ParamField>
 
 <ParamField path="options.push" type="false | { serviceWorkerPath?: string }">
@@ -484,7 +484,7 @@ Both `/inapp/challenge` and `/inapp/verify` are rate limited to **3 requests per
 
 ### Step 3, Connect the socket
 
-Connect Socket.IO at path `/api/v1/inapp/register`. The token can go in `handshake.auth.token`, an `Authorization: Bearer` header, or a `?t=` query param.
+Open the real-time connection at path `/api/v1/inapp/register`. The token can go in `handshake.auth.token`, an `Authorization: Bearer` header, or a `?t=` query param.
 
 ```ts
 import { io } from "socket.io-client";
@@ -691,6 +691,6 @@ Rate-limit (429) responses from the throttler return a flat body, `{ statusCode,
   </Accordion>
 
   <Accordion title="Real-time works locally but not in production" icon="server">
-    Multi-instance deployments need `REDIS_URL` set so the Socket.IO Redis adapter can broadcast across nodes. Without it, live delivery only reaches users connected to the same instance, replay on reconnect still works, so the symptom is delayed rather than missing notifications.
+    Live delivery depends on the wallet holding an open real-time connection. If something in your production stack closes idle connections (an aggressive proxy or load balancer, for example), toasts fall back to web or mobile push, and anything missed is replayed on the next reconnect, so it's delayed rather than lost. Make sure your infrastructure allows long-lived WebSocket connections.
   </Accordion>
 </AccordionGroup>
