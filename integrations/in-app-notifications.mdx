@@ -341,7 +341,24 @@ The SDK fetches the platform VAPID key, registers the subscription with the serv
 
 ## Mobile push
 
-For a native iOS or Android app, register the device's push token after `start()`. The SDK doesn't fetch the token, obtain it with your own push library (`expo-notifications`, `@react-native-firebase/messaging`, etc.) and hand it over.
+Mobile push reaches a native iOS or Android app even when it's closed. It needs a one-time setup, because each notification travels through Apple's and Google's own push services, and they have to trust your app first.
+
+**What you need from your side:**
+
+<Steps>
+  <Step title="Set up push with Apple and Google">
+    - **iOS:** an Apple Developer account and an **APNs auth key** (a `.p8` file).
+    - **Android:** a Firebase project with **Firebase Cloud Messaging (FCM)** enabled, and its service-account key.
+  </Step>
+  <Step title="Upload those credentials once, in the dashboard">
+    An Owner or Admin adds them under your organization's push credentials. Until they're in place, device tokens register but nothing is delivered.
+  </Step>
+  <Step title="Get the device token in your app, and hand it to the SDK">
+    The SDK doesn't fetch the token for you. Get it with your own push library (for example `expo-notifications` or `@react-native-firebase/messaging`) and pass it to `registerDevice`.
+  </Step>
+</Steps>
+
+**What this does:** ties one device to a wallet so pushes can reach it. Call it after `start()`.
 
 ```ts
 import messaging from "@react-native-firebase/messaging";
@@ -350,17 +367,13 @@ await client.start(walletAddress);
 await messaging().requestPermission();
 
 const token = await messaging().getToken();
-await client.registerDevice(token, "android");
+await client.registerDevice(token, "android"); // use "ios" for Apple devices
 
-// Keep it fresh; tokens rotate.
+// Tokens rotate, so keep the registration fresh.
 messaging().onTokenRefresh((t) => client.registerDevice(t, "android"));
 ```
 
-Use `"ios"` for APNs. Stop delivery to one device with `unregisterDevice(token)`.
-
-<Note>
-Mobile push requires your Apple (APNs `.p8`) or Firebase (FCM service account) credentials on file, an OWNER or ADMIN uploads them once in the dashboard under organization push credentials. Without them, device tokens register but nothing is delivered.
-</Note>
+Use `"ios"` for Apple devices (APNs) and `"android"` for Android (FCM). Stop delivery to one device with `unregisterDevice(token)`.
 
 ## Choosing a channel is automatic
 

@@ -23,7 +23,7 @@
   },
   "styling": {
     "eyebrows": "breadcrumbs",
-    "codeblocks": "dark"
+    "codeblocks": "system"
   },
   "logo": {
     "light": "/logo/light.png",
@@ -161,6 +161,7 @@
           {
             "group": "Developers",
             "icon": "code",
+            "root": "api/developers",
             "pages": [
               "api/domains",
               "api/automation-triggers",
