@@ -13,7 +13,7 @@ This page covers all three in plain terms.
 
 ## On-chain triggers
 
-These start a flow from something that happens on-chain. Nine are **business presets**, each built around a moment that matters, and one is a generic catch-all for anything the presets don't cover.
+These start a flow from something that happens on-chain. Over twenty are **business presets**, each built around a moment that matters, plus a generic catch-all for anything a preset doesn't cover.
 
 On EVM chains they fire automatically: the platform watches the contract for you and turns matching activity into automation entries, with nothing to index or configure. See [Contract-Based Flows](/automation/contract-based-flows). On Solana, on-chain events are sent in through the [Automation Trigger API](/api/automation-triggers), a developer task.
 
@@ -23,17 +23,34 @@ For a preset you supply **one thing: the token or contract to watch.** The rest,
 
 | Preset | Fires when |
 | --- | --- |
-| **Token acquired** | A new wallet mints in |
-| **Governance activity** | A proposal is created or a vote is cast |
-| **Swap completed** | A wallet makes a DEX trade |
-| **Liquidity added** | A wallet deposits into your protocol |
-| **Borrow opened** | A borrow position opens |
-| **Capital withdrawn** | Liquidity or capital is pulled out |
-| **Liquidation detected** | A wallet is liquidated |
-| **Approval intent** | A wallet approves your contract |
-| **Exchange outflow** | Tokens head to an exchange |
+| **Token acquired** | A new wallet mints in. |
+| **Large transfer** | A transfer moves more than a size you set. |
+| **Supply change** | Tokens are issued or redeemed (a mint or a burn). |
+| **NFT sold** | An NFT sells on a marketplace. |
+| **NFT listed** | An NFT is listed for sale. |
+| **Swap completed** | A wallet makes a DEX trade. |
+| **Position opened** | A wallet opens a leveraged or margin position. |
+| **Position closed** | A wallet closes a position, a natural win-back moment. |
+| **Liquidity added** | A wallet deposits liquidity into your protocol. |
+| **Capital withdrawn** | Liquidity or capital is pulled out. |
+| **Borrow opened** | A wallet opens or extends a borrow. |
+| **Loan repaid** | A wallet pays down its debt. |
+| **Liquidation detected** | A wallet is liquidated. |
+| **Rewards claimed** | A wallet harvests rewards or yield. |
+| **Staked** | A wallet stakes, restakes, or deposits into a vault. |
+| **Unstaked** | A wallet unstakes or requests a withdrawal, an early-exit signal. |
+| **Approval intent** | A wallet approves a contract, a pre-conversion signal. |
+| **Exchange outflow** | Tokens head to an exchange, a churn signal. |
+| **Governance activity** | A proposal is created or a vote is cast. |
+| **Delegated** | A wallet delegates its voting power. |
+| **Bridged** | Tokens move across chains. |
+| **Attestation** | A wallet registers a name or earns a credential. |
 
 You also pick the **chain** to watch, though it's usually filled in from your project settings. That's the whole setup: pick your token, publish.
+
+<Note>
+A couple of presets take one extra input. **Large transfer** asks for the amount that counts as "large," so set it to a meaningful size for your token. The lending, staking, and NFT presets watch the specific contract or collection you name.
+</Note>
 
 ### Generic on-chain event
 
@@ -53,16 +70,32 @@ For a numeric threshold, "more than $100," say, use a **branch** later in the fl
 
 Anything your product does can start a flow. Send a [custom event](/integrations/custom-events), a signup, a deposit, a plan upgrade, and match it by name. Always name the events you want to match; leaving it blank matches *every* custom event. The full path, from firing the event to the user seeing an in-app push, is in [Custom Events](/integrations/custom-events#end-to-end-notify-a-user-from-an-offchain-event).
 
-## Lifecycle triggers
+## Off-chain triggers
 
-Three triggers fire on things that happen inside your audience:
+These fire on things that happen in your audience and your messaging, no chain activity required. Ten are available:
 
-- **Entered a segment.** A contact joins a segment you're watching.
-- **Opened an email.** A recipient opens a campaign email (optionally, one specific campaign).
-- **Health score crossed a line.** A contact's health score rises above, or falls below, a number you set.
+| Trigger | Fires when |
+| --- | --- |
+| **Segment entered** | A contact joins a saved segment. |
+| **Form submitted** | A wallet completes a capture form (any form, or one you pick). |
+| **Joined a list** | A contact is added to a list. |
+| **Email opened** | A recipient opens one of your campaign emails. |
+| **Email clicked** | A recipient clicks a link in an email. |
+| **Email bounced** | An email hard-bounces, a list-hygiene signal you can act on. |
+| **Unsubscribed** | A contact unsubscribes. |
+| **Health factor crossed** | A wallet's on-chain lending position falls through a health-factor threshold you set, in time to warn them before liquidation. |
+| **Date reached** | A fixed date arrives, or a yearly date stored on the contact (a birthday, a renewal). |
+| **Lifetime value crossed** | A contact's estimated lifetime value rises above, or falls below, a dollar figure you set. |
+
+Most of these fire on their own, from real activity in your workspace, so there's nothing to wire up. A few have details worth knowing:
 
 <Note>
-These, and custom events, fire when your system tells the platform they happened, through the [Automation Trigger API](/api/automation-triggers). The platform doesn't invent them on its own.
+Two triggers are easy to confuse:
+
+- **Health factor crossed** is about a wallet's **on-chain lending position**. You set the chain, the lending pool, and the threshold, where `1.0` means liquidation, so a value like `1.2` warns the borrower while they can still act. Use it for at-risk-borrower and liquidation-rescue flows.
+- **Lifetime value crossed** is about a contact's **estimated dollar value to you**, and has nothing to do with lending. In the builder this one is currently labelled "Health factor threshold" (a naming fix is on the way), so pick it by the description, not the label.
+
+Also, **Date reached** uses your team's timezone, not each contact's, so "9:00am" means 9:00am where the flow was built.
 </Note>
 
 ## One entry per event

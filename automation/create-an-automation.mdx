@@ -30,37 +30,57 @@ An automation is a **trigger** (the thing that starts it) plus a **flow** (what 
 
 ## The building blocks
 
-Seven blocks make up a flow:
+Eleven blocks make up a flow. The messaging blocks reach the contact; the rest shape the flow, organize your audience, or call your own systems.
 
 | Block | What it does |
 | --- | --- |
-| **Send email** | Email the contact |
-| **Send in-app** | Send an in-app push to the contact's wallet |
-| **Launch campaign** | Fire a campaign you've already prepared |
-| **Wait** | Pause the flow for a while |
-| **Branch** | Split the flow down different paths |
-| **Add tag** | Tag the contact |
-| **Call a webhook** | Ping your own system (for developers) |
+| **Send email** | Email the contact from a template. |
+| **Send in-app** | Push an in-app notification to the contact's wallet. |
+| **Wait** | Pause the flow for a set time, or until the contact does something. |
+| **Branch** | Split the flow down different paths based on a condition. |
+| **A/B split** | Randomly split contacts into weighted variants, for a test or a holdout. |
+| **Add tag** | Put a tag on the contact. |
+| **Remove tag** | Take a tag off the contact. |
+| **Add to list** | Add the contact to an audience list. |
+| **Remove from list** | Take the contact off an audience list. |
+| **Launch campaign** | Fire a campaign you've already built. |
+| **Call a webhook** | Ping your own system (for developers). |
 
-### The messaging blocks
+### Messaging blocks
 
-The three messaging blocks (send email, send in-app, launch campaign) send to **the contact who triggered the flow** by default, or to a specific list of wallets you name. Content is personalized per recipient, so an in-app push supports the same merge variables as email, like `{{ greeting_name }}`.
+**Send email**, **Send in-app**, and **Launch campaign** all send to **the contact who triggered the flow** by default. You can also aim them at a specific list of wallets, or a whole segment. Content is personalized per recipient, so an in-app push supports the same merge variables as email, like `{{ greeting_name }}`.
 
-- **Send email** uses a saved template, or a subject and body you type in. It needs at least one of those.
+- **Send email** uses a saved template plus a subject line (required, so it lands well in the inbox).
 - **Send in-app** uses a title and body, with an optional button (give it both a label and a link for the button to show).
 - **Launch campaign** kicks off a campaign you've already built, aimed at the recipient.
 
 ### Wait
 
-Pause the flow before the next step: a number of seconds, minutes, hours, or days, or "until 9:00am in this timezone." Waiting contacts are parked and picked back up when the time comes, so a long wait costs you nothing while it sits.
+Pause before the next step in one of two ways:
 
-### Add tag
+- **For a set time**, a number of seconds, minutes, hours, or days, or "until 9:00am in a timezone."
+- **Until the contact does something**, hold them here until they enter a segment, submit a form, open an email, or a matching on-chain event fires, with a timeout path if it never happens.
 
-Tag the contact, one tag or several at once. Useful for marking who's been through a flow so you can segment or suppress on it later. (There's no "remove tag" step.)
+Waiting contacts are parked and picked back up when the time comes, so a long wait costs you nothing while it sits.
+
+### A/B split
+
+Randomly send contacts down two or more paths, each with a weight you set (50/50 by default). Use it to test two messages against each other, or to hold a group back as a control:
+
+- **Weights are relative**, so 70/30 sends roughly seven in ten down the first path.
+- **A variant with no path out is your holdout**: contacts assigned to it simply stop, giving you an untouched control group to compare against.
+- **Assignment is stable**, a contact keeps the same variant even if the flow retries, so your test stays clean.
+
+### Tags and lists
+
+Four blocks keep your audience organized as contacts move through a flow:
+
+- **Add tag** and **Remove tag** put a tag on the contact or take it off (one or several at once). Handy for marking who's been through a flow so you can segment or suppress on it later. Removing a tag the contact doesn't have is simply a no-op.
+- **Add to list** and **Remove from list** move the contact in or out of an audience [list](/audience/segments). Adding to a list can itself start a "joined a list" automation (loops are prevented), so lists are a clean way to hand a contact from one flow into another. Removing from a list is the way back out.
 
 ### Call a webhook (for developers)
 
-The webhook block pings one of your own endpoints partway through a flow, so your systems can react to what happened. It's the one developer-flavored block: it needs a public `https` URL, and it hands your endpoint the contact's context. The full detail, payload shape, retries, and the security rules, is in [Webhooks](/api/webhooks). This block sends **out**; to start an automation from your own system, see [Contract-Based Flows](/automation/contract-based-flows).
+The webhook block pings one of your own endpoints partway through a flow, so your systems can react to what happened. It's the one developer-flavored block: it needs a public `https` URL, and it hands your endpoint the contact's context. You can add a signing secret so your receiver can confirm the call really came from us. The full detail is in [Webhooks](/api/webhooks). This block sends **out**; to start an automation from your own system, see [Contract-Based Flows](/automation/contract-based-flows).
 
 ## Drafts and validation
 
