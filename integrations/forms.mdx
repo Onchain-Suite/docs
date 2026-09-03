@@ -1,0 +1,120 @@
+---
+title: "Forms"
+description: "Embed a capture form, submit to it from your site or backend, and optionally prove wallet ownership."
+---
+
+Capture forms are how email enters your workspace, with consent. A visitor gives you their address, confirms it, and joins a list you can message. The full walkthrough for marketers is [Capture Forms](/audience/capture-forms); this page is the **implementation** side: how to put a form on your site, submit to it, and optionally verify a wallet.
+
+<Note>
+**In plain terms.** You build the form in the dashboard (its fields, its consent text, the list it feeds). Then you either paste a ready-made snippet onto your site, or, if you want full control of the look, render your own form and post to one endpoint. Either way the platform handles the confirmation email, spam protection, and list membership for you.
+</Note>
+
+## Which method should I use?
+
+- **Just want a form on your page**, copy the **embed snippet** from the dashboard. No code to write.
+- **Want it to match your design**, **render your own** form and post to the submit endpoint.
+- **Already collect email somewhere else**, use **server-side ingest** with a secret key.
+- **Want proof the wallet is really theirs**, add the **wallet verification** handshake.
+
+## The fastest path: the dashboard embed
+
+Every form gives you a ready-to-paste HTML snippet (find it on the form in your dashboard). Drop it onto your page and you're done: it renders the fields, includes spam and bot protection, shows your consent checkbox, and posts to the right place. This is the recommended path for most sites.
+
+## Submit from your own form
+
+Prefer to build the markup yourself? Post the visitor's details to the form's public submit endpoint. The `{token}` is the form's public token, shown on the form in your dashboard.
+
+**What this does:** sends one submission to the form. If the form uses double opt-in, this starts the confirmation email, and the contact joins the list only after they click the link.
+
+```bash
+curl -X POST https://api.onchainsuite.com/api/v1/public/forms/{token}/submit \
+  -H "Content-Type: application/json" \
+  -d '{
+    "email": "alice@example.com",
+    "walletAddress": "0xabc...",
+    "fields": { "referral": "twitter" },
+    "consent": true,
+    "consentText": "I agree to receive product updates."
+  }'
+```
+
+The endpoint is public (the token is the credential) and accepts submissions from any origin unless you've set an origin allowlist on the form. It returns quickly and finishes the work in the background, so a success response means "accepted," not "already added." At least one of `email` or `walletAddress` is required, and a form that requires consent rejects a submission without `consent: true`.
+
+<Note>
+To render your own inputs correctly, fetch the form's public definition first. A `GET` on `/api/v1/public/forms/{token}` returns the form's fields, settings, and consent text (and nothing private), so you can build your markup from it.
+</Note>
+
+<Warning>
+If your form has the bot challenge turned on, use the **dashboard embed snippet** rather than hand-rolling the markup, the snippet wires the challenge up for you. A custom form that skips it can be rejected as unverified.
+</Warning>
+
+## Verify wallet ownership (optional)
+
+A submitted wallet address is self-reported by default. To record it as **verified**, have the wallet sign a short challenge before you submit. This never blocks a submission: an unsigned wallet is still captured, just marked unverified.
+
+**What this does:** asks the platform for a one-time message, has the wallet sign it, and submits the signature so the platform can confirm the wallet is genuinely the visitor's.
+
+```ts
+// 1. Ask for a one-time challenge for this wallet
+const { message, nonce } = await fetch(
+  `https://api.onchainsuite.com/api/v1/public/forms/${token}/nonce?wallet=${address}`,
+).then((r) => r.json());
+
+// 2. Have the wallet sign the exact message returned
+const signature = await signMessage(message); // your wallet library
+
+// 3. Submit with the signed proof
+await fetch(`https://api.onchainsuite.com/api/v1/public/forms/${token}/submit`, {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify({
+    email: "alice@example.com",
+    consent: true,
+    wallet: { address, signature, nonce },
+  }),
+});
+```
+
+The challenge is single-use and valid for a few minutes. Sign the message exactly as it comes back.
+
+## Ingest from your backend
+
+Already have a consented email from elsewhere? Hand it to the same form from your server with a **secret key**, no browser involved. Use this for imports or server-side capture.
+
+**What this does:** submits to the form as a trusted server-to-server call. The key's organization must own the form, or the request 404s.
+
+```bash
+curl -X POST https://api.onchainsuite.com/api/v1/forms/{token}/ingest \
+  -H "Authorization: Bearer sk_live_…" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "email": "alice@example.com",
+    "walletAddress": "0xabc...",
+    "consent": true,
+    "consentText": "I agree to receive product updates."
+  }'
+```
+
+<Note>
+The first server-side ingest **permanently switches the form into API mode** and turns on privacy protection for its captures. See [Server-Side API](/integrations/server-api#quickstart-ingest-a-capture).
+</Note>
+
+## What you set on the form (in the dashboard)
+
+You configure a form once, in the dashboard, and every submission path above respects it:
+
+| Setting | What it controls |
+| --- | --- |
+| Fields | Which inputs you collect (email, wallet, and your own text fields). |
+| Double opt-in | Whether a confirmation click is required before joining. On by default for new forms. |
+| Bound list | The [segment](/audience/segments) confirmed contacts join. If you don't pick one, a list named after the form is created for you. |
+| Consent | Whether consent is required, and the exact wording stored with each submission. |
+| Success URL | Where to send someone after they confirm (otherwise they see a branded success page). |
+| Allowed origins | The sites permitted to submit. Leave empty to allow any. |
+| Tags | Applied to contacts on confirmation, including per-answer tagging rules. |
+
+## After a submission
+
+With double opt-in, a submission is **pending** until the visitor clicks the confirmation link (single-use, valid 14 days). Only then do tags and list membership apply, and confirmation fires the `segment_entered` and `form_submitted` triggers, so a [welcome automation](/automation/triggers-and-conditions) can greet them. Without double opt-in, they join immediately.
+
+The email address is never returned by any read path: you see reachability and consent, not the address itself. Custom `fields` are capped (up to 20 keys, and any key containing "email" is dropped), so keep them small and purposeful.

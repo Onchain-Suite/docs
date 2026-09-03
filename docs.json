@@ -46,7 +46,6 @@
             "icon": "rocket",
             "pages": [
               "index",
-              "getting-started/overview",
               "getting-started/create-your-workspace",
               "getting-started/set-up-project-settings",
               "getting-started/send-your-first-campaign"
@@ -56,7 +55,6 @@
             "group": "Campaigns",
             "icon": "paper-plane",
             "pages": [
-              "campaigns/overview",
               "campaigns/create-a-campaign",
               "campaigns/email-editor",
               "campaigns/template-library",
@@ -68,7 +66,6 @@
             "group": "Audience",
             "icon": "users",
             "pages": [
-              "audience/overview",
               "audience/unified-profiles",
               "audience/wallet-enrichment",
               "audience/segments",
@@ -82,7 +79,6 @@
             "group": "Intelligence",
             "icon": "chart-mixed",
             "pages": [
-              "intelligence/overview",
               "intelligence/sql-query-editor",
               "intelligence/starter-queries",
               "intelligence/generate-sql",
@@ -94,7 +90,6 @@
             "group": "Analytics",
             "icon": "chart-column",
             "pages": [
-              "analytics/overview",
               "analytics/holder-distribution",
               "analytics/retention-cohorts",
               "analytics/engagement-by-segment",
@@ -106,7 +101,6 @@
             "group": "Automation",
             "icon": "bolt",
             "pages": [
-              "automation/overview",
               "automation/create-an-automation",
               "automation/triggers-and-conditions",
               "automation/contract-based-flows",
@@ -117,7 +111,6 @@
             "group": "Project Settings",
             "icon": "gear",
             "pages": [
-              "settings/overview",
               "settings/branding",
               "settings/sender-verification",
               "settings/domain-authentication",
@@ -152,6 +145,7 @@
               "integrations/overview",
               "integrations/in-app-notifications",
               "integrations/custom-events",
+              "integrations/forms",
               "integrations/server-api",
               "integrations/api-keys",
               "integrations/wallet-and-contract-data"

@@ -100,7 +100,7 @@ curl -X POST https://api.onchainsuite.com/api/v1/v2/automations/runtime/triggers
   }'
 ```
 
-Optional fields let you match more precisely: `topic0` (the event signature hash), `programId` and `instructionName` (Solana), and `sourceId` to tag the origin. The platform resolves the canonical event from whatever you supply, preferring `topic0`, then Solana program plus instruction, then the event name.
+This endpoint matches on the fields above: the `event` name, and any of `contractAddress`, `walletAddress`, and your `payload` keys that the automation's trigger filters on. Always send `txHash` so retries are de-duplicated (see [Deduplication](#deduplication)).
 
 <Note>
 For most EVM contracts you don't need this endpoint at all. The platform watches the contract for you once the automation is published. Send events in only for Solana contracts or when you run your own indexer. See [Contract-Based Flows](/automation/contract-based-flows).

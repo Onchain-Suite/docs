@@ -188,3 +188,23 @@ h3 {
   font-size: 0.875em;
   white-space: nowrap;
 }
+
+/* ---------------------------------------------------------------------------
+ * Sidebar — slightly slimmer than the Mintlify default to give content more
+ * room. `#sidebar` is Mintlify's left-nav container; these hooks are internal
+ * and subject to change, so the rules are additive and no-op if they move.
+ * Verify on a deploy: if a gap appears between the nav and the content, the
+ * content offset variable below needs matching.
+ * ------------------------------------------------------------------------ */
+@media (min-width: 1024px) {
+  :root {
+    /* Mintlify keys its left content offset to this custom property on newer
+     * builds; setting it keeps the content flush with the slimmer sidebar. */
+    --sidebar-width: 16rem;
+  }
+
+  #sidebar {
+    width: 16rem !important;
+    min-width: 16rem !important;
+  }
+}
