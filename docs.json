@@ -23,7 +23,12 @@
   },
   "styling": {
     "eyebrows": "breadcrumbs",
-    "codeblocks": "system"
+    "codeblocks": {
+      "theme": {
+        "light": "light-plus",
+        "dark": "dark-plus"
+      }
+    }
   },
   "logo": {
     "light": "/logo/light.png",
