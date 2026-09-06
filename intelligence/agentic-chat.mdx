@@ -1,0 +1,69 @@
+---
+title: "Agentic Chat"
+description: "Ask anything about your on-chain and off-chain audience in plain English, and turn the answer into an audience."
+---
+
+Agentic Chat is the fastest way to get an answer out of your data. Ask a question the way you'd ask a teammate, and the assistant does the digging: it reads your on-chain and email data, works through the question step by step, and answers in plain English, usually with a table you can scan. When the answer is an audience, it can save it as a segment for you.
+
+<Note>
+**In plain terms.** It's not a search box that runs one lookup. It reasons: it picks the right data, runs a query or two, reads the results, and sometimes asks a clarifying question before answering. Think analyst, not filter.
+</Note>
+
+## What you can ask
+
+Ask about your **on-chain** audience, your **email and campaign** results, or both at once, which is where it shines.
+
+**On-chain**
+- Who holds your token or NFT, and how holdings are spread.
+- A wallet's balances, recent activity, and NFT holdings across chains.
+- Token prices, and how a wallet's portfolio value has moved.
+- Who's active on a contract, and who has approved it.
+
+**Off-chain (your audience and messaging)**
+- Who opened, clicked, or bounced on a recent campaign.
+- Which segment converts best.
+- Look up a contact and see their engagement.
+
+**Both together, the useful part**
+- "Which of my holders never open my emails?"
+- "Top 100 wallets by portfolio value that went quiet this month."
+- "Holders of this collection who clicked the last campaign."
+
+Crossing on-chain holdings with email engagement in one question is the thing a rule builder can't do, and chat does it for you.
+
+## It builds the audience for you
+
+When an answer is a list of people worth messaging, ask the assistant to **save it as a segment**. It creates a real, reusable audience (named however you like) that shows up in the **Segments** tab and anywhere segments are used, ready to drop into a campaign or automation. You review it and launch; the assistant never sends anything on its own.
+
+## It proposes, you approve
+
+The assistant can go a step further and draft the next move, a campaign aimed at a segment, an in-app message, a retention play, but these are always **proposal-first**. It shows you exactly what it would do and waits for your go-ahead. Nothing sends, and anything it drafts stays a draft until you activate it. Building a segment is the one thing it does right away, because a segment only groups people, it doesn't message anyone.
+
+## Privacy holds
+
+The assistant works with contact records and, at most, email domains, never raw email addresses. Segments store the people, not their addresses, and the send pipeline resolves each person to a channel only at send time. So you can analyze and build audiences freely without exposing anyone's address. See [Privacy and ZK](/audience/privacy).
+
+## What it runs on
+
+On-chain answers read from your **enriched wallet data**: each wallet's portfolio value, activity, NFT holdings, and scores. The "Data enriched · N wallets" status at the top of Intelligence shows how many of your wallets are enriched and how fresh that is. Answers are only as complete as that set, so [enrich more wallets or refresh](/audience/wallet-enrichment) before a big analysis. Two related notes:
+
+- **Email-only contacts** (no wallet on file) don't appear in on-chain questions, but the assistant can still find them by their engagement.
+- **Results are bounded.** Each step returns a capped number of rows and tells you when a list is cut short, so a "total" can be a large sample rather than every last wallet. Ask it to narrow the question when you need an exact count.
+
+## What it costs
+
+Chat is the most capable AI feature, so it draws the most from your monthly **AI-credit** allowance: roughly **35 to 50 credits per turn**, depending on how much reasoning the question needs (a quick lookup costs less than a deep, multi-step analysis). For comparison, generating a single SQL query costs 5.
+
+| Plan | Monthly AI credits |
+| --- | --- |
+| Launch | 500 |
+| Growth | 8,000 |
+| Pro | 16,000 |
+
+When the monthly allowance runs out, chat pauses (the [SQL editor](/intelligence/sql-query-editor) keeps working, and running SQL is always free), and on pay-as-you-go it draws from your prepaid balance instead. Warnings appear as you approach the limit. See [Plans and billing](/settings/plans-and-billing).
+
+## Getting good answers
+
+- **Name the specifics:** the chain or contract, a time window ("this month"), and the goal ("for a win-back"). Vague questions get clarifying questions back.
+- **Ask for the audience you'll act on,** and save it as a segment in the same breath: "...and save those as a segment called Dormant Whales."
+- **Spot-check before you send.** Treat a chat-built segment like any draft audience: read a few rows against wallets you recognize before wiring it into a live campaign.

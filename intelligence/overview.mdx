@@ -1,36 +1,46 @@
 ---
 title: "Overview"
-description: "Use intelligence tools to turn wallet, contract, and product activity into audiences and insights."
+description: "Turn wallet, contract, and product activity into answers and audiences, by chat, by SQL, and from enriched wallet data."
 ---
 
-## What Intelligence Covers
+Intelligence is where your on-chain and off-chain data meet, so you can answer questions about your audience and turn the answers into audiences you can message. It handles questions like:
 
-The intelligence area helps teams answer questions like:
+- Which of my holders never open my emails?
+- Which high-value wallets have gone quiet this month?
+- Which cohort responded best to the last campaign?
+- Which segment is worth activating next?
 
-- Which users are most likely to churn?
-- Which wallets show high-value behavior?
-- Which cohorts responded to the last campaign?
-- Which segments are worth activating next?
+There are four ways in, and they all read from the same data.
 
-## Ways to work
+## The four pillars
 
 <CardGroup cols={2}>
+  <Card title="Agentic Chat" icon="sparkles" href="/intelligence/agentic-chat">
+    Ask anything in plain English. The assistant does the digging and can build a segment for you. Start here.
+  </Card>
+  <Card title="Wallet enrichment" icon="wand-magic-sparkles" href="/audience/wallet-enrichment">
+    The on-chain data behind every answer: each wallet's portfolio value, activity, NFTs, and scores.
+  </Card>
   <Card title="SQL editor" icon="table" href="/intelligence/sql-query-editor">
-    Query the curated schema directly for full control.
+    Full control, for an exact, repeatable cohort that combines on-chain, audience, and messaging data.
   </Card>
-  <Card title="Generate SQL" icon="wand-magic-sparkles" href="/intelligence/generate-sql">
-    Describe a cohort in plain language and get a draft query.
-  </Card>
-  <Card title="Starter queries" icon="bookmark" href="/intelligence/starter-queries">
-    Six ready-to-run queries for common cohorts.
-  </Card>
-  <Card title="AI assistant" icon="message" href="#ai-assistant">
-    Ask questions in a chat that can run queries for you.
+  <Card title="Segments" icon="filter" href="/intelligence/segments-from-queries">
+    Turn any answer or query into a reusable audience for campaigns and automations.
   </Card>
 </CardGroup>
 
-## AI assistant
+## Start with a question
 
-Alongside the editor there's a conversational assistant. Ask a question in plain language and it can run curated SQL, surface recommendations, and help shape a segment. It draws on the same read-only schema, so it can never see another workspace's data or modify anything.
+The fastest path is [Agentic Chat](/intelligence/agentic-chat). Ask something like "which of my holders never open my emails," and the assistant reasons across your on-chain and email data, answers in plain English, and offers to save the result as a segment. It's the front door to everything else here.
 
-Assistant chat costs more AI credits than a one-off SQL generation, because each turn can reason and call tools. See the credit costs on [Generate SQL](/intelligence/generate-sql#modes-and-credit-cost).
+## The data behind every answer
+
+Every on-chain answer, in chat or SQL, reads from **enriched wallet data**: each wallet's portfolio value, recent activity, NFT holdings, and derived engagement and value scores. The "Data enriched · N wallets" status at the top of Intelligence shows how many of your wallets are enriched and how fresh that data is. Answers are only as complete as that set, so [enrich more wallets](/audience/wallet-enrichment) or refresh before a big analysis.
+
+## When to reach for SQL
+
+Chat handles most questions. Reach for the [SQL editor](/intelligence/sql-query-editor) when you need an exact, repeatable cohort in one precise definition, or want to save a query and re-run it for free. Prefer to describe it in words? [Generate a draft query](/intelligence/generate-sql) from a plain-language prompt, then refine it.
+
+## Turn answers into audiences
+
+However you get there, chat, a [starter query](/intelligence/starter-queries), or your own SQL, the output becomes a [segment](/intelligence/segments-from-queries): a saved, reusable audience you drop into a campaign or automation. That's the whole point of Intelligence, not just to learn something, but to act on it.
