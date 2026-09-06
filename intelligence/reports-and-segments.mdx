@@ -1,0 +1,120 @@
+---
+title: "Reports and Segments"
+description: "Generate a query from a prompt, save its result as a report to rerun and export, or turn it into a reusable segment."
+---
+
+Once you have a query in the [SQL editor](/intelligence/sql-query-editor), this page is what you do with it. Don't want to write the SQL yourself? Generate it from a plain-language prompt. Happy with the result? Save it as a **report** to rerun and export, or as a **segment** to message.
+
+## Generate a query from a prompt
+
+Describe the cohort you want and get back a draft query against the [curated schema](/api/sql-schema). Useful when you know the audience but don't want to start from an empty editor.
+
+### Modes and credit cost
+
+| Mode | Credits | Use it for |
+| --- | --- | --- |
+| `fast` | 1 | Simple single-table filters |
+| `best` | 5 | Multi-table joins and derived logic, the default |
+
+Repeating the same prompt within 6 hours returns the cached result and costs **nothing**. Running the resulting SQL is always free; only generation consumes credits. (For comparison, a turn in [Agentic Chat](/intelligence/agentic-chat), which reasons and runs queries for you, costs more, roughly 35 to 50.) Your plan's allowance is on [Plans and billing](/settings/plans-and-billing). If your workspace runs out of credits, generation is blocked while the editor keeps working, you can still write and run SQL by hand.
+
+### Writing a good prompt
+
+The strongest prompts name four things:
+
+- The **behavior** to isolate: minted, swapped, clicked, or went quiet
+- The **time window**, such as "in the last 30 days"
+- The **chain or contract**, when relevant
+- The **business goal**: win-back, VIP targeting, or a governance reminder
+
+<CodeGroup>
+```text Vague
+find inactive users
+```
+
+```text Specific
+Find contacts on Base with portfolio value over $5,000 whose last
+onchain activity was more than 30 days ago and who opened an email
+in the last 90 days. I want a win-back audience.
+```
+</CodeGroup>
+
+The second prompt names the chain, the threshold, both time windows, and the goal, so the generated query needs far less editing.
+
+More examples:
+
+- Recent minters on Base who haven't clicked a campaign in the last 30 days.
+- High-value wallets with declining activity that should enter a churn win-back flow.
+- Contacts who clicked a governance reminder but have no `VoteCast` activity.
+- Holders of more than three NFTs from one collection who have never received an email.
+
+### Reviewing the result
+
+Generated SQL is always re-validated against the schema before it reaches you, so it can't contain unsupported tables or write operations. What validation **cannot** check is whether the query answers your actual question.
+
+<AccordionGroup>
+  <Accordion title="Does it answer the question you asked?" icon="circle-question">
+    The most common failure isn't invalid SQL. It's a valid query for a subtly different question. Read the `WHERE` clause against your original intent, line by line.
+  </Accordion>
+  <Accordion title="Will the joins duplicate rows?" icon="copy">
+    `wallet_activity_summary` is per wallet per chain; `nft_holdings` is per token. Joining either to a per-wallet table fans out rows. If a wallet appears twice, that's why; add a `chain` filter or aggregate.
+  </Accordion>
+  <Accordion title="Are wallet joins case-safe?" icon="text-size">
+    Wallet casing isn't normalized. Joins should use `lower()` on both sides or they'll silently drop rows.
+  </Accordion>
+  <Accordion title="Is the date window explicit?" icon="calendar">
+    An unbounded query over all history usually isn't what you meant, and is far more likely to hit the 5-second timeout.
+  </Accordion>
+</AccordionGroup>
+
+Run it on a narrow window first, spot-check a few rows against wallets you recognize, then save. Once saved, the query re-runs for free, so the credit cost is one-time. Treat generated SQL as a first draft from someone who knows the schema but not your business.
+
+## Save as a report
+
+Save a query and it becomes a named result your team can rerun on demand rather than rebuilding. Reports are **free to rerun**; only generating a query from a prompt costs credits.
+
+Reports worth saving:
+
+- Weekly audience health
+- Campaign response by segment
+- Re-engagement opportunities
+- Contract activity summaries
+- High-value wallet cohorts
+
+A report's results export to CSV for a spreadsheet, a deck, or another tool.
+
+**Best practices**
+
+- Use consistent names and clear owners.
+- Make date windows explicit, so a rerun means the same thing next month.
+- Prefer `contact_360` for anything blending identity, on-chain, and email data; it joins them for you.
+- Archive reports you no longer use to keep the workspace tidy.
+
+## Save as a segment
+
+The SQL editor is the most precise way to build an audience, because it can reach on-chain and messaging data the rule builder can't. Any query result can be saved as a **segment** and reused in a campaign or automation.
+
+<Steps>
+  <Step title="Write and run the query">
+    Build the cohort in the [SQL editor](/intelligence/sql-query-editor). Start from a [starter query](/intelligence/starter-queries) if one is close.
+  </Step>
+  <Step title="Include a wallet column">
+    The result must contain a wallet column named `wallet_address`, `wallet`, or `address`. Saving fails without one, because a segment needs someone to target.
+  </Step>
+  <Step title="Save as a segment">
+    Name it and save. It's now available anywhere a segment is.
+  </Step>
+  <Step title="Use it downstream">
+    Feed it into a campaign or an automation.
+  </Step>
+</Steps>
+
+**Checks before saving**
+
+- **Deduplicate.** Joining a per-wallet table to a per-chain or per-token table fans out rows. Aggregate or filter first so a wallet appears once.
+- **Confirm the identity type.** A query returning contacts is different from one returning raw wallet rows; make sure it's the audience you mean.
+- **Spot-check.** Read a few rows against wallets you recognize before wiring the segment into a live send.
+
+<Note>
+A report is for **reading and exporting**; a segment is for **messaging**. Saving as a segment needs a wallet column (`wallet_address`, `wallet`, or `address`); a report is free-form.
+</Note>

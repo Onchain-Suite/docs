@@ -10,7 +10,7 @@ A segment is a reusable group of contacts. Once saved, a segment feeds campaigns
 There are three ways to define one:
 
 - **Rules.** Combine the built-in criteria: tags, a minimum contact score, and whether a wallet address is present.
-- **SQL.** Save any query result as a segment. This is how you build on-chain cohorts, since the [SQL editor](/intelligence/sql-query-editor) can reach enrichment and messaging data the rule builder can't. See [Segments From Queries](/intelligence/segments-from-queries).
+- **SQL.** Save any query result as a segment. This is how you build on-chain cohorts, since the [SQL editor](/intelligence/sql-query-editor) can reach enrichment and messaging data the rule builder can't. See [Segments From Queries](/intelligence/reports-and-segments#save-as-a-segment).
 - **Natural language.** Describe the audience you want and get back draft rules to review.
 
 <Note>
@@ -48,7 +48,7 @@ For anything the three criteria can't express, such as on-chain value, activity 
 - Query-built audiences ready for follow-up
 
 <Note>
-A holder-based segment is only as complete as your contact list. Running [wallet sync](/audience/wallet-enrichment#syncing-holders) discovers the current holders of your configured contracts and adds the new ones as contacts, so a "holders of contract X" segment grows as sync brings in wallets you didn't have yet, without spending per-wallet enrichment credits to find them.
+A holder-based segment is only as complete as your contact list. Running [wallet sync](/intelligence/wallet-enrichment#syncing-holders) discovers the current holders of your configured contracts and adds the new ones as contacts, so a "holders of contract X" segment grows as sync brings in wallets you didn't have yet, without spending per-wallet enrichment credits to find them.
 </Note>
 
 ## Best practices
