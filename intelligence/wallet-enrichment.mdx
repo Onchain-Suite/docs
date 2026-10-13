@@ -91,6 +91,8 @@ Enrichment reads directly from the chains, so the data reflects real on-chain hi
 
 **EVM mainnets:** `eth-mainnet`, `base-mainnet`, `matic-mainnet`, `bsc-mainnet`, `arbitrum-mainnet`, `optimism-mainnet`, `sei-mainnet`. **Solana:** `solana-mainnet`. Testnets including `eth-sepolia`, `base-sepolia-testnet`, `monad-testnet`, and `solana-devnet` are also supported.
 
+**Cosmos:** Sovren (`sovr-1`) is supported for **on-chain event tracking** (licenses, activation, rewards, and governance feed automations and segments, see [Contract-Based Flows](/automation/contract-based-flows)) and for a wallet's **SOVR balance** as a segment attribute. Full portfolio, NFT, and engagement-score enrichment is EVM and Solana only, Sovren wallets carry their balance and on-chain activity rather than a scored portfolio.
+
 A wallet is enriched per chain, so metrics reflect the chain you enriched it on. Enrich the same wallet on multiple chains to build a cross-chain picture, activity summaries are stored per chain.
 
 ## When enrichment runs

@@ -21,7 +21,7 @@ Contract-based flows respond to what wallets actually do on-chain: minting, swap
 Give the trigger a **chain and a contract address**, then publish. That's it. Matching on-chain activity starts creating automation entries after a short delay for finality, so a reversed or re-orged transaction never messages anyone (seconds on an L2, a couple of minutes on Ethereum mainnet).
 
 <Warning>
-**Automatic watching is EVM-only.** For Solana contracts, or if you run your own indexer, send events in through the [Automation Trigger API](/api/automation-triggers) instead, a developer task.
+**Automatic watching covers EVM chains and Sovren (Cosmos).** For Solana contracts, or if you run your own indexer, send events in through the [Automation Trigger API](/api/automation-triggers) instead, a developer task.
 </Warning>
 
 <Note>
@@ -34,7 +34,9 @@ In the builder, a **preset needs one input: your token or contract.** The event 
 
 ### Where it works
 
-Automatic watching covers the major EVM chains, Ethereum, Base, Arbitrum, Optimism, and Polygon, plus Solana through the trigger API. Chain and contract are often filled in from your project settings.
+Automatic watching covers the major EVM chains, Ethereum, Base, Arbitrum, Optimism, and Polygon, plus **Sovren (`sovr-1`), a Cosmos chain** the platform watches natively, and Solana through the trigger API. Chain and contract are often filled in from your project settings.
+
+On Sovren the platform tracks the chain's native module activity, licenses assigned and activated, rewards claimed, and governance, and turns each into a trigger the same way it does EVM contract events. Sovren records these in the chain itself rather than in deployed contracts, so you don't paste a contract address, you pick the moment.
 
 ### What it can watch for
 
