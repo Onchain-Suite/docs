@@ -87,13 +87,25 @@ est_ltv = portfolio_value_usd × 0.08
 
 ## Supported chains
 
-Enrichment reads directly from the chains, so the data reflects real on-chain history.
+Onchain Suite reads wallet and on-chain activity directly from each network, so your audiences and automations work wherever your users are.
 
-**EVM mainnets:** `eth-mainnet`, `base-mainnet`, `matic-mainnet`, `bsc-mainnet`, `arbitrum-mainnet`, `optimism-mainnet`, `sei-mainnet`. **Solana:** `solana-mainnet`. Testnets including `eth-sepolia`, `base-sepolia-testnet`, `monad-testnet`, and `solana-devnet` are also supported.
+<CardGroup cols={3}>
+  <Card title="EVM" icon="ethereum">
+    Ethereum · Base · Arbitrum · Optimism · Polygon · zkSync · BNB Chain · Avalanche · Gnosis · Celo · Scroll · Sei · Kaia · Flow EVM · Hyperliquid · Arc · Robinhood Chain · ADI Chain
+  </Card>
+  <Card title="Non-EVM" icon="layer-group">
+    Solana · Bitcoin · Tron · Aptos · Sui · Starknet
+  </Card>
+  <Card title="Cosmos" icon="atom">
+    Sovren (`sovr-1`) and other Cosmos (CometBFT) chains, tracked natively for on-chain events and wallet balances
+  </Card>
+</CardGroup>
 
-**Cosmos:** Sovren (`sovr-1`) is supported for **on-chain event tracking** (licenses, activation, rewards, and governance feed automations and segments, see [Contract-Based Flows](/automation/contract-based-flows)) and for a wallet's **SOVR balance** as a segment attribute. Full portfolio, NFT, and engagement-score enrichment is EVM and Solana only, Sovren wallets carry their balance and on-chain activity rather than a scored portfolio.
+A wallet is read per chain, so metrics reflect the chain you enriched it on, enrich the same wallet on more than one to build a cross-chain picture. Testnets are available for the major networks (for example `eth-sepolia`, `base-sepolia-testnet`, and `solana-devnet`).
 
-A wallet is enriched per chain, so metrics reflect the chain you enriched it on. Enrich the same wallet on multiple chains to build a cross-chain picture, activity summaries are stored per chain.
+<Note>
+Coverage depth varies by network. EVM chains and Solana return the full picture, portfolio value, NFT holdings, activity, and the derived engagement score and LTV. Cosmos chains contribute on-chain events (licenses, activation, rewards, governance, see [Contract-Based Flows](/automation/contract-based-flows)) and wallet balances that feed segments and automations.
+</Note>
 
 ## When enrichment runs
 
