@@ -1,0 +1,136 @@
+---
+title: "On-Chain Purchase Follow-Up"
+description: "When a wallet buys, mints, or swaps, follow up automatically from the on-chain event, in-app and by email where you have one."
+---
+
+**Goal.** When a wallet completes a purchase on-chain, a mint, a swap, a deposit, follow up automatically: confirm in-app, suggest the next step, and email where you have an address.
+
+**Who it's for.** Web3 teams. This is the wallet-native parallel of the Web2 [Purchase confirmation](/use-cases/web2/purchase-confirmation): the purchase happens **on-chain**, so there's often nothing to send from your backend, the platform sees it for you, and the first touch is **in-app** rather than email.
+
+**Outcome to move.** Repeat on-chain activity and the share of buyers who take the next step.
+
+## Prerequisites
+
+- Your contract configured in [project settings](/getting-started/set-up-project-settings), so the platform can watch it.
+- The [in-app SDK](/integrations/in-app-notifications) installed, so the follow-up can land in your dApp.
+
+## Build it
+
+<Steps>
+  <Step title="Trigger on the on-chain purchase (no code)">
+    For EVM contracts, the platform watches the chain for you. In the [automation builder](/automation/create-an-automation), pick the preset that matches the purchase, **Swap completed**, **Token acquired** (a mint), or **Liquidity added** (a deposit), and give it your contract. That's the whole setup. See [Contract-based flows](/automation/contract-based-flows).
+
+    `trigger (Swap completed) → send in-app (Thanks for your swap)`
+  </Step>
+
+  <Step title="Follow up in-app, and by email where you have one">
+    Add a **Send in-app** block, then branch so wallets with an email also get one:
+
+    `trigger → send in-app → branch (has email → send email | else → in-app only)`
+
+    The in-app message reaches the wallet in your dApp; the email reaches the ones who've shared an address through a [capture form](/audience/capture-forms).
+  </Step>
+
+  <Step title="Purchases your backend knows about (optional)">
+    Some purchases aren't a plain on-chain event, a fiat on-ramp, a Solana contract, or an off-chain store tied to a wallet. Send those in yourself as a custom event keyed by the wallet:
+
+    <CodeGroup>
+    ```bash curl
+    curl -X POST https://api.onchainsuite.com/api/v1/events \
+      -H "Authorization: Bearer sk_live_…" \
+      -H "Content-Type: application/json" \
+      -d '{
+        "event": "purchase_completed",
+        "contact": { "walletAddress": "0xabc..." },
+        "payload": { "sku": "pass-gold", "total_usd": 49.0 },
+        "idempotencyKey": "purchase:0xabc:9184"
+      }'
+    ```
+
+    ```python Python
+    import os, requests
+
+    requests.post(
+        "https://api.onchainsuite.com/api/v1/events",
+        headers={"Authorization": f"Bearer {os.environ['ONCHAIN_SECRET_KEY']}"},
+        json={
+            "event": "purchase_completed",
+            "contact": {"walletAddress": "0xabc..."},
+            "payload": {"sku": "pass-gold", "total_usd": 49.0},
+            "idempotencyKey": "purchase:0xabc:9184",
+        },
+    ).raise_for_status()
+    ```
+
+    ```typescript TypeScript
+    await fetch("https://api.onchainsuite.com/api/v1/events", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${process.env.ONCHAIN_SECRET_KEY}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        event: "purchase_completed",
+        contact: { walletAddress: "0xabc..." },
+        payload: { sku: "pass-gold", total_usd: 49.0 },
+        idempotencyKey: "purchase:0xabc:9184",
+      }),
+    });
+    ```
+
+    ```php PHP
+    $ch = curl_init("https://api.onchainsuite.com/api/v1/events");
+    curl_setopt_array($ch, [
+        CURLOPT_POST => true,
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_HTTPHEADER => [
+            "Authorization: Bearer " . getenv("ONCHAIN_SECRET_KEY"),
+            "Content-Type: application/json",
+        ],
+        CURLOPT_POSTFIELDS => json_encode([
+            "event" => "purchase_completed",
+            "contact" => ["walletAddress" => "0xabc..."],
+            "payload" => ["sku" => "pass-gold", "total_usd" => 49.0],
+            "idempotencyKey" => "purchase:0xabc:9184",
+        ]),
+    ]);
+    curl_exec($ch);
+    curl_close($ch);
+    ```
+
+    ```go Go
+    body, _ := json.Marshal(map[string]any{
+        "event":          "purchase_completed",
+        "contact":        map[string]string{"walletAddress": "0xabc..."},
+        "payload":        map[string]any{"sku": "pass-gold", "total_usd": 49.0},
+        "idempotencyKey": "purchase:0xabc:9184",
+    })
+    req, _ := http.NewRequest("POST",
+        "https://api.onchainsuite.com/api/v1/events", bytes.NewReader(body))
+    req.Header.Set("Authorization", "Bearer "+os.Getenv("ONCHAIN_SECRET_KEY"))
+    req.Header.Set("Content-Type", "application/json")
+    http.DefaultClient.Do(req)
+    ```
+    </CodeGroup>
+  </Step>
+
+  <Step title="Activate and publish.">
+    As with any automation, both are required.
+  </Step>
+</Steps>
+
+## Test
+
+Do the on-chain action with a wallet you control and wait out the short finality delay, then confirm the automation registered an entry and the in-app message arrived. See [Testing a flow](/automation/contract-based-flows#testing-a-flow).
+
+## Measure
+
+- **In-app delivered and viewed**, and email open and click where you sent one.
+- **Repeat purchases** from wallets that entered the follow-up.
+- **Email capture rate** among buyers who had no address.
+
+## Variations
+
+- **Upsell the holders.** Trigger on **Token acquired** and point minters at your next drop.
+- **Win-back.** Pair with an [on-chain trigger](/automation/triggers-and-conditions) like **Exchange outflow** to catch a wallet heading for the door.
+- **Web2 parallel.** A regular, off-chain checkout? Use [Purchase confirmation](/use-cases/web2/purchase-confirmation).

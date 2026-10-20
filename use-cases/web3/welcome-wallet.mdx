@@ -1,0 +1,139 @@
+---
+title: "Welcome a New Wallet"
+description: "When a wallet connects or mints in, greet them in-app automatically, and by email if you have one."
+---
+
+**Goal.** The moment a new wallet connects to your dApp or mints your token, greet them with an in-app notification, and an email too if the wallet has one on file.
+
+**Who it's for.** Web3 teams. This is the wallet-native parallel of the Web2 [Welcome email](/use-cases/web2/welcome-email): same play, but the identity is a **wallet** instead of an email, and the first touch is an **in-app message** instead of an email send, because a fresh wallet usually has no email yet.
+
+**Outcome to move.** First-session activation: the share of new wallets who take your key action (mint, deposit, vote) after connecting.
+
+## Prerequisites
+
+- The **in-app SDK** installed in your dApp, so in-app messages can land. See [In-app notifications](/integrations/in-app-notifications).
+- To greet from an on-chain mint with no code, your contract configured in [project settings](/getting-started/set-up-project-settings).
+- To greet from your own backend, a **secret key**. See [API keys](/integrations/api-keys).
+
+## Build it
+
+<Steps>
+  <Step title="Tell Onchain Suite a wallet arrived">
+    Two ways, pick one:
+
+    - **No code (on-chain):** if "arriving" means minting your token, use the **Token acquired** on-chain trigger. The platform watches your contract and fires for you, nothing to send. See [Contract-based flows](/automation/contract-based-flows).
+    - **From your dApp or backend:** if "arriving" means connecting a wallet in your app, send a `wallet_connected` event with the wallet address.
+
+    **What this does:** tells Onchain Suite "this wallet just showed up," addressed by wallet rather than email.
+
+    <CodeGroup>
+    ```bash curl
+    curl -X POST https://api.onchainsuite.com/api/v1/events \
+      -H "Authorization: Bearer sk_live_…" \
+      -H "Content-Type: application/json" \
+      -d '{
+        "event": "wallet_connected",
+        "contact": { "walletAddress": "0xabc..." },
+        "attributes": { "source": "dapp" }
+      }'
+    ```
+
+    ```python Python
+    import os, requests
+
+    requests.post(
+        "https://api.onchainsuite.com/api/v1/events",
+        headers={"Authorization": f"Bearer {os.environ['ONCHAIN_SECRET_KEY']}"},
+        json={
+            "event": "wallet_connected",
+            "contact": {"walletAddress": "0xabc..."},
+            "attributes": {"source": "dapp"},
+        },
+    ).raise_for_status()
+    ```
+
+    ```typescript TypeScript
+    await fetch("https://api.onchainsuite.com/api/v1/events", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${process.env.ONCHAIN_SECRET_KEY}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        event: "wallet_connected",
+        contact: { walletAddress: "0xabc..." },
+        attributes: { source: "dapp" },
+      }),
+    });
+    ```
+
+    ```php PHP
+    $ch = curl_init("https://api.onchainsuite.com/api/v1/events");
+    curl_setopt_array($ch, [
+        CURLOPT_POST => true,
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_HTTPHEADER => [
+            "Authorization: Bearer " . getenv("ONCHAIN_SECRET_KEY"),
+            "Content-Type: application/json",
+        ],
+        CURLOPT_POSTFIELDS => json_encode([
+            "event" => "wallet_connected",
+            "contact" => ["walletAddress" => "0xabc..."],
+            "attributes" => ["source" => "dapp"],
+        ]),
+    ]);
+    curl_exec($ch);
+    curl_close($ch);
+    ```
+
+    ```go Go
+    body, _ := json.Marshal(map[string]any{
+        "event":      "wallet_connected",
+        "contact":    map[string]string{"walletAddress": "0xabc..."},
+        "attributes": map[string]string{"source": "dapp"},
+    })
+    req, _ := http.NewRequest("POST",
+        "https://api.onchainsuite.com/api/v1/events", bytes.NewReader(body))
+    req.Header.Set("Authorization", "Bearer "+os.Getenv("ONCHAIN_SECRET_KEY"))
+    req.Header.Set("Content-Type", "application/json")
+    http.DefaultClient.Do(req)
+    ```
+    </CodeGroup>
+  </Step>
+
+  <Step title="Build the welcome automation">
+    In the [automation builder](/automation/create-an-automation), trigger on your signal (the **Token acquired** preset, or the custom event `wallet_connected`) and add a **Send in-app** block.
+
+    `trigger → send in-app (Welcome onchain)`
+
+    The in-app push reaches the wallet the moment they're connected, and is held and replayed on their next visit if they've stepped away.
+  </Step>
+
+  <Step title="Reach email too, when you have it (optional)">
+    Branch so wallets you can email also get one. A [Branch](/automation/triggers-and-conditions#branches-route-entries-down-different-paths) on "has email" sends an email where there's an address and falls back to in-app only where there isn't:
+
+    `trigger → branch (has email → send email | else → in-app only)`
+
+    No email yet? Invite the wallet to share one with a [capture form](/audience/capture-forms), the consent-first way email enters your audience.
+  </Step>
+
+  <Step title="Activate and publish">
+    Both are required, same as any automation. See the [publish step](/automation/create-an-automation#publish).
+  </Step>
+</Steps>
+
+## Test
+
+Connect a wallet you control (or mint with it), then check the automation's entries and confirm the in-app toast arrives in your dApp. On-chain triggers fire a short while after the transaction confirms, by design. See [Testing a flow](/automation/contract-based-flows#testing-a-flow).
+
+## Measure
+
+- **In-app delivered and viewed** on the [campaign report](/analytics/campaign-report).
+- **First-session activation**: did welcomed wallets take your key action? Watch it with an on-chain trigger or a follow-up event.
+- **Email capture rate**: how many welcomed wallets went on to share an email.
+
+## Variations
+
+- **Mint welcome.** Trigger on **Token acquired** for a pure on-chain welcome, no code at all.
+- **Add a nudge.** Follow the welcome with a [Wait](/automation/create-an-automation#wait) and a second in-app message if the wallet hasn't acted.
+- **Web2 parallel.** Working from email instead of wallets? Use [Welcome email on signup](/use-cases/web2/welcome-email).

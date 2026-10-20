@@ -1,0 +1,66 @@
+---
+title: "Review and Feedback Requests"
+description: "Ask happy customers for a review or feedback at the right moment, after they've seen value."
+---
+
+**Goal.** A few days after someone receives their order or hits a success milestone, ask for a review or a quick bit of feedback, when they're most likely to say yes.
+
+**Who it's for.** Web2 e-commerce, SaaS, and apps.
+
+**Outcome to move.** Review volume, and feedback you can act on.
+
+## Prerequisites
+
+- A [verified sending domain](/settings/domain-authentication) and a [secret key](/integrations/api-keys).
+
+## Build it
+
+<Steps>
+  <Step title="Send a milestone event">
+    Fire an event at the moment worth celebrating, `order_delivered`, `goal_reached`, or `used_for_30_days`.
+
+    ```bash
+    curl -X POST https://api.onchainsuite.com/api/v1/events \
+      -H "Authorization: Bearer sk_live_…" \
+      -H "Content-Type: application/json" \
+      -d '{
+        "event": "order_delivered",
+        "contact": { "email": "alice@example.com" },
+        "payload": { "order_id": "A-1024", "product": "Standing desk" }
+      }'
+    ```
+
+    Other languages follow the same shape, see the [API Reference](/api-reference).
+  </Step>
+
+  <Step title="Wait, then ask">
+    Give them time to actually use it, then ask once:
+
+    `trigger (order_delivered) → wait 5 days → send email (How's it going? Leave a review)`
+
+    Personalize with the product from the event so the ask feels specific, not generic.
+  </Step>
+
+  <Step title="Route by sentiment (optional)">
+    If your email asks a quick "thumbs up / thumbs down," send that back as an event (`feedback_positive` / `feedback_negative`) and branch: point happy customers to a public review, and route unhappy ones to a support conversation instead of a review site.
+  </Step>
+
+  <Step title="Activate and publish.">
+    Both are required.
+  </Step>
+</Steps>
+
+## Test
+
+Send the milestone event with your own email and confirm the request arrives after the wait, personalized correctly.
+
+## Measure
+
+- **Response rate** on the ask.
+- **Reviews collected** (and average rating).
+- **Negative feedback caught** before it became a public review.
+
+## Variations
+
+- **Only ask the satisfied.** Gate the request on a health or engagement signal so you ask your happiest customers first.
+- **Incentive, carefully.** A small thank-you can lift response, but keep it compliant with the review platform's rules.

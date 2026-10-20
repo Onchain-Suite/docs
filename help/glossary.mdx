@@ -3,7 +3,7 @@ title: "Glossary"
 description: "Definitions for the main Onchain Suite terms used across the docs."
 ---
 
-## Core Terms
+## Core terms
 
 ### Workspace
 
@@ -13,13 +13,17 @@ The top-level container for your team, projects, and shared access.
 
 The operational space where settings, audiences, campaigns, automations, and integrations live.
 
-### Wallet-First Identity
+### Identity
 
-The model where the wallet is the canonical user record and other channels attach when available.
+A contact is one record that can be anchored by a **wallet**, an **email**, or your own **user id**. Any one is enough, and none requires the others, so a wallet-only contact and an email-only contact are both fully usable.
+
+### Reachability
+
+How a contact can be messaged: by **in-app** (for wallets signed in to your dApp), **email**, or both. Segments and sends can target by reachability.
 
 ### Audience
 
-A set of users or wallets selected for messaging, analysis, or lifecycle action.
+A set of contacts, identified by wallet, email, or both, selected for messaging, analysis, or lifecycle action.
 
 ### Segment
 
@@ -35,12 +39,16 @@ A triggered workflow that listens for an event, checks conditions, and sends or 
 
 ### Play
 
-A pre-built automation pattern designed for a common Web3 lifecycle moment.
+A pre-built automation pattern for a common lifecycle moment: welcome, onboarding, purchase, or win-back, plus Web3 moments like first deposit or governance reminders.
 
-### Publishable Key
+### Double opt-in
+
+A capture-form setting that holds a new email contact until they confirm by clicking a link, so only real, consenting addresses enter your audience.
+
+### Publishable key
 
 A client-safe key used for flows such as wallet registration or in-app challenge and verification.
 
-### Secret Key
+### Secret key
 
-A server-only key used for secure protocol-to-platform operations.
+A server-only key used for secure server-to-platform operations.

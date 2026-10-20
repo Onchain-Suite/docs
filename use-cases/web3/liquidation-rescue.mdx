@@ -1,0 +1,58 @@
+---
+title: "Liquidation Rescue"
+description: "Warn a borrower in time, when their lending position's health factor falls toward liquidation."
+---
+
+**Goal.** When a wallet's lending position drops toward the liquidation line, reach the borrower in-app and by email while they can still act, add collateral or repay, so they don't get liquidated.
+
+**Who it's for.** Web3 lending protocols and teams whose users hold borrow positions. Web3-only by nature, and one of the highest-value alerts you can send.
+
+**Outcome to move.** Liquidations avoided, and the trust that comes from catching them.
+
+## Prerequisites
+
+- The [in-app SDK](/integrations/in-app-notifications) installed.
+- The lending pool and chain you want to watch (you'll set these on the trigger).
+
+## Build it
+
+<Steps>
+  <Step title="Trigger when the health factor crosses your line (no code)">
+    Use the **Health factor crossed** trigger. You set the chain, the lending pool, and the threshold, where `1.0` is liquidation, so a value like `1.2` warns the borrower early. See [Triggers and conditions](/automation/triggers-and-conditions#off-chain-triggers).
+
+    `trigger (Health factor crossed 1.2) → send in-app (Your position is at risk) → branch (has email → also send email)`
+
+    Lead with in-app: it's immediate, and a borrower checking their position is likely in your dApp.
+  </Step>
+
+  <Step title="Escalate as it worsens">
+    Add a second, more urgent trigger at a tighter threshold (say `1.05`) for a stronger "act now" message, so the urgency matches the risk.
+  </Step>
+
+  <Step title="Confirm when they recover (optional)">
+    A short "you're back in the safe zone" once their health factor recovers closes the loop and builds trust.
+  </Step>
+
+  <Step title="Activate and publish.">
+    Both are required.
+  </Step>
+</Steps>
+
+## Test
+
+With a wallet you control on a testnet pool, move the position toward the threshold and confirm the alert fires in-app and by email.
+
+<Note>
+This is a time-sensitive, high-stakes alert. Keep the message short, specific, and actionable, exactly what's at risk and the one thing to do about it, and test the timing carefully before going live.
+</Note>
+
+## Measure
+
+- **Liquidations avoided**: positions that recovered after an alert.
+- **Alert-to-action time**.
+- **Opt-in**: how many borrowers share an email so you can reach them off-app too.
+
+## Variations
+
+- **Tier by position size.** A large position at risk may warrant a more personal touch.
+- **Pair with win-back.** Combine with [Win back dormant wallets](/use-cases/web3/win-back) for borrowers who go quiet after a close call.

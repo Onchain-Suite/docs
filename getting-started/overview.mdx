@@ -5,35 +5,35 @@ description: "Understand how Onchain Suite is organized before you send your fir
 
 ## Two ways in
 
-There are two starting points, depending on who you are.
+There are two starting points, depending on your role.
 
 <CardGroup cols={2}>
-  <Card title="Building a dApp" icon="code" href="/api/overview">
-    Drop the SDK into your frontend for wallet-based in-app notifications, then send events and read data as you grow. Start with **Build on the Platform**.
+  <Card title="Developers" icon="code" href="/api/overview">
+    Send events from your app, push in-app notifications, and read your data. Web3 or Web2. Start with **Developer Guides**.
   </Card>
-  <Card title="Running campaigns" icon="paper-plane" href="/campaigns/overview">
-    Set up a workspace, authenticate a domain, build an audience, and send. Start with the operator sections here.
+  <Card title="Marketers and operators" icon="paper-plane" href="/campaigns/overview">
+    Set up a workspace, authenticate a domain, build an audience, and send. Start with the sections here.
   </Card>
 </CardGroup>
 
-Many teams do both: a frontend developer wires up the SDK, and a growth team runs campaigns and automations on top of the same audience.
+Many teams do both: a developer wires up events and the SDK, and a growth team runs campaigns and automations on top of the same audience.
 
-## Platform Model
+## Platform model
 
-Onchain Suite is designed around what growth teams and dApp developers actually need to do, not around backend services or internal data systems.
+Onchain Suite is designed around what growth teams and developers actually need to do, not around backend services or internal data systems.
 
 An operator team typically works in this order:
 
 1. Create a workspace for your team.
 2. Configure a project for a brand, product line, or environment.
-3. Verify senders and domains.
-4. Connect contract, wallet, and product data sources.
+3. Verify your sender and domain so email sends from your address.
+4. Bring in your audience: import contacts, connect product events, and (for Web3) wallet and contract data.
 5. Review audiences, segments, or the first cohort insight.
 6. Launch a campaign or automation.
 
-A dApp developer usually starts the other end: add the [in-app SDK](/integrations/in-app-notifications), send [custom events](/integrations/custom-events), and let automations react to them.
+A developer usually starts the other end: send [custom events](/integrations/custom-events) from your product, add the [in-app SDK](/integrations/in-app-notifications) for Web3 push, and let automations react to them.
 
-## Core Concepts
+## Core concepts
 
 ### Workspace
 
@@ -43,18 +43,18 @@ A workspace is the top-level home for your organization, billing, and shared acc
 
 A project contains the settings, senders, integrations, audiences, campaigns, and automations for one operating context.
 
-### Wallet-First Identity
+### Identity: wallet, email, or both
 
-The wallet is the canonical user record. Other identifiers such as email or chat handles attach when they are available, but a wallet does not need a linked email before it becomes usable inside the platform.
+A contact is one record that can be identified by a **wallet**, an **email**, your own **user id**, or all three. Web3 teams usually start from the wallet; Web2 teams from email. None of them requires the others, so a wallet with no email is usable, and so is an email with no wallet.
 
 ### Audience
 
-Audiences can come from imported users, behavioral events, wallet attributes, contract activity, or SQL-generated segments.
+Audiences can come from imported contacts, product events, email engagement, wallet attributes, contract activity, or SQL-generated segments.
 
 ### Plays
 
-Plays are pre-built automation patterns for common Web3 lifecycle moments such as first deposit, governance reminders, churn win-back, and migration alerts.
+Plays are pre-built automation patterns for common lifecycle moments: welcome and onboarding, purchases and win-back, plus Web3 moments like first deposit, governance reminders, and migration alerts.
 
-## First-Mile Goal
+## First-mile goal
 
-The best first experience is not a big setup project. It is a quick, valuable insight or a small working workflow that proves your data, targeting, and messaging loop are connected.
+The best first experience isn't a big setup project. It's a quick, valuable insight or a small working workflow that proves your data, targeting, and messaging loop are connected.

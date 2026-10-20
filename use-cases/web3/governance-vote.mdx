@@ -1,0 +1,54 @@
+---
+title: "Governance Vote Reminders"
+description: "A proposal goes live, remind token holders to vote, and nudge the ones who haven't before it closes."
+---
+
+**Goal.** When a governance proposal opens, reach your token holders in-app and by email, then remind the ones who haven't voted as the deadline nears, to lift turnout.
+
+**Who it's for.** Web3 protocols and DAOs with on-chain governance. Web3-only by nature.
+
+**Outcome to move.** Voter turnout.
+
+## Prerequisites
+
+- Your governance contract in [project settings](/getting-started/set-up-project-settings).
+- The [in-app SDK](/integrations/in-app-notifications) installed.
+
+## Build it
+
+<Steps>
+  <Step title="Trigger when a proposal opens (no code)">
+    Use the **Governance activity** on-chain preset, which fires on a new proposal. The platform watches your contract for you. See [Contract-based flows](/automation/contract-based-flows).
+
+    `trigger (Governance activity) → send in-app (New proposal: have your say) → branch (has email → also send email)`
+  </Step>
+
+  <Step title="Remind the wallets that haven't voted">
+    As the deadline approaches, re-reach holders who haven't cast a vote. The **Governance activity** preset also recognizes a vote cast, so tag wallets **Voted** when they do, and target the reminder at holders who aren't tagged **Voted**.
+
+    `trigger (Date reached: 1 day before close) → audience = holders NOT tagged Voted → send in-app + email (Voting closes tomorrow)`
+  </Step>
+
+  <Step title="Thank voters (optional)">
+    A short "thanks for voting" keeps participation feeling rewarding and lifts turnout next time.
+  </Step>
+
+  <Step title="Activate and publish.">
+    Both are required.
+  </Step>
+</Steps>
+
+## Test
+
+With a wallet you control, confirm the proposal-opened message fires after the short finality delay, cast a vote, and confirm it's tagged **Voted** and excluded from the reminder.
+
+## Measure
+
+- **Turnout** per proposal, before and after reminders.
+- **Reminder lift**: votes cast after the "closes tomorrow" nudge.
+- **Channel mix**: in-app versus email participation.
+
+## Variations
+
+- **Delegate reminders.** Target wallets that hold voting power but usually delegate.
+- **Quorum watch.** If a proposal is short of quorum near the deadline, send a stronger push.

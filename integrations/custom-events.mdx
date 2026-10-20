@@ -98,6 +98,10 @@ This distinction matters more than it looks:
 
 Put things that describe the *person* in `attributes`, and things that describe the *event* in `payload`.
 
+<Note>
+**Tagging and lists:** an event carries no `tags` or `listId` field, and `attributes` are traits, not tags. To **tag a contact or add them to a list** in response to an event, build an [automation](/automation/create-an-automation) that triggers on the event and runs an **Add tag** or **Add to list** action. (Capture forms are the exception: they apply their bound list and tags on submission.)
+</Note>
+
 ## Batch ingestion
 
 Send up to 100 events in one request:

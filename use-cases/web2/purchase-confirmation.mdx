@@ -1,0 +1,140 @@
+---
+title: "Purchase Confirmation"
+description: "When someone buys, confirm the order by email and follow up to drive the next purchase."
+---
+
+**Goal.** The moment someone completes a purchase, send an order confirmation, then follow up a few days later to drive repeat business.
+
+**Who it's for.** Web2 teams with email (e-commerce, SaaS upgrades, marketplaces). The Web3 parallel, a purchase that happens on-chain, is [On-chain purchase follow-up](/use-cases/web3/onchain-purchase).
+
+**Outcome to move.** Repeat purchase rate and revenue per customer.
+
+## Prerequisites
+
+- A [verified sending domain](/settings/domain-authentication) and a [secret key](/integrations/api-keys).
+- Consent to email the buyer (collected at checkout or signup).
+
+## Build it
+
+<Steps>
+  <Step title="Send the purchase event from your backend">
+    When your checkout succeeds, send a `purchase_completed` event. Put the order facts in `payload` (they stay with the event) and buyer traits in `attributes` (they attach to the contact).
+
+    <CodeGroup>
+    ```bash curl
+    curl -X POST https://api.onchainsuite.com/api/v1/events \
+      -H "Authorization: Bearer sk_live_…" \
+      -H "Content-Type: application/json" \
+      -d '{
+        "event": "purchase_completed",
+        "contact": { "email": "alice@example.com" },
+        "payload": { "order_id": "A-1024", "total_usd": 149.0, "items": 2 },
+        "idempotencyKey": "order:A-1024"
+      }'
+    ```
+
+    ```python Python
+    import os, requests
+
+    requests.post(
+        "https://api.onchainsuite.com/api/v1/events",
+        headers={"Authorization": f"Bearer {os.environ['ONCHAIN_SECRET_KEY']}"},
+        json={
+            "event": "purchase_completed",
+            "contact": {"email": "alice@example.com"},
+            "payload": {"order_id": "A-1024", "total_usd": 149.0, "items": 2},
+            "idempotencyKey": "order:A-1024",
+        },
+    ).raise_for_status()
+    ```
+
+    ```typescript TypeScript
+    await fetch("https://api.onchainsuite.com/api/v1/events", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${process.env.ONCHAIN_SECRET_KEY}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        event: "purchase_completed",
+        contact: { email: "alice@example.com" },
+        payload: { order_id: "A-1024", total_usd: 149.0, items: 2 },
+        idempotencyKey: "order:A-1024",
+      }),
+    });
+    ```
+
+    ```php PHP
+    $ch = curl_init("https://api.onchainsuite.com/api/v1/events");
+    curl_setopt_array($ch, [
+        CURLOPT_POST => true,
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_HTTPHEADER => [
+            "Authorization: Bearer " . getenv("ONCHAIN_SECRET_KEY"),
+            "Content-Type: application/json",
+        ],
+        CURLOPT_POSTFIELDS => json_encode([
+            "event" => "purchase_completed",
+            "contact" => ["email" => "alice@example.com"],
+            "payload" => ["order_id" => "A-1024", "total_usd" => 149.0, "items" => 2],
+            "idempotencyKey" => "order:A-1024",
+        ]),
+    ]);
+    curl_exec($ch);
+    curl_close($ch);
+    ```
+
+    ```go Go
+    body, _ := json.Marshal(map[string]any{
+        "event":          "purchase_completed",
+        "contact":        map[string]string{"email": "alice@example.com"},
+        "payload":        map[string]any{"order_id": "A-1024", "total_usd": 149.0, "items": 2},
+        "idempotencyKey": "order:A-1024",
+    })
+    req, _ := http.NewRequest("POST",
+        "https://api.onchainsuite.com/api/v1/events", bytes.NewReader(body))
+    req.Header.Set("Authorization", "Bearer "+os.Getenv("ONCHAIN_SECRET_KEY"))
+    req.Header.Set("Content-Type", "application/json")
+    http.DefaultClient.Do(req)
+    ```
+    </CodeGroup>
+
+    <Note>
+    The `idempotencyKey` (here `order:A-1024`) stops a retried request from sending two confirmations for one order. Build it from something stable like the order id. See [Idempotency](/integrations/custom-events#idempotency).
+    </Note>
+  </Step>
+
+  <Step title="Confirm the order">
+    Build an automation that triggers on `purchase_completed` and sends a **confirmation email**, personalized with the `order_id` and `total_usd` from the event.
+
+    `trigger (purchase_completed) → send email (Order confirmed)`
+  </Step>
+
+  <Step title="Follow up to drive the next purchase">
+    Extend the flow with a wait and a nudge:
+
+    `→ wait 5 days → send email (You might also like…)`
+
+    Branch on `total_usd` to treat big-ticket buyers differently from small ones.
+  </Step>
+
+  <Step title="Activate and publish.">
+    As with any automation, both are required.
+  </Step>
+</Steps>
+
+## Test
+
+Send the event with your own email and a test `order_id`, then confirm the confirmation email arrives and reads correctly. Re-send the same `idempotencyKey` to prove a duplicate doesn't double-send.
+
+## Measure
+
+- **Confirmation deliverability** (it should be near 100%; a confirmation that bounces is a support ticket).
+- **Repeat purchase rate** among people who entered the follow-up.
+- **Revenue attributed** to the follow-up email via the [campaign report](/analytics/campaign-report).
+
+## Variations
+
+- **Refunds and cancellations.** Send `purchase_refunded` and branch to a different message.
+- **Post-purchase onboarding.** For software, chain the confirmation into a short "get the most from it" series.
+- **Web3 parallel.** For an on-chain purchase, see [On-chain purchase follow-up](/use-cases/web3/onchain-purchase).

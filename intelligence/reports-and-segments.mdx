@@ -99,7 +99,7 @@ The SQL editor is the most precise way to build an audience, because it can reac
     Build the cohort in the [SQL editor](/intelligence/sql-query-editor). Start from a [starter query](/intelligence/starter-queries) if one is close.
   </Step>
   <Step title="Include a wallet column">
-    The result must contain a wallet column named `wallet_address`, `wallet`, or `address`. Saving fails without one, because a segment needs someone to target.
+    To save from the editor or a report, the result must contain a wallet column named `wallet_address`, `wallet`, or `address`, and saving here fails without one. Working from an **email-only** cohort with no wallet? Ask [Agentic Chat](/intelligence/agentic-chat) to save it as a segment instead: it targets contacts directly, so it covers email-only contacts too.
   </Step>
   <Step title="Save as a segment">
     Name it and save. It's now available anywhere a segment is.
@@ -116,5 +116,5 @@ The SQL editor is the most precise way to build an audience, because it can reac
 - **Spot-check.** Read a few rows against wallets you recognize before wiring the segment into a live send.
 
 <Note>
-A report is for **reading and exporting**; a segment is for **messaging**. Saving as a segment needs a wallet column (`wallet_address`, `wallet`, or `address`); a report is free-form.
+A report is for **reading and exporting**; a segment is for **messaging**. Saving a segment **from a query or report** needs a wallet column (`wallet_address`, `wallet`, or `address`); a report is free-form. Email-only cohorts are saved through [Agentic Chat](/intelligence/agentic-chat) instead.
 </Note>

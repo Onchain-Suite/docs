@@ -1,0 +1,349 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Onchain Suite API",
+    "version": "1.0.0",
+    "description": "The server-to-server API. Authenticate with a secret (`sk_`) key and call these endpoints from your backend to register contacts, send events, message users, ingest consented captures, and feed automations. Secret keys are server-only: never ship one to a browser, a mobile app, or a public repo."
+  },
+  "servers": [
+    { "url": "https://api.onchainsuite.com/api/v1", "description": "Production" }
+  ],
+  "security": [{ "secretKey": [] }],
+  "tags": [
+    { "name": "Contacts", "description": "Register and list contacts." },
+    { "name": "Events", "description": "Send product events that drive automations and segments." },
+    { "name": "Messaging", "description": "Send in-app pushes and launch campaigns." },
+    { "name": "Forms", "description": "Ingest consented captures from your backend." },
+    { "name": "Automation", "description": "Feed trigger events into the automation runtime." }
+  ],
+  "paths": {
+    "/identify": {
+      "post": {
+        "tags": ["Contacts"],
+        "summary": "Register a wallet as a contact",
+        "description": "Register a wallet address as a workspace contact. Wallet addresses only: personal identifiers (email, phone, name) are rejected. Idempotent on the wallet, and the address is lower-cased. To attach an email, use a capture form instead.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["walletAddress"],
+                "properties": {
+                  "walletAddress": { "type": "string", "example": "0xabc123..." }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Registered.", "content": { "application/json": { "schema": { "type": "object", "properties": { "ok": { "type": "boolean" } } } } } },
+          "400": { "description": "A personal identifier was supplied (`PERSONAL_IDENTIFIER_REJECTED`).", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } },
+          "401": { "description": "Missing, invalid, or revoked secret key." }
+        }
+      }
+    },
+    "/contacts": {
+      "get": {
+        "tags": ["Contacts"],
+        "summary": "List contacts",
+        "description": "List contacts with reachability flags (email, in-app) and tags. The email address itself is never returned.",
+        "parameters": [
+          { "name": "limit", "in": "query", "schema": { "type": "integer", "default": 50 } },
+          { "name": "cursor", "in": "query", "schema": { "type": "string" }, "description": "Pagination cursor from a previous response." }
+        ],
+        "responses": {
+          "200": {
+            "description": "A page of contacts.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "contacts": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": { "type": "string" },
+                          "walletAddress": { "type": "string", "nullable": true },
+                          "reachable": { "type": "object", "properties": { "email": { "type": "boolean" }, "inapp": { "type": "boolean" } } },
+                          "tags": { "type": "array", "items": { "type": "string" } }
+                        }
+                      }
+                    },
+                    "nextCursor": { "type": "string", "nullable": true }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/events": {
+      "post": {
+        "tags": ["Events"],
+        "summary": "Send a custom event",
+        "description": "Send one product event (a signup, a deposit, a purchase). It resolves to a contact by wallet, then email, then external id, creating the contact if none matches. Returns `202`: accepted for processing, not yet acted on.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["event", "contact"],
+                "properties": {
+                  "event": { "type": "string", "description": "Event name, matching `^[a-zA-Z0-9_.:-]{1,64}$`, lower-cased on arrival.", "example": "first_deposit" },
+                  "contact": { "$ref": "#/components/schemas/ContactRef" },
+                  "attributes": { "type": "object", "description": "Contact traits merged onto the contact record. Max 50 keys.", "additionalProperties": true },
+                  "payload": { "type": "object", "description": "Event-specific data, kept with the event. Max 16 KB.", "additionalProperties": true },
+                  "idempotencyKey": { "type": "string", "description": "Your dedup key. Strongly recommended.", "example": "deposit:0xabc:9184" },
+                  "occurredAt": { "type": "string", "format": "date-time", "description": "When it happened. Rejected if older than 7 days or more than 5 minutes in the future." },
+                  "test": { "type": "boolean", "description": "Dry run: reports what it would match but sends nothing." }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": { "description": "Accepted.", "content": { "application/json": { "schema": { "type": "object", "properties": { "accepted": { "type": "boolean" }, "deduplicated": { "type": "boolean" }, "idempotencyKey": { "type": "string" } } } } } },
+          "400": { "description": "Validation failure (the message names the field)." },
+          "401": { "description": "Missing, invalid, or revoked secret key." },
+          "429": { "description": "Rate limited (`RATE_LIMITED`), back off and retry." }
+        }
+      }
+    },
+    "/events/batch": {
+      "post": {
+        "tags": ["Events"],
+        "summary": "Send a batch of events",
+        "description": "Send up to 100 events in one request. Always returns `202`, even when individual events fail, so inspect each entry in `results`.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["events"],
+                "properties": {
+                  "events": {
+                    "type": "array",
+                    "maxItems": 100,
+                    "items": {
+                      "type": "object",
+                      "required": ["event", "contact"],
+                      "properties": {
+                        "event": { "type": "string" },
+                        "contact": { "$ref": "#/components/schemas/ContactRef" }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": { "description": "Accepted (check each result).", "content": { "application/json": { "schema": { "type": "object", "properties": { "results": { "type": "array", "items": { "type": "object", "properties": { "accepted": { "type": "boolean" }, "deduplicated": { "type": "boolean" }, "error": { "type": "string" } } } } } } } } }
+        }
+      }
+    },
+    "/inapp/push": {
+      "post": {
+        "tags": ["Messaging"],
+        "summary": "Send an in-app push to a wallet",
+        "description": "Send a wallet-addressed in-app notification. If the wallet has a live connection it arrives as a toast; otherwise it goes to web or mobile push, or is held and replayed on reconnect.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["walletAddress", "title", "body"],
+                "properties": {
+                  "walletAddress": { "type": "string", "example": "0xabc123..." },
+                  "title": { "type": "string", "example": "Deposit received" },
+                  "body": { "type": "string", "example": "Your first deposit is in. Welcome aboard." },
+                  "ctaLabel": { "type": "string" },
+                  "ctaUrl": { "type": "string" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Queued.", "content": { "application/json": { "schema": { "type": "object", "properties": { "deliveredNow": { "type": "boolean" }, "campaignRunId": { "type": "string" } } } } } },
+          "402": { "description": "Plan limit exceeded (`PLAN_LIMIT_EXCEEDED`)." },
+          "429": { "description": "Daily in-app quota exceeded." }
+        }
+      }
+    },
+    "/messages/pending": {
+      "get": {
+        "tags": ["Messaging"],
+        "summary": "Fetch pending in-app pushes for a wallet",
+        "description": "Fetch queued in-app pushes for one wallet, for clients that can't hold a live connection.",
+        "parameters": [
+          { "name": "wallet", "in": "query", "required": true, "schema": { "type": "string" }, "description": "The wallet address." }
+        ],
+        "responses": {
+          "200": { "description": "Pending messages.", "content": { "application/json": { "schema": { "type": "object", "properties": { "messages": { "type": "array", "items": { "type": "object" } } } } } } }
+        }
+      }
+    },
+    "/campaigns/{id}/send": {
+      "post": {
+        "tags": ["Messaging"],
+        "summary": "Launch a prepared campaign",
+        "description": "Launch a campaign you've already prepared in the dashboard. Takes the prepared campaign id (not a run id); it launches what's already set up.",
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "string" }, "description": "The prepared campaign id." }
+        ],
+        "responses": {
+          "200": { "description": "Launched.", "content": { "application/json": { "schema": { "type": "object", "properties": { "ok": { "type": "boolean" }, "campaignRunId": { "type": "string" } } } } } },
+          "404": { "description": "Campaign not found in this workspace." }
+        }
+      }
+    },
+    "/forms/{token}/ingest": {
+      "post": {
+        "tags": ["Forms"],
+        "summary": "Ingest a consented capture",
+        "description": "Hand a consented email (and optional wallet) to a capture form from your server. If the form uses double opt-in, this starts the confirmation email. The key's workspace must own the form.",
+        "parameters": [
+          { "name": "token", "in": "path", "required": true, "schema": { "type": "string" }, "description": "The form's public token." }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "email": { "type": "string", "format": "email", "example": "alice@example.com" },
+                  "walletAddress": { "type": "string" },
+                  "consent": { "type": "boolean", "example": true },
+                  "consentText": { "type": "string", "example": "I agree to receive product updates." },
+                  "fields": { "type": "object", "additionalProperties": true }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Accepted (processed in the background).", "content": { "application/json": { "schema": { "type": "object", "properties": { "ok": { "type": "boolean" }, "queued": { "type": "boolean" } } } } } },
+          "404": { "description": "Form not owned by this workspace." }
+        }
+      }
+    },
+    "/v2/automations/runtime/triggers/onchain-event": {
+      "post": {
+        "tags": ["Automation"],
+        "summary": "Feed an on-chain trigger event",
+        "description": "Post an on-chain event to start matching automations. For EVM contracts you usually don't need this (the platform watches for you); use it for Solana or your own indexer. Always send `txHash` so retries are de-duplicated.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["chain", "event"],
+                "properties": {
+                  "chain": { "type": "string", "example": "base-mainnet" },
+                  "event": { "type": "string", "example": "Transfer" },
+                  "walletAddress": { "type": "string" },
+                  "contractAddress": { "type": "string" },
+                  "txHash": { "type": "string" },
+                  "sourceEventId": { "type": "string" },
+                  "payload": { "type": "object", "additionalProperties": true }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Matched against your live automations.", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/TriggerResult" } } } }
+        }
+      }
+    },
+    "/v2/automations/runtime/triggers/segment-entered": {
+      "post": {
+        "tags": ["Automation"],
+        "summary": "Feed a segment-entered trigger",
+        "description": "Tell the platform a contact entered a segment, to start matching automations. Identify the contact by any of contactId, email, or walletAddress.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["segmentId"],
+                "properties": {
+                  "segmentId": { "type": "string" },
+                  "contactId": { "type": "string" },
+                  "email": { "type": "string", "format": "email" },
+                  "walletAddress": { "type": "string" },
+                  "sourceEventId": { "type": "string" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Matched against your live automations.", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/TriggerResult" } } } }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "secretKey": {
+        "type": "http",
+        "scheme": "bearer",
+        "description": "Your secret key, for example `sk_live_...`. Send it as `Authorization: Bearer sk_live_...`. A `sk_test_...` key runs in test mode."
+      }
+    },
+    "schemas": {
+      "ContactRef": {
+        "type": "object",
+        "description": "Who the event or action is for. Provide at least one identifier.",
+        "properties": {
+          "email": { "type": "string", "format": "email" },
+          "walletAddress": { "type": "string" },
+          "externalId": { "type": "string", "description": "Your own user id." }
+        }
+      },
+      "TriggerResult": {
+        "type": "object",
+        "properties": {
+          "matchedAutomations": { "type": "integer" },
+          "entries": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "automationId": { "type": "string" },
+                "entryId": { "type": "string" },
+                "queued": { "type": "boolean" },
+                "duplicate": { "type": "boolean" }
+              }
+            }
+          }
+        }
+      },
+      "Error": {
+        "type": "object",
+        "properties": {
+          "error": {
+            "type": "object",
+            "properties": {
+              "code": { "type": "string" },
+              "message": { "type": "string" }
+            }
+          }
+        }
+      }
+    }
+  }
+}

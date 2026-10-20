@@ -1,0 +1,59 @@
+---
+title: "Rewards Claim Nudge"
+description: "Remind wallets sitting on unclaimed rewards or idle stake to come back and claim."
+---
+
+**Goal.** Catch wallets that have rewards to claim (or stake sitting idle) and nudge them to act, which brings dormant users back on-chain.
+
+**Who it's for.** Web3 protocols with staking, yield, or rewards. Web3-only by nature.
+
+**Outcome to move.** Claim rate, and reactivation of idle wallets.
+
+## Prerequisites
+
+- Your staking/rewards contract in [project settings](/getting-started/set-up-project-settings).
+- The [in-app SDK](/integrations/in-app-notifications) installed, and wallets [enriched](/intelligence/wallet-enrichment) so you can spot idle positions.
+
+## Build it
+
+<Steps>
+  <Step title="Build the 'unclaimed' cohort">
+    Build a [segment](/intelligence/reports-and-segments#save-as-a-segment) of wallets that staked but have gone quiet, a good proxy for rewards worth claiming:
+
+    ```sql
+    SELECT wallet_address
+    FROM contact_360
+    WHERE last_onchain_action = 'staked'
+      AND days_since_last_activity > 14
+    ```
+  </Step>
+
+  <Step title="Nudge them in-app and by email">
+    Run an automation off that segment:
+
+    `trigger (entered Unclaimed segment) → send in-app (You have rewards waiting) → branch (has email → also send email)`
+  </Step>
+
+  <Step title="Stop once they claim">
+    Watch the contract with the **Rewards claimed** on-chain preset, and tag wallets **Claimed** when they do. Exclude **Claimed** wallets from the segment so you only nudge the ones still sitting on rewards. See [Contract-based flows](/automation/contract-based-flows).
+  </Step>
+
+  <Step title="Activate and publish.">
+    Both are required.
+  </Step>
+</Steps>
+
+## Test
+
+Add a wallet you control to the cohort, confirm the nudge arrives, claim with it, and confirm the **Rewards claimed** trigger tags it and drops it from the nudge.
+
+## Measure
+
+- **Claim rate** among nudged wallets versus a holdout.
+- **Reactivation**: did claimers go on to do more on-chain?
+- **Value claimed** that would otherwise have sat idle.
+
+## Variations
+
+- **Restake prompt.** After a claim, nudge them to restake.
+- **Tier by size.** A large idle position may warrant a more personal reach.

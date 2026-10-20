@@ -1,0 +1,69 @@
+---
+title: "Abandoned Cart Recovery"
+description: "Someone starts checkout but doesn't finish, remind them, and recover the sale."
+---
+
+**Goal.** When a shopper adds to cart or begins checkout and doesn't complete the purchase, send a timely reminder (and maybe a second) to bring them back.
+
+**Who it's for.** Web2 e-commerce and marketplaces working from email.
+
+**Outcome to move.** Recovered revenue and checkout completion rate.
+
+## Prerequisites
+
+- A [verified sending domain](/settings/domain-authentication) and a [secret key](/integrations/api-keys).
+- Consent to email the shopper (from their account or checkout).
+
+## Build it
+
+<Steps>
+  <Step title="Send a checkout-started event">
+    When a shopper begins checkout, send a `checkout_started` event with the cart in `payload`. Send a matching `purchase_completed` when they finish (see [Purchase confirmation](/use-cases/web2/purchase-confirmation)), the automation uses the gap between the two.
+
+    ```bash
+    curl -X POST https://api.onchainsuite.com/api/v1/events \
+      -H "Authorization: Bearer sk_live_…" \
+      -H "Content-Type: application/json" \
+      -d '{
+        "event": "checkout_started",
+        "contact": { "email": "alice@example.com" },
+        "payload": { "cart_id": "C-88", "total_usd": 120.0, "items": 3 },
+        "idempotencyKey": "checkout:C-88"
+      }'
+    ```
+
+    For Python, TypeScript, PHP, or Go, the shape is identical, see the [API Reference](/api-reference) or [Welcome email](/use-cases/web2/welcome-email).
+  </Step>
+
+  <Step title="Build the recovery automation">
+    Trigger on `checkout_started`, wait, then check whether they bought. The cleanest shape is a [Wait until the contact does something](/automation/create-an-automation#wait): wait for `purchase_completed`, and take the timeout branch if it never comes.
+
+    `trigger (checkout_started) → wait up to 1h for purchase_completed → (timeout) send email (You left something behind)`
+  </Step>
+
+  <Step title="Add a second nudge (optional)">
+    `→ wait 1 day → still no purchase? → send email (Still thinking it over?)`
+
+    Keep it to two. A third reminder rarely converts and costs you unsubscribes.
+  </Step>
+
+  <Step title="Activate and publish.">
+    Both are required.
+  </Step>
+</Steps>
+
+## Test
+
+Send a `checkout_started` with your own email and no matching `purchase_completed`, then confirm the reminder arrives after the wait. Send the purchase too, and confirm it suppresses the reminder.
+
+## Measure
+
+- **Recovery rate**: reminders that led to a completed purchase.
+- **Revenue recovered** versus a holdout.
+- **Unsubscribes** on the reminder, if they climb, cut the second nudge.
+
+## Variations
+
+- **Incentive on the second touch.** Free shipping or a small discount can tip a hesitant cart.
+- **Segment by cart value.** Treat a big cart differently from a small one.
+- **Web3 parallel.** For an on-chain purchase that stalls, see [On-chain purchase follow-up](/use-cases/web3/onchain-purchase).

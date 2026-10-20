@@ -1,0 +1,55 @@
+---
+title: "Allowlist and Claim Reminders"
+description: "Remind allowlisted wallets to mint or claim before the window closes, and stop once they do."
+---
+
+**Goal.** You have a set of wallets eligible to mint or claim. Remind them in-app (and by email where you have one) before the window closes, and stop reminding each wallet the moment it claims.
+
+**Who it's for.** Web3 teams running a mint, an allowlist, or a claim window. This is the wallet-native cousin of a Web2 [abandoned cart](/use-cases/web2/abandoned-cart): a started-but-unfinished action you want to recover.
+
+**Outcome to move.** Claim / mint completion rate.
+
+## Prerequisites
+
+- The [in-app SDK](/integrations/in-app-notifications) installed, so reminders land in your dApp.
+- Your mint/claim contract in [project settings](/getting-started/set-up-project-settings).
+- The list of eligible wallets, imported or built as a [segment](/audience/segments).
+
+## Build it
+
+<Steps>
+  <Step title="Build the eligible segment">
+    [Import](/audience/imports-and-exports) the allowlist, or build the eligible cohort as a segment. This is who you'll remind.
+  </Step>
+
+  <Step title="Remind before the window closes">
+    Run an automation that sends an in-app reminder (and an email where available) on a schedule as the deadline approaches, using the [Date reached](/automation/triggers-and-conditions#off-chain-triggers) trigger:
+
+    `trigger (Date reached: 3 days before close) → send in-app (Your mint window is open) → branch (has email → also send email)`
+
+    Add a second reminder for the final hours.
+  </Step>
+
+  <Step title="Stop reminding wallets that claim">
+    Watch the contract with the **Token acquired** on-chain trigger, and when a wallet mints, tag it **Claimed**. Exclude **Claimed** wallets from the reminder segment so nobody who already minted gets nagged. See [Contract-based flows](/automation/contract-based-flows).
+  </Step>
+
+  <Step title="Activate and publish.">
+    Both are required.
+  </Step>
+</Steps>
+
+## Test
+
+Add a wallet you control to the eligible segment, confirm the reminder arrives, then mint with it and confirm it drops out of the reminders.
+
+## Measure
+
+- **Claim rate** among reminded wallets versus a holdout.
+- **Reminder-to-claim time**.
+- **Email capture**: how many eligible wallets shared an email along the way.
+
+## Variations
+
+- **Tiered reminders.** A whale on the allowlist might warrant a more personal touch.
+- **Post-claim welcome.** Chain a claim into [Welcome a new wallet](/use-cases/web3/welcome-wallet).

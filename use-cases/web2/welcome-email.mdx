@@ -1,0 +1,143 @@
+---
+title: "Welcome Email on Signup"
+description: "When someone signs up, send a welcome email automatically and start a short onboarding series."
+---
+
+**Goal.** The moment someone creates an account, send them a warm welcome email, then follow with a two or three step onboarding series over the next few days.
+
+**Who it's for.** Web2 teams (SaaS, apps, e-commerce) working from email. Web3 teams with an email on file can run this exactly as written; if you only have a wallet, use [Welcome a new wallet](/use-cases/web3/welcome-wallet) instead.
+
+**Outcome to move.** Activation: the share of new signups who complete your key first action (verify, create a project, make a first purchase).
+
+## Prerequisites
+
+- A **verified sending domain** so email sends from your address. See [Domain Authentication](/settings/domain-authentication).
+- Consent to email the person. Collect it on your signup form (a checkbox) or through a [capture form](/audience/capture-forms).
+- If you'll send the signup from your backend, a **secret key**. See [API keys](/integrations/api-keys).
+
+## Build it
+
+<Steps>
+  <Step title="Tell Onchain Suite someone signed up">
+    Two ways, pick one:
+
+    - **No code:** embed a [capture form](/audience/capture-forms) on your signup page. A confirmed submission adds the contact and can trigger the welcome automatically.
+    - **From your backend:** if your app already has the consented email, send an `account_created` event. This is the flexible path and the rest of this guide assumes it.
+
+    **What this does:** tells Onchain Suite "this person just signed up," so an automation can greet them. It runs from your server with a secret key.
+
+    <CodeGroup>
+    ```bash curl
+    curl -X POST https://api.onchainsuite.com/api/v1/events \
+      -H "Authorization: Bearer sk_live_…" \
+      -H "Content-Type: application/json" \
+      -d '{
+        "event": "account_created",
+        "contact": { "email": "alice@example.com" },
+        "attributes": { "plan": "free", "first_name": "Alice" }
+      }'
+    ```
+
+    ```python Python
+    import os, requests
+
+    requests.post(
+        "https://api.onchainsuite.com/api/v1/events",
+        headers={"Authorization": f"Bearer {os.environ['ONCHAIN_SECRET_KEY']}"},
+        json={
+            "event": "account_created",
+            "contact": {"email": "alice@example.com"},
+            "attributes": {"plan": "free", "first_name": "Alice"},
+        },
+    ).raise_for_status()
+    ```
+
+    ```typescript TypeScript
+    await fetch("https://api.onchainsuite.com/api/v1/events", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${process.env.ONCHAIN_SECRET_KEY}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        event: "account_created",
+        contact: { email: "alice@example.com" },
+        attributes: { plan: "free", first_name: "Alice" },
+      }),
+    });
+    ```
+
+    ```php PHP
+    $ch = curl_init("https://api.onchainsuite.com/api/v1/events");
+    curl_setopt_array($ch, [
+        CURLOPT_POST => true,
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_HTTPHEADER => [
+            "Authorization: Bearer " . getenv("ONCHAIN_SECRET_KEY"),
+            "Content-Type: application/json",
+        ],
+        CURLOPT_POSTFIELDS => json_encode([
+            "event" => "account_created",
+            "contact" => ["email" => "alice@example.com"],
+            "attributes" => ["plan" => "free", "first_name" => "Alice"],
+        ]),
+    ]);
+    curl_exec($ch);
+    curl_close($ch);
+    ```
+
+    ```go Go
+    body, _ := json.Marshal(map[string]any{
+        "event":      "account_created",
+        "contact":    map[string]string{"email": "alice@example.com"},
+        "attributes": map[string]string{"plan": "free", "first_name": "Alice"},
+    })
+    req, _ := http.NewRequest("POST",
+        "https://api.onchainsuite.com/api/v1/events", bytes.NewReader(body))
+    req.Header.Set("Authorization", "Bearer "+os.Getenv("ONCHAIN_SECRET_KEY"))
+    req.Header.Set("Content-Type", "application/json")
+    http.DefaultClient.Do(req)
+    ```
+    </CodeGroup>
+
+    The `attributes` (like `first_name` and `plan`) attach to the contact, so you can personalize the email and branch on them later. See [Custom events](/integrations/custom-events) for the full field list.
+  </Step>
+
+  <Step title="Build the welcome automation">
+    In the [automation builder](/automation/create-an-automation), create a flow whose **trigger** is your signup, then a **Send email** block. If you used the event above, trigger on the custom event `account_created`; if you used a form, trigger on **Form submitted**. See [Triggers and conditions](/automation/triggers-and-conditions).
+
+    `trigger (account_created) → send email (Welcome)`
+  </Step>
+
+  <Step title="Write the welcome email">
+    Use a [template](/campaigns/template-library) or type the subject and body inline. Personalize with the attributes you sent, for example a `{{ first_name }}` greeting. Keep it to one clear next step.
+  </Step>
+
+  <Step title="Add the onboarding series (optional)">
+    Extend the flow with a wait and a second email:
+
+    `trigger → send email (Welcome) → wait 1 day → send email (Getting started) → wait 2 days → send email (Tips)`
+
+    Each [Wait](/automation/create-an-automation#wait) block parks the contact until it's time, so the series costs nothing while it sits.
+  </Step>
+
+  <Step title="Activate and publish">
+    Both are required. An active but unpublished automation matches signups and does nothing. See the [publish step](/automation/create-an-automation#publish).
+  </Step>
+</Steps>
+
+## Test
+
+Send the event with your own address (or submit the form), then check the automation's entries to confirm the welcome fired. On a test secret key (`sk_test_…`) the event is a dry run, so nothing sends; use a live key and your own inbox for an end-to-end test.
+
+## Measure
+
+- **Welcome open and click rate** on the [campaign report](/analytics/campaign-report).
+- **Activation**: did welcomed users complete your key first action? Send that as another event (for example `project_created`) and compare.
+- **Onboarding completion**: watch the automation's completion rate in [Automation performance](/analytics/automation-performance).
+
+## Variations
+
+- **Branch by plan.** After the welcome, add a [Branch](/automation/triggers-and-conditions#branches-route-entries-down-different-paths) on the `plan` attribute to send paid and free users different next steps.
+- **Double opt-in.** If you collect email through a form with confirmation, the welcome fires only after the person confirms, which keeps your list clean. See [Capture forms](/audience/capture-forms).
+- **Web3 parallel.** No email, just a wallet? Run [Welcome a new wallet](/use-cases/web3/welcome-wallet), which greets the user in-app instead.

@@ -18,8 +18,10 @@ Everything below applies to automation `send_email` and `send_inapp` content too
 Reference a value with double braces. Values come from namespaces:
 
 ```text
-Hi {{ person.first_name }}, your wallet {{ person.wallet_short }} qualified.
+Hi {{ person.first_name }}, welcome aboard.
 ```
+
+For contacts with a wallet, on-chain traits are available too, for example `your wallet {{ person.wallet_short }} qualified`.
 
 ### `person`: the contact
 

@@ -1,15 +1,15 @@
 ---
 title: "Privacy and ZK"
-description: "How Onchain Suite protects contact identity: wallet-first by default, and a private fingerprint that matches contacts without exposing their email."
+description: "How Onchain Suite protects contact identity: privacy-first by default, with a private fingerprint that matches contacts without exposing their email."
 ---
 
-Onchain Suite is built to hold as little personal data as possible while still letting you run real lifecycle messaging. The privacy model has two parts: a wallet-first identity that often needs no personal data at all, and a private fingerprint that lets the platform work with an email without exposing it.
+Onchain Suite is built to hold as little personal data as possible while still letting you run real lifecycle messaging. The privacy model has two parts: an identity that can carry no personal data at all (a wallet, which is already public on-chain), and a private fingerprint that lets the platform work with an email without exposing it. Most teams use one or both, a wallet audience, an email audience, or a mix, and each is well protected.
 
-## Wallet-first means less to protect
+## A wallet-only audience has nothing to leak
 
 A contact can exist with **just a wallet address**. Wallets are already public on-chain, so a wallet-only audience carries no personal data to leak. You can enrich, segment, and reach these users with [in-app notifications](/integrations/in-app-notifications) without ever collecting an email or a name.
 
-The privacy question only arises when you *do* collect an email, and that's where the fingerprint comes in.
+Many teams, though, work mostly or entirely from **email**, which is a first-class, well-protected path too. That's what the fingerprint and encryption below are for.
 
 ## The email fingerprint
 

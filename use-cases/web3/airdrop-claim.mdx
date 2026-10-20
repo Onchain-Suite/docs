@@ -1,0 +1,57 @@
+---
+title: "Airdrop Claim Campaign"
+description: "Announce an airdrop to eligible wallets, remind the ones who haven't claimed, and confirm when they do."
+---
+
+**Goal.** Drive claims on an airdrop: tell eligible wallets it's live, remind the ones who haven't claimed before the window closes, and confirm each claim, all without nagging wallets that have already claimed.
+
+**Who it's for.** Web3 teams running a token or NFT airdrop. Web3-only by nature.
+
+**Outcome to move.** Claim rate, and the activation that follows a claim.
+
+## Prerequisites
+
+- The [in-app SDK](/integrations/in-app-notifications) installed.
+- Your claim contract in [project settings](/getting-started/set-up-project-settings).
+- The list of eligible wallets, imported or built as a [segment](/audience/segments).
+
+## Build it
+
+<Steps>
+  <Step title="Announce to eligible wallets">
+    Run an automation off your eligible segment the moment the claim opens:
+
+    `trigger (claim window opens) → send in-app (Your airdrop is live) → branch (has email → also send email)`
+  </Step>
+
+  <Step title="Remind the unclaimed">
+    Watch the claim contract with the **Token acquired** on-chain preset, and tag each wallet **Claimed** when it claims. As the deadline nears, remind eligible wallets that aren't tagged **Claimed**:
+
+    `trigger (Date reached: 2 days before close) → audience = eligible NOT tagged Claimed → send in-app + email (Last chance to claim)`
+
+    See [Contract-based flows](/automation/contract-based-flows).
+  </Step>
+
+  <Step title="Welcome them after they claim">
+    A claim is a great first moment. Chain it into a short welcome, and point new holders at what to do next, hold, stake, vote. See [Welcome a new wallet](/use-cases/web3/welcome-wallet).
+  </Step>
+
+  <Step title="Activate and publish.">
+    Both are required.
+  </Step>
+</Steps>
+
+## Test
+
+Add a wallet you control to the eligible segment, confirm the announcement and reminder, claim with it, and confirm it's tagged **Claimed** and excluded from further reminders.
+
+## Measure
+
+- **Claim rate** over the window, and the lift from each reminder.
+- **Post-claim activity**: did claimers go on to hold, stake, or vote?
+- **Unclaimed at close**: who to follow up with, or learn from.
+
+## Variations
+
+- **Expiry urgency.** A countdown in the final reminders tends to lift claims.
+- **Email capture.** Use the campaign to invite wallets to share an email through a [capture form](/audience/capture-forms), so you can reach them beyond this drop.

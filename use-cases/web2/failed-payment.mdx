@@ -1,0 +1,67 @@
+---
+title: "Failed Payment Recovery"
+description: "A charge fails, recover it with a short, well-timed dunning series before the account lapses."
+---
+
+**Goal.** When a subscription payment fails, recover it quickly with a clear, polite series, so a passive failure (an expired card) doesn't quietly become a churned customer.
+
+**Who it's for.** Web2 SaaS and subscription businesses.
+
+**Outcome to move.** Involuntary churn, and recovered revenue.
+
+## Prerequisites
+
+- A [verified sending domain](/settings/domain-authentication) and a [secret key](/integrations/api-keys).
+
+## Build it
+
+<Steps>
+  <Step title="Send payment events">
+    Send `payment_failed` when a charge fails, and `payment_recovered` when it succeeds on retry. The recovery series runs between the two.
+
+    ```bash
+    curl -X POST https://api.onchainsuite.com/api/v1/events \
+      -H "Authorization: Bearer sk_live_…" \
+      -H "Content-Type: application/json" \
+      -d '{
+        "event": "payment_failed",
+        "contact": { "email": "alice@example.com" },
+        "payload": { "reason": "card_expired", "amount_usd": 49.0 },
+        "idempotencyKey": "dunning:inv-5521"
+      }'
+    ```
+
+    Other languages follow the same shape, see the [API Reference](/api-reference).
+  </Step>
+
+  <Step title="Build the dunning series">
+    Trigger on `payment_failed` and send a short sequence, each with a one-click link to fix the card:
+
+    `trigger (payment_failed) → send email (Update your payment) → wait 2 days → send email (Still can't charge your card) → wait 3 days → send email (Last reminder before your account pauses)`
+
+    Branch so anyone who sends `payment_recovered` exits immediately with a "you're all set."
+  </Step>
+
+  <Step title="Hand off if it still fails">
+    If the series completes without recovery, tag the contact **Payment failed** so your team (or a downgrade flow) can take over.
+  </Step>
+
+  <Step title="Activate and publish.">
+    Both are required.
+  </Step>
+</Steps>
+
+## Test
+
+Send `payment_failed` with your own email, confirm the series fires on schedule. Send `payment_recovered` partway through and confirm it stops.
+
+## Measure
+
+- **Recovery rate** of failed payments.
+- **Revenue saved** versus the pre-automation baseline.
+- **Which email recovers the most** (usually the first), so you can tune timing.
+
+## Variations
+
+- **Branch on reason.** An expired card and an insufficient-funds failure may warrant different wording.
+- **In-app banner.** Pair with an in-app prompt for users who log in during the dunning window.

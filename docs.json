@@ -44,7 +44,7 @@
   "navigation": {
     "tabs": [
       {
-        "tab": "Use the Platform",
+        "tab": "User Guides",
         "groups": [
           {
             "group": "Getting Started",
@@ -143,7 +143,7 @@
         "icon": "grid-2"
       },
       {
-        "tab": "Build on the Platform",
+        "tab": "Developer Guides",
         "icon": "terminal",
         "pages": [
           "api/overview"
@@ -175,6 +175,55 @@
               "api/mcp"
             ]
           }
+        ]
+      },
+      {
+        "tab": "Use Cases",
+        "icon": "lightbulb",
+        "pages": [
+          "use-cases/overview"
+        ],
+        "groups": [
+          {
+            "group": "Web3",
+            "icon": "wallet",
+            "pages": [
+              "use-cases/web3/welcome-wallet",
+              "use-cases/web3/claim-reminder",
+              "use-cases/web3/onchain-purchase",
+              "use-cases/web3/airdrop-claim",
+              "use-cases/web3/governance-vote",
+              "use-cases/web3/rewards-nudge",
+              "use-cases/web3/liquidation-rescue",
+              "use-cases/web3/win-back"
+            ]
+          },
+          {
+            "group": "Web2",
+            "icon": "envelope",
+            "pages": [
+              "use-cases/web2/welcome-email",
+              "use-cases/web2/onboarding-checklist",
+              "use-cases/web2/trial-to-paid",
+              "use-cases/web2/purchase-confirmation",
+              "use-cases/web2/abandoned-cart",
+              "use-cases/web2/review-request",
+              "use-cases/web2/failed-payment",
+              "use-cases/web2/win-back"
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "API Reference",
+        "icon": "code-branch",
+        "openapi": "/api-reference/openapi.json"
+      },
+      {
+        "tab": "Changelog",
+        "icon": "clock-rotate-left",
+        "pages": [
+          "changelog/overview"
         ]
       }
     ],

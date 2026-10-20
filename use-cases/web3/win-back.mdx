@@ -1,0 +1,64 @@
+---
+title: "Win Back Dormant Wallets"
+description: "Catch wallets heading for the door, tokens to an exchange, liquidity withdrawn, or gone quiet, and pull them back in-app and by email."
+---
+
+**Goal.** Notice when a wallet shows an exit signal, moving tokens to an exchange, withdrawing liquidity, or simply going dormant, and reach them with a timely win-back before they're gone for good.
+
+**Who it's for.** Web3 teams. This is the wallet-native parallel of the Web2 [Win back quiet subscribers](/use-cases/web2/win-back): instead of "stopped opening emails," the signal is **on-chain behavior**, and the first touch is **in-app**.
+
+**Outcome to move.** Retained wallets, and recovered TVL or activity.
+
+## Prerequisites
+
+- Your contract configured in [project settings](/getting-started/set-up-project-settings).
+- The [in-app SDK](/integrations/in-app-notifications) installed, so the win-back can land.
+
+## Build it
+
+<Steps>
+  <Step title="Trigger on an exit signal (no code)">
+    For EVM contracts, the platform watches the chain for you. In the [automation builder](/automation/create-an-automation), pick the on-chain preset that matches your risk signal, **Exchange outflow** (tokens heading to a CEX), **Capital withdrawn** (liquidity pulled), or **Unstaked**, and give it your contract. See [Contract-based flows](/automation/contract-based-flows).
+
+    `trigger (Exchange outflow) → send in-app (Everything okay?)`
+  </Step>
+
+  <Step title="Reach them in-app, and by email where you have one">
+    Lead with an in-app message (it reaches the wallet right away), then branch to email for wallets that have shared an address:
+
+    `trigger → send in-app → branch (has email → send email | else → in-app only)`
+  </Step>
+
+  <Step title="Also catch the quietly dormant">
+    Some wallets don't signal, they just stop. Build a dormant cohort with a [SQL segment](/intelligence/reports-and-segments#save-as-a-segment):
+
+    ```sql
+    SELECT wallet_address
+    FROM contact_360
+    WHERE days_since_last_activity > 30
+      AND portfolio_value_usd > 1000
+    ```
+
+    Run a separate automation off that segment to re-engage before they drift further.
+  </Step>
+
+  <Step title="Activate and publish.">
+    As with any automation, both are required.
+  </Step>
+</Steps>
+
+## Test
+
+Perform the exit action with a wallet you control (or add it to the dormant segment), wait out the short finality delay for on-chain triggers, and confirm the automation registered an entry and the in-app message arrived. See [Testing a flow](/automation/contract-based-flows#testing-a-flow).
+
+## Measure
+
+- **In-app delivered and viewed**, and email engagement where sent.
+- **Retention**: did flagged wallets stay active, or return on-chain, after the win-back?
+- **Recovered value**: activity or TVL that came back versus a holdout.
+
+## Variations
+
+- **Tier the response.** A whale heading for the exit may warrant a different message, or a human, than a small wallet.
+- **Pair with lending risk.** Combine with the [Health factor crossed](/automation/triggers-and-conditions#off-chain-triggers) trigger to catch borrowers before liquidation.
+- **Web2 parallel.** Working from email engagement instead of on-chain signals? See [Win back quiet subscribers](/use-cases/web2/win-back).

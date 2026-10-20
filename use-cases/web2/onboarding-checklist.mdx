@@ -1,0 +1,63 @@
+---
+title: "Onboarding Activation Series"
+description: "Guide new users to their key first actions with a series that adapts to what they've already done."
+---
+
+**Goal.** Get a new user to the actions that predict they'll stick (create a project, invite a teammate, make a first purchase), and only nudge them on the steps they haven't finished.
+
+**Who it's for.** Web2 SaaS and apps.
+
+**Outcome to move.** Activation rate: the share of new users who complete your key setup actions.
+
+## Prerequisites
+
+- A [verified sending domain](/settings/domain-authentication) and a [secret key](/integrations/api-keys).
+- Decide your 2 or 3 "activation" actions and send an event for each.
+
+## Build it
+
+<Steps>
+  <Step title="Send an event for each activation step">
+    Fire an event as the user completes each key action, for example `project_created`, `teammate_invited`, `first_purchase`.
+
+    ```bash
+    curl -X POST https://api.onchainsuite.com/api/v1/events \
+      -H "Authorization: Bearer sk_live_…" \
+      -H "Content-Type: application/json" \
+      -d '{ "event": "project_created", "contact": { "email": "alice@example.com" } }'
+    ```
+
+    Other languages follow the same shape, see the [API Reference](/api-reference).
+  </Step>
+
+  <Step title="Nudge only the unfinished steps">
+    Start the series from [signup](/use-cases/web2/welcome-email), then at each step branch on whether the matching event has fired:
+
+    `welcome → wait 1 day → did they create a project? (no → send "Create your first project") → wait 2 days → invited a teammate? (no → send "Better with your team")`
+
+    A [Branch](/automation/triggers-and-conditions#branches-route-entries-down-different-paths) reads what the contact has done, so finished steps are skipped and nobody is nagged about something they've already done.
+  </Step>
+
+  <Step title="Celebrate completion">
+    When the last step fires, send a short "you're all set" and stop. Tag these contacts as **Activated** so you can measure and segment on it later.
+  </Step>
+
+  <Step title="Activate and publish.">
+    Both are required.
+  </Step>
+</Steps>
+
+## Test
+
+Walk your own account through the steps out of order and confirm the series only prompts the ones you skipped, and stops when you finish.
+
+## Measure
+
+- **Activation rate** over time.
+- **Step drop-off**: which action loses the most people, so you know where to focus the product, not just the email.
+- **Time to activate**.
+
+## Variations
+
+- **Role-based paths.** An admin and a solo user need different checklists, branch on a `role` attribute.
+- **In-product plus email.** Pair the emails with in-app prompts for users who are active in the app.

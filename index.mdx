@@ -1,19 +1,19 @@
 ---
 title: "Onchain Suite Docs"
-description: "The communication infrastructure layer for Web3, connect onchain behavior to identity, segmentation, messaging, and measurement."
+description: "The lifecycle messaging platform for Web3 and Web2: identify people by wallet or email, reach them by in-app and email, and measure what works."
 mode: "custom"
 ---
 
 <div className="px-4 pt-16 pb-10 lg:pt-28 lg:pb-14 max-w-4xl mx-auto text-center">
-  <p className="os-eyebrow">Retention infrastructure for Web3</p>
+  <p className="os-eyebrow">Lifecycle messaging for Web3 and Web2</p>
 
   <h1 className="os-hero-title mt-4 text-4xl lg:text-6xl font-bold tracking-tight">
-    Turn onchain behavior into messages that land
+    Reach every user, by wallet or email
   </h1>
 
   <p className="mt-6 text-lg lg:text-xl text-gray-500 dark:text-zinc-400 max-w-2xl mx-auto">
-    Detect what wallets do. Resolve who they are. Reach them by email or in-app push,
-    and measure whether it worked. One loop, wallet-first.
+    Identify people by wallet or email, reach them by in-app and email, automate from
+    what they do, and measure whether it worked. Web3 or Web2, one loop.
   </p>
 
   <div className="mt-8 flex flex-wrap gap-3 justify-center">
@@ -39,7 +39,7 @@ mode: "custom"
 <div className="px-4 py-14 max-w-6xl mx-auto">
   <h2 className="text-2xl font-semibold tracking-tight text-center">Start where you are</h2>
   <p className="mt-3 text-center text-gray-500 dark:text-zinc-400">
-    Two paths through these docs, depending on what you're doing today.
+    Two paths through these docs, whether you run on email, on wallets, or both.
   </p>
 
   <div className="mt-10">
@@ -48,7 +48,7 @@ mode: "custom"
         Set up a workspace, build an audience, and send your first campaign.
       </Card>
       <Card title="Build an integration" icon="code" href="/api/overview" horizontal>
-        Send custom events, push in-app notifications, and query your data.
+        Send events, push in-app notifications, and query your data.
       </Card>
     </Columns>
   </div>
@@ -63,22 +63,22 @@ mode: "custom"
   <div className="mt-10">
     <Columns cols={2}>
       <Card title="Detect" icon="satellite-dish" href="/integrations/custom-events">
-        Capture onchain activity and custom product events as they happen.
+        Capture product events (signups, purchases) and on-chain activity as they happen.
       </Card>
       <Card title="Resolve" icon="fingerprint" href="/audience/unified-profiles">
-        Tie wallets, emails, and external IDs to one contact record.
+        Tie a wallet, an email, or your own user id to one contact record.
       </Card>
       <Card title="Segment" icon="filter" href="/intelligence/sql-query-editor">
-        Build cohorts with rules or SQL across onchain and messaging data.
+        Build cohorts with rules or SQL across your product, email, and on-chain data.
       </Card>
       <Card title="Reach" icon="tower-broadcast" href="/campaigns/overview">
-        Send email and wallet-addressed in-app push from one workflow.
+        Send email and in-app from one workflow.
       </Card>
       <Card title="Automate" icon="bolt" href="/automation/overview">
-        Trigger flows the moment a wallet does something worth responding to.
+        Trigger flows the moment someone signs up, buys, or does something on-chain.
       </Card>
       <Card title="Measure" icon="chart-line" href="/campaigns/launch-and-monitor">
-        Track opens, clicks, and delivery across both channels.
+        Track opens, clicks, and delivery across channels.
       </Card>
     </Columns>
   </div>
@@ -89,23 +89,23 @@ mode: "custom"
 
   <div className="mt-10">
     <Columns cols={3}>
-      <Card title="In-app notifications" icon="bell" href="/integrations/in-app-notifications">
-        Wallet-authenticated push in your dApp, two lines with the SDK.
+      <Card title="Welcome email on signup" icon="envelope" href="/use-cases/web2/welcome-email">
+        Someone signs up, send a welcome email and start onboarding.
+      </Card>
+      <Card title="Welcome a new wallet" icon="wallet" href="/use-cases/web3/welcome-wallet">
+        A wallet connects or mints in, greet them in-app.
+      </Card>
+      <Card title="Send your first campaign" icon="paper-plane" href="/getting-started/send-your-first-campaign">
+        From a fresh workspace to a live send.
       </Card>
       <Card title="Custom events" icon="signal-stream" href="/integrations/custom-events">
         Send product events and trigger automations from them.
       </Card>
-      <Card title="SQL schema" icon="table" href="/api/sql-schema">
-        Every table, column, and type you can query.
+      <Card title="In-app notifications" icon="bell" href="/integrations/in-app-notifications">
+        Wallet-addressed push in your dApp, two lines with the SDK.
       </Card>
       <Card title="Automation triggers" icon="diagram-project" href="/automation/triggers-and-conditions">
-        The full trigger catalog and filter operators.
-      </Card>
-      <Card title="Contract-based flows" icon="link" href="/automation/contract-based-flows">
-        React to mints, swaps, approvals, and liquidations.
-      </Card>
-      <Card title="Docs MCP server" icon="robot" href="/api/mcp">
-        Connect these docs to Claude, Cursor, or VS Code.
+        The full trigger catalog, from signups to swaps.
       </Card>
     </Columns>
   </div>
@@ -113,10 +113,11 @@ mode: "custom"
 
 <div className="px-4 pb-24 max-w-4xl mx-auto text-center">
   <hr className="os-hero-rule mb-12" />
-  <h2 className="text-xl font-semibold tracking-tight">Wallet-first, by design</h2>
+  <h2 className="text-xl font-semibold tracking-tight">Wallet-first or email-first, your call</h2>
   <p className="mt-4 text-gray-500 dark:text-zinc-400">
-    The wallet is the canonical user record. Email is optional, and so is every other
-    identifier, which means you can reach someone who has never given you an address,
-    and still measure whether it worked.
+    Identify people however you have them: a wallet, an email, your own user id, or all
+    three on one record. Web3 teams reach people by wallet and in-app where there's no
+    email. Web2 teams run the whole platform on email. Either way, it's one audience, one
+    set of tools, and one measure of what worked.
   </p>
 </div>

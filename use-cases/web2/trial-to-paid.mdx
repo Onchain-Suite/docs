@@ -1,0 +1,66 @@
+---
+title: "Trial to Paid Conversion"
+description: "Turn free trials into paying customers with a nudge series timed to the trial window."
+---
+
+**Goal.** When someone starts a free trial, guide them to the "aha" moment and ask for the upgrade before the trial ends.
+
+**Who it's for.** Web2 SaaS and apps with a trial or freemium plan.
+
+**Outcome to move.** Trial-to-paid conversion rate.
+
+## Prerequisites
+
+- A [verified sending domain](/settings/domain-authentication) and a [secret key](/integrations/api-keys).
+
+## Build it
+
+<Steps>
+  <Step title="Send trial and upgrade events">
+    Send `trial_started` when the trial begins (put the end date in `attributes`), and `subscription_started` when they pay. The automation runs between the two and exits when they convert.
+
+    ```bash
+    curl -X POST https://api.onchainsuite.com/api/v1/events \
+      -H "Authorization: Bearer sk_live_…" \
+      -H "Content-Type: application/json" \
+      -d '{
+        "event": "trial_started",
+        "contact": { "email": "alice@example.com" },
+        "attributes": { "plan": "pro", "trial_ends": "2026-11-01" }
+      }'
+    ```
+
+    Other languages follow the same shape, see the [API Reference](/api-reference).
+  </Step>
+
+  <Step title="Build the conversion series">
+    Trigger on `trial_started` and space a few emails across the trial:
+
+    `trigger → send email (Get set up) → wait 2 days → send email (The feature worth trying) → wait until 2 days before trial_ends → send email (Your trial ends soon)`
+
+    Add a [Branch](/automation/triggers-and-conditions#branches-route-entries-down-different-paths) so anyone who sends `subscription_started` drops out and gets a thank-you instead of the "ends soon" push.
+  </Step>
+
+  <Step title="Follow up after the trial ends (optional)">
+    One more email a day or two after expiry, with a clear path back, catches the people who meant to upgrade and forgot.
+  </Step>
+
+  <Step title="Activate and publish.">
+    Both are required.
+  </Step>
+</Steps>
+
+## Test
+
+Send `trial_started` with your own email, confirm the series fires and the "ends soon" timing is right. Send `subscription_started` and confirm it exits the series.
+
+## Measure
+
+- **Conversion rate** of the trial cohort.
+- **Which email precedes the upgrade** (use the [campaign report](/analytics/campaign-report)) to learn what moves people.
+- **Activation events** (did they reach the "aha" action) correlated with conversion.
+
+## Variations
+
+- **Branch on usage.** Send active and inactive trials different messages, active users get a nudge to upgrade, inactive ones get help getting started.
+- **Offer at the end.** A time-boxed discount on the last day can lift conversion.

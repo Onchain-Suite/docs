@@ -1,0 +1,68 @@
+---
+title: "Win Back Quiet Subscribers"
+description: "Re-engage subscribers who've stopped opening, then sunset the ones who stay quiet to protect your deliverability."
+---
+
+**Goal.** Spot subscribers who've gone quiet, send a re-engagement email to win them back, and gracefully stop emailing the ones who never respond, which keeps your sending reputation healthy.
+
+**Who it's for.** Web2 teams working from email. The Web3 parallel, catching wallets that show on-chain exit signals, is [Win back dormant wallets](/use-cases/web3/win-back).
+
+**Outcome to move.** Reactivation rate, and a cleaner, more engaged list.
+
+## Prerequisites
+
+- A [verified sending domain](/settings/domain-authentication).
+- Enough history that "quiet" means something (at least a few sends).
+
+## Build it
+
+<Steps>
+  <Step title="Define the quiet cohort">
+    Build a segment of contacts who haven't opened or clicked in a while. The quickest way is a [SQL query](/intelligence/sql-query-editor) saved as a [segment](/intelligence/reports-and-segments#save-as-a-segment):
+
+    ```sql
+    SELECT email
+    FROM contact_360
+    WHERE last_engaged_at < now() - interval '60 days'
+      AND email_unsubscribed = false
+    ```
+
+    Or build the same thing with rules in the [segment builder](/audience/segments) if you'd rather not write SQL.
+  </Step>
+
+  <Step title="Send a re-engagement email">
+    Create an automation that triggers when a contact **enters the quiet segment**, and sends one honest "we miss you" email, a reason to come back, not just a nudge.
+
+    `trigger (entered Quiet segment) → send email (We miss you)`
+  </Step>
+
+  <Step title="Give them a beat, then decide">
+    Wait a week, then branch on whether they re-engaged:
+
+    `→ wait 7 days → branch (opened or clicked → tag Reactivated | else → tag Unengaged)`
+  </Step>
+
+  <Step title="Sunset the ones who stay quiet">
+    Contacts tagged **Unengaged** should drop out of your regular sends. Suppress them or move them to a low-frequency list. Continuing to email people who never open is the fastest way to hurt deliverability for everyone else.
+  </Step>
+
+  <Step title="Activate and publish.">
+    As with any automation, both are required.
+  </Step>
+</Steps>
+
+## Test
+
+Add your own address to the quiet segment (or lower the window to a day for a test), and confirm the re-engagement email arrives and the branch routes you correctly when you do or don't open it.
+
+## Measure
+
+- **Reactivation rate**: share of the quiet cohort who opened or clicked the win-back.
+- **Deliverability trend** on the [campaign report](/analytics/campaign-report), it should improve as you stop emailing the unengaged.
+- **List health** in [Health and churn](/audience/health-and-churn).
+
+## Variations
+
+- **Offer an incentive.** A discount or a "here's what's new" can lift reactivation.
+- **Preference center.** Let people choose fewer emails instead of leaving entirely.
+- **Web3 parallel.** Watching for on-chain exit signals instead? See [Win back dormant wallets](/use-cases/web3/win-back).
