@@ -100,7 +100,10 @@
                   "payload": { "type": "object", "description": "Event-specific data, kept with the event. Max 16 KB.", "additionalProperties": true },
                   "idempotencyKey": { "type": "string", "description": "Your dedup key. Strongly recommended.", "example": "deposit:0xabc:9184" },
                   "occurredAt": { "type": "string", "format": "date-time", "description": "When it happened. Rejected if older than 7 days or more than 5 minutes in the future." },
-                  "test": { "type": "boolean", "description": "Dry run: reports what it would match but sends nothing." }
+                  "test": { "type": "boolean", "description": "Dry run: reports what it would match but sends nothing." },
+                  "tags": { "type": "array", "items": { "type": "string" }, "description": "Tags to apply to the resolved contact, created by name if new. Applied before automations run." },
+                  "listIds": { "type": "array", "items": { "type": "string" }, "description": "Lists to add the contact to, by list id or name. An unknown name creates a tag-backed list; a consent-gated list admits only consent-confirmed contacts." },
+                  "addToList": { "type": "string", "description": "Convenience alias for a single list, merged with listIds." }
                 }
               }
             }

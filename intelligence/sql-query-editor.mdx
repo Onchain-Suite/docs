@@ -70,7 +70,7 @@ LIMIT 100
     Pick two or three wallets from the result and confirm they genuinely belong in the cohort.
   </Step>
   <Step title="Save as a report or segment">
-    Saving as a segment **from the editor** requires a wallet column in your output, `wallet_address`, `wallet`, or `address`, and fails without one. To save an **email-only** cohort (no wallet), ask [Agentic Chat](/intelligence/agentic-chat) to save it instead: it builds the segment by contact, so it covers contacts who have an email and no wallet.
+    Saving as a segment needs a column the platform can target: a **wallet** (`wallet_address`, `wallet`, or `address`), an **email** (`email` or `email_address`), or a **contact id** (`contact_id`). An email column is matched to your existing contacts, so a Web2, email-only cohort saves directly; the save reports how many emails matched, and emails with no contact yet are skipped. It fails only when the result has none of these.
   </Step>
   <Step title="Use it downstream">
     Feed the segment into a campaign or an automation.

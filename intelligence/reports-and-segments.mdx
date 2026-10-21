@@ -98,8 +98,8 @@ The SQL editor is the most precise way to build an audience, because it can reac
   <Step title="Write and run the query">
     Build the cohort in the [SQL editor](/intelligence/sql-query-editor). Start from a [starter query](/intelligence/starter-queries) if one is close.
   </Step>
-  <Step title="Include a wallet column">
-    To save from the editor or a report, the result must contain a wallet column named `wallet_address`, `wallet`, or `address`, and saving here fails without one. Working from an **email-only** cohort with no wallet? Ask [Agentic Chat](/intelligence/agentic-chat) to save it as a segment instead: it targets contacts directly, so it covers email-only contacts too.
+  <Step title="Include a column to target">
+    The result must contain a **wallet** (`wallet_address`, `wallet`, or `address`), an **email** (`email` or `email_address`), or a **contact id** (`contact_id`). An email column is matched to your existing contacts, so a Web2, email-only cohort saves directly; the save reports how many emails matched, and emails with no contact yet are skipped. Saving fails only when the result has none of these.
   </Step>
   <Step title="Save as a segment">
     Name it and save. It's now available anywhere a segment is.
@@ -116,5 +116,5 @@ The SQL editor is the most precise way to build an audience, because it can reac
 - **Spot-check.** Read a few rows against wallets you recognize before wiring the segment into a live send.
 
 <Note>
-A report is for **reading and exporting**; a segment is for **messaging**. Saving a segment **from a query or report** needs a wallet column (`wallet_address`, `wallet`, or `address`); a report is free-form. Email-only cohorts are saved through [Agentic Chat](/intelligence/agentic-chat) instead.
+A report is for **reading and exporting**; a segment is for **messaging**. Saving a segment **from a query or report** needs a **wallet**, **email**, or **contact-id** column (an email column is matched to your existing contacts); a report is free-form.
 </Note>
