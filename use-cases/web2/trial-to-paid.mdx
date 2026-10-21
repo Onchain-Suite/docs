@@ -26,11 +26,12 @@ description: "Turn free trials into paying customers with a nudge series timed t
       -d '{
         "event": "trial_started",
         "contact": { "email": "alice@example.com" },
-        "attributes": { "plan": "pro", "trial_ends": "2026-11-01" }
+        "attributes": { "plan": "pro", "trial_ends": "2026-11-01" },
+        "addToList": "Trials"
       }'
     ```
 
-    Other languages follow the same shape, see the [API Reference](/api-reference).
+    Other languages follow the same shape, see the [API Reference](/api-reference). The `addToList` here drops every trial into a **Trials** list as it starts, see [Tags, lists, and segments](/integrations/tags-lists-segments).
   </Step>
 
   <Step title="Build the conversion series">

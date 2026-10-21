@@ -1,0 +1,61 @@
+---
+title: "Tags, Lists, and Segments"
+description: "Three ways to organize your audience, and how to put a contact into one from an event, a form, an automation, or Intelligence."
+---
+
+Tags, lists, and segments are how you group contacts so a campaign or automation can target them. They overlap, so here's the plain version and, below, every way to put a contact into one.
+
+## The three, in plain terms
+
+- **Tag**, a free-form label on a contact (`vip`, `beta`, `nft-holder`). A contact can carry many. You create a tag just by using it.
+- **List**, a named group a contact belongs to, backed by a tag. Imports land in a list, and capture forms add to a bound list. List names are unique per workspace. A list is usually what you send a campaign to.
+- **Segment**, a saved audience definition. Either a **fixed set** (materialized from a query or an [Agentic Chat](/intelligence/agentic-chat) answer) or a **rule** that re-evaluates over time. Segments feed campaigns and automations too.
+
+<Note>
+Lists and segments overlap a lot. Reach for a **list** for "people I put here" (imports, form sign-ups, an event that says where they belong), and a **segment** for "people who match this" (a query or a rule).
+</Note>
+
+## Put a contact into a tag or list
+
+Four ways, pick by where the decision is made.
+
+### From an event, inline
+
+Send `tags`, `listIds`, or `addToList` on a [custom event](/integrations/custom-events). Tags and unknown list names are created for you, and the change lands **before** automations run, so an automation on the same event can branch on it.
+
+```bash
+curl -X POST https://api.onchainsuite.com/api/v1/events \
+  -H "Authorization: Bearer sk_live_…" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "event": "beta_joined",
+    "contact": { "email": "alice@example.com" },
+    "tags": ["beta"],
+    "addToList": "Beta users"
+  }'
+```
+
+Use this when the event itself tells you where the contact belongs. A list bound to a consent-required form still admits only consent-confirmed contacts, so you can't bypass double opt-in this way.
+
+### From a capture form
+
+A [capture form](/audience/capture-forms) applies its bound list and tags on confirmation, the consent-first way an email and a list membership arrive together.
+
+### From an automation
+
+Add an **Add tag**, **Remove tag**, **Add to list**, or **Remove from list** action to an [automation](/automation/create-an-automation). Use this when the decision depends on branching logic, a channel, what the contact did, or a wait.
+
+### From Intelligence, as a segment
+
+Save a [SQL or Reports result](/intelligence/reports-and-segments#save-as-a-segment), or an [Agentic Chat](/intelligence/agentic-chat) answer, as a **segment**. A query result can be keyed by a **wallet**, **email**, or **contact-id** column, so an email-only, Web2 cohort works too.
+
+## Which one should I use?
+
+- "This event means they belong here" → set it **inline on the event**.
+- "They gave consent through a form" → the form's **bound list**.
+- "It depends on branching or timing" → an **automation** action.
+- "Everyone who matches this query or question" → a **segment**.
+
+## Using them downstream
+
+Tags, lists, and segments all target [campaigns](/campaigns/overview) and [automation triggers](/automation/triggers-and-conditions) (for example, "entered a segment" or "joined a list"). To take a contact out of a list, use the **Remove from list** action; there's no list-exit trigger, so removing someone won't start another flow.

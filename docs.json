@@ -156,6 +156,7 @@
             "pages": [
               "integrations/in-app-notifications",
               "integrations/custom-events",
+              "integrations/tags-lists-segments",
               "integrations/forms",
               "integrations/server-api",
               "integrations/api-keys",

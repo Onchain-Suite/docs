@@ -24,7 +24,7 @@ description: "When a wallet connects or mints in, greet them in-app automaticall
     - **No code (on-chain):** if "arriving" means minting your token, use the **Token acquired** on-chain trigger. The platform watches your contract and fires for you, nothing to send. See [Contract-based flows](/automation/contract-based-flows).
     - **From your dApp or backend:** if "arriving" means connecting a wallet in your app, send a `wallet_connected` event with the wallet address.
 
-    **What this does:** tells Onchain Suite "this wallet just showed up," addressed by wallet rather than email.
+    **What this does:** tells Onchain Suite "this wallet just showed up," addressed by wallet rather than email. Add `tags` or `addToList` here to label the wallet (say `connected-wallet`) as it arrives, see [Tags, lists, and segments](/integrations/tags-lists-segments).
 
     <CodeGroup>
     ```bash curl
