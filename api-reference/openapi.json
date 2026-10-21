@@ -60,19 +60,31 @@
                 "schema": {
                   "type": "object",
                   "properties": {
-                    "contacts": {
+                    "data": {
                       "type": "array",
                       "items": {
                         "type": "object",
                         "properties": {
                           "id": { "type": "string" },
                           "walletAddress": { "type": "string", "nullable": true },
-                          "reachable": { "type": "object", "properties": { "email": { "type": "boolean" }, "inapp": { "type": "boolean" } } },
-                          "tags": { "type": "array", "items": { "type": "string" } }
+                          "emailReachable": { "type": "boolean", "description": "True only for a real, sendable email; a wallet-only contact's synthetic placeholder does not count." },
+                          "pushReachable": { "type": "boolean", "description": "True for a connected wallet (an in-app push target)." },
+                          "tags": { "type": "array", "items": { "type": "string" } },
+                          "createdAt": { "type": "string", "nullable": true }
                         }
                       }
                     },
-                    "nextCursor": { "type": "string", "nullable": true }
+                    "meta": {
+                      "type": "object",
+                      "properties": {
+                        "page": { "type": "integer" },
+                        "limit": { "type": "integer" },
+                        "totalItems": { "type": "integer" },
+                        "totalPages": { "type": "integer" },
+                        "hasNextPage": { "type": "boolean" },
+                        "hasPreviousPage": { "type": "boolean" }
+                      }
+                    }
                   }
                 }
               }
