@@ -43,6 +43,17 @@ Returns `202 Accepted`:
 
 Ingestion is asynchronous, `202` means accepted for processing, not that automations have already run.
 
+When you send `listIds` / `addToList`, the response may also carry a `warnings` array, resolved at request time, so you learn immediately when a list name was auto-created or a consent-gated list will be skipped:
+
+```json
+{
+  "accepted": true,
+  "deduplicated": false,
+  "idempotencyKey": "deposit:0xabc:9184",
+  "warnings": ["Created list \"Depositors\" — it did not exist."]
+}
+```
+
 ### Request fields
 
 <ParamField path="event" type="string" required>
@@ -111,7 +122,7 @@ This distinction matters more than it looks:
 Put things that describe the *person* in `attributes`, and things that describe the *event* in `payload`.
 
 <Note>
-**Tagging and lists, inline.** Send `tags`, `listIds`, or `addToList` on the event to put the resolved contact into a tag or list right away, no automation required. Tags and unknown list names are created for you, and the change lands **before** automations run, so an automation on the same event can branch on it. A list bound to a consent-required capture form still admits only consent-confirmed contacts. (You can also tag or add to a list from an [automation](/automation/create-an-automation) with an **Add tag** / **Add to list** action, for example when the decision depends on branching logic.)
+**Tagging and lists, inline.** Send `tags`, `listIds`, or `addToList` on the event to put the resolved contact into a tag or list right away, no automation required. Tags and unknown list names are created for you, and the change lands **before** automations run, so an automation on the same event can branch on it. Adding to a list also fires that list's **List joined** trigger, so the join can start its own flow, see [Triggering on a list join](#triggering-on-a-list-join). A list bound to a consent-required capture form still admits only consent-confirmed contacts. (You can also tag or add to a list from an [automation](/automation/create-an-automation) with an **Add tag** / **Add to list** action, for example when the decision depends on branching logic.)
 </Note>
 
 ## Batch ingestion
@@ -220,6 +231,21 @@ Filters read a flat context where your `payload` keys are spread in at the top l
 Available alongside your payload keys: `event`, `contactId`, `walletAddress`, `email`, `externalId`. A payload key with one of those names overrides the built-in value, so avoid naming a payload field `email`.
 
 Operators are `eq`, `neq`, `in`, `contains`, and `exists`, the same set used by on-chain triggers, and all filters must pass. See [Triggers and Conditions](/automation/triggers-and-conditions) for the details, including the note that unrecognized operators are silently dropped.
+
+### Triggering on a list join
+
+Besides the event itself, you can trigger an automation on the **list join** the event causes. When an event routes a contact into a list with `listIds` / `addToList`, that list's **List joined** trigger fires — the same one a capture-form signup fires. So a flow like *"when a contact joins **Depositors**, send a welcome"* runs straight from your events, without wiring the automation to each event name.
+
+Build it in the dashboard with a **List joined** trigger on the target list (see [Create an Automation](/automation/create-an-automation)); your event just needs to add the contact:
+
+```bash
+curl -X POST https://api.onchainsuite.com/api/v1/events \
+  -H "Authorization: Bearer sk_live_…" \
+  -H "Content-Type: application/json" \
+  -d '{ "event": "first_deposit", "contact": { "walletAddress": "0xabc..." }, "addToList": "Depositors" }'
+```
+
+It fires only on a **real** join — a contact already in the list doesn't re-trigger, which also keeps list → list automation chains from looping. Consent-gated lists fire only once the contact is confirmed, and a dry-run or deduplicated event fires nothing.
 
 ## End-to-end: notify a user from an offchain event
 

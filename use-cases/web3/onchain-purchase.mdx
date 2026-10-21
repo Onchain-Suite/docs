@@ -131,6 +131,16 @@ Do the on-chain action with a wallet you control and wait out the short finality
 
 ## Variations
 
+- **Drop buyers into a list, let the list run the flow.** Instead of (or alongside) triggering on the event, add the buyer to a **Buyers** list on the same call and let that list's **List joined** trigger drive the follow-up, handy when several different events (a purchase, a mint, a subscription) should all feed one onboarding flow. The list is created on first use.
+
+  ```bash
+  curl -X POST https://api.onchainsuite.com/api/v1/events \
+    -H "Authorization: Bearer sk_live_…" \
+    -H "Content-Type: application/json" \
+    -d '{ "event": "purchase_completed", "contact": { "walletAddress": "0xabc..." }, "addToList": "Buyers" }'
+  ```
+
+  See [Triggering on a list join](/integrations/custom-events#triggering-on-a-list-join).
 - **Upsell the holders.** Trigger on **Token acquired** and point minters at your next drop.
 - **Win-back.** Pair with an [on-chain trigger](/automation/triggers-and-conditions) like **Exchange outflow** to catch a wallet heading for the door.
 - **Web2 parallel.** A regular, off-chain checkout? Use [Purchase confirmation](/use-cases/web2/purchase-confirmation).
