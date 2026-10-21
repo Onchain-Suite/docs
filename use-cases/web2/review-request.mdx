@@ -62,5 +62,15 @@ Send the milestone event with your own email and confirm the request arrives aft
 
 ## Variations
 
+- **Route into a list, let the list run the flow.** Add the contact to a **Recent buyers** list on the same `order_delivered` call and let that list's **List joined** trigger drive the follow-up, handy when several events should feed one flow for your delivered orders. The list is created on first use.
+
+  ```bash
+  curl -X POST https://api.onchainsuite.com/api/v1/events \
+    -H "Authorization: Bearer sk_live_…" \
+    -H "Content-Type: application/json" \
+    -d '{ "event": "order_delivered", "contact": { "email": "alice@example.com" }, "addToList": "Recent buyers" }'
+  ```
+
+  See [Triggering on a list join](/integrations/custom-events#triggering-on-a-list-join).
 - **Only ask the satisfied.** Gate the request on a health or engagement signal so you ask your happiest customers first.
 - **Incentive, carefully.** A small thank-you can lift response, but keep it compliant with the review platform's rules.

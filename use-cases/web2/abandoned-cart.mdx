@@ -64,6 +64,16 @@ Send a `checkout_started` with your own email and no matching `purchase_complete
 
 ## Variations
 
+- **Route into a list, let the list run the flow.** Add the contact to a **Abandoned carts** list on the same `checkout_started` call and let that list's **List joined** trigger drive the follow-up, handy when several events should feed one flow for your stalled checkouts. The list is created on first use.
+
+  ```bash
+  curl -X POST https://api.onchainsuite.com/api/v1/events \
+    -H "Authorization: Bearer sk_live_…" \
+    -H "Content-Type: application/json" \
+    -d '{ "event": "checkout_started", "contact": { "email": "alice@example.com" }, "addToList": "Abandoned carts" }'
+  ```
+
+  See [Triggering on a list join](/integrations/custom-events#triggering-on-a-list-join).
 - **Incentive on the second touch.** Free shipping or a small discount can tip a hesitant cart.
 - **Segment by cart value.** Treat a big cart differently from a small one.
 - **Web3 parallel.** For an on-chain purchase that stalls, see [On-chain purchase follow-up](/use-cases/web3/onchain-purchase).

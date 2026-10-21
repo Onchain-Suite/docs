@@ -59,5 +59,15 @@ Walk your own account through the steps out of order and confirm the series only
 
 ## Variations
 
+- **Route into a list, let the list run the flow.** Add the contact to a **Onboarding** list on the same `project_created` call and let that list's **List joined** trigger drive the follow-up, handy when several events should feed one flow for your new accounts. The list is created on first use.
+
+  ```bash
+  curl -X POST https://api.onchainsuite.com/api/v1/events \
+    -H "Authorization: Bearer sk_live_…" \
+    -H "Content-Type: application/json" \
+    -d '{ "event": "project_created", "contact": { "email": "alice@example.com" }, "addToList": "Onboarding" }'
+  ```
+
+  See [Triggering on a list join](/integrations/custom-events#triggering-on-a-list-join).
 - **Role-based paths.** An admin and a solo user need different checklists, branch on a `role` attribute.
 - **In-product plus email.** Pair the emails with in-app prompts for users who are active in the app.

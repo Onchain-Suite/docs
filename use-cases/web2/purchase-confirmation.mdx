@@ -135,6 +135,16 @@ Send the event with your own email and a test `order_id`, then confirm the confi
 
 ## Variations
 
+- **Route into a list, let the list run the flow.** Add the contact to a **Customers** list on the same `purchase_completed` call and let that list's **List joined** trigger drive the follow-up, handy when several events should feed one flow for your buyers. The list is created on first use.
+
+  ```bash
+  curl -X POST https://api.onchainsuite.com/api/v1/events \
+    -H "Authorization: Bearer sk_live_…" \
+    -H "Content-Type: application/json" \
+    -d '{ "event": "purchase_completed", "contact": { "email": "alice@example.com" }, "addToList": "Customers" }'
+  ```
+
+  See [Triggering on a list join](/integrations/custom-events#triggering-on-a-list-join).
 - **Refunds and cancellations.** Send `purchase_refunded` and branch to a different message.
 - **Post-purchase onboarding.** For software, chain the confirmation into a short "get the most from it" series.
 - **Web3 parallel.** For an on-chain purchase, see [On-chain purchase follow-up](/use-cases/web3/onchain-purchase).

@@ -62,5 +62,15 @@ Send `trial_started` with your own email, confirm the series fires and the "ends
 
 ## Variations
 
+- **Route into a list, let the list run the flow.** Add the contact to a **Trials** list on the same `trial_started` call and let that list's **List joined** trigger drive the follow-up, handy when several events should feed one flow for your trials. The list is created on first use.
+
+  ```bash
+  curl -X POST https://api.onchainsuite.com/api/v1/events \
+    -H "Authorization: Bearer sk_live_…" \
+    -H "Content-Type: application/json" \
+    -d '{ "event": "trial_started", "contact": { "email": "alice@example.com" }, "addToList": "Trials" }'
+  ```
+
+  See [Triggering on a list join](/integrations/custom-events#triggering-on-a-list-join).
 - **Branch on usage.** Send active and inactive trials different messages, active users get a nudge to upgrade, inactive ones get help getting started.
 - **Offer at the end.** A time-boxed discount on the last day can lift conversion.

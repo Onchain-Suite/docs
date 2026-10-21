@@ -138,6 +138,16 @@ Send the event with your own address (or submit the form), then check the automa
 
 ## Variations
 
+- **Route into a list, let the list run the flow.** Add the contact to a **Subscribers** list on the same `account_created` call and let that list's **List joined** trigger drive the follow-up, handy when several events should feed one flow for your new signups. The list is created on first use.
+
+  ```bash
+  curl -X POST https://api.onchainsuite.com/api/v1/events \
+    -H "Authorization: Bearer sk_live_…" \
+    -H "Content-Type: application/json" \
+    -d '{ "event": "account_created", "contact": { "email": "alice@example.com" }, "addToList": "Subscribers" }'
+  ```
+
+  See [Triggering on a list join](/integrations/custom-events#triggering-on-a-list-join).
 - **Branch by plan.** After the welcome, add a [Branch](/automation/triggers-and-conditions#branches-route-entries-down-different-paths) on the `plan` attribute to send paid and free users different next steps.
 - **Double opt-in.** If you collect email through a form with confirmation, the welcome fires only after the person confirms, which keeps your list clean. See [Capture forms](/audience/capture-forms).
 - **Web3 parallel.** No email, just a wallet? Run [Welcome a new wallet](/use-cases/web3/welcome-wallet), which greets the user in-app instead.

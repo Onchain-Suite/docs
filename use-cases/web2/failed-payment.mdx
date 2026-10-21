@@ -63,5 +63,15 @@ Send `payment_failed` with your own email, confirm the series fires on schedule.
 
 ## Variations
 
+- **Route into a list, let the list run the flow.** Add the contact to a **Payment issues** list on the same `payment_failed` call and let that list's **List joined** trigger drive the follow-up, handy when several events should feed one flow for your failed payments. The list is created on first use.
+
+  ```bash
+  curl -X POST https://api.onchainsuite.com/api/v1/events \
+    -H "Authorization: Bearer sk_live_…" \
+    -H "Content-Type: application/json" \
+    -d '{ "event": "payment_failed", "contact": { "email": "alice@example.com" }, "addToList": "Payment issues" }'
+  ```
+
+  See [Triggering on a list join](/integrations/custom-events#triggering-on-a-list-join).
 - **Branch on reason.** An expired card and an insufficient-funds failure may warrant different wording.
 - **In-app banner.** Pair with an in-app prompt for users who log in during the dunning window.
