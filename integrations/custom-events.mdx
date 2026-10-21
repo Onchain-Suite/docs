@@ -121,9 +121,23 @@ This distinction matters more than it looks:
 
 Put things that describe the *person* in `attributes`, and things that describe the *event* in `payload`.
 
-<Note>
-**Tagging and lists, inline.** Send `tags`, `listIds`, or `addToList` on the event to put the resolved contact into a tag or list right away, no automation required. Tags and unknown list names are created for you, and the change lands **before** automations run, so an automation on the same event can branch on it. Adding to a list also fires that list's **List joined** trigger, so the join can start its own flow, see [Triggering on a list join](#triggering-on-a-list-join). A list bound to a consent-required capture form still admits only consent-confirmed contacts. (You can also tag or add to a list from an [automation](/automation/create-an-automation) with an **Add tag** / **Add to list** action, for example when the decision depends on branching logic.)
-</Note>
+### Build lists, segments, and tags from events, no automation needed
+
+Sending `tags`, `listIds`, or `addToList` on an event is all it takes: your secret key creates and populates the list, segment, or tag **directly**. You do **not** build an automation for the membership itself. A **List** is a tag-backed [segment](/audience/segments), so building a list builds a segment you can target anywhere in the product.
+
+- **From one event or from many.** Send the same `addToList` on every relevant event (`first_deposit`, `swap_completed`, `vote_cast`) and they all feed the one list; name different lists per event to fan out instead. One event can also add to several lists/tags at once.
+- **Created on first use.** An unknown list name or tag is created for you, addressable by that name next time (names are unique per workspace). A list bound to a consent-required form still admits only confirmed contacts, so you can't bypass double opt-in.
+- **Lands before automations run**, so an automation on the same event can branch on the new tag.
+
+```bash
+# Build a "Depositors" segment straight from events — no automation involved.
+curl -X POST https://api.onchainsuite.com/api/v1/events \
+  -H "Authorization: Bearer sk_live_…" \
+  -H "Content-Type: application/json" \
+  -d '{ "event": "first_deposit", "contact": { "walletAddress": "0xabc..." }, "addToList": "Depositors", "tags": ["activated"] }'
+```
+
+An automation comes in only when you want to **act** on membership, send a message, branch, wait. Adding to a list also fires its **List joined** trigger ([details](#triggering-on-a-list-join)) if you want the join to start a flow, and you can still tag or add from an [automation](/automation/create-an-automation) action when the decision needs branching logic.
 
 ## Batch ingestion
 
