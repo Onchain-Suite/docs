@@ -51,6 +51,10 @@ description: "A charge fails, recover it with a short, well-timed dunning series
   </Step>
 </Steps>
 
+<Note>
+**Organize as you go.** Add `"tags": ["payment-failed"]` to the `payment_failed` event, or use an **Add tag** action, to flag at-risk accounts. See [Tags, lists, and segments](/integrations/tags-lists-segments).
+</Note>
+
 ## Test
 
 Send `payment_failed` with your own email, confirm the series fires on schedule. Send `payment_recovered` partway through and confirm it stops.

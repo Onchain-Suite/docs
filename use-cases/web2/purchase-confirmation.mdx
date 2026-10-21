@@ -123,6 +123,10 @@ description: "When someone buys, confirm the order by email and follow up to dri
   </Step>
 </Steps>
 
+<Note>
+**Organize as you go.** Add `"addToList": "Customers"` to the `purchase_completed` event to build a Customers list as orders land. See [Tags, lists, and segments](/integrations/tags-lists-segments).
+</Note>
+
 ## Test
 
 Send the event with your own email and a test `order_id`, then confirm the confirmation email arrives and reads correctly. Re-send the same `idempotencyKey` to prove a duplicate doesn't double-send.

@@ -119,6 +119,10 @@ description: "When a wallet buys, mints, or swaps, follow up automatically from 
   </Step>
 </Steps>
 
+<Note>
+**Organize as you go.** On the off-chain purchase event, add `"addToList": "Buyers"` to build a Buyers list; on the on-chain path, use an **Add to list** action. See [Tags, lists, and segments](/integrations/tags-lists-segments).
+</Note>
+
 ## Test
 
 Do the on-chain action with a wallet you control and wait out the short finality delay, then confirm the automation registered an entry and the in-app message arrived. See [Testing a flow](/automation/contract-based-flows#testing-a-flow).
