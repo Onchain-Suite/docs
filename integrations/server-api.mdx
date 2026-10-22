@@ -122,6 +122,7 @@ A few semantics worth knowing before you wire these up:
 - **`POST /campaigns/{id}/send`** takes a **prepared campaign id**, not the `campaignRunId` returned by `/inapp/push`. It can't compose or retarget; it launches what's already in the dashboard.
 - **`GET /contacts`** returns a per-contact `emailReachable` and `pushReachable` (and `tags`), never the email itself. `emailReachable` is `true` only for a **real, sendable email**, a wallet-only contact's synthetic placeholder address doesn't count, so an email-first audience can key a send off it. `pushReachable` is `true` for a **connected wallet** (an in-app push target). Narrow the list with `?tag=` and `?hasWallet=true|false`.
 - **`GET /events/catalog`** is a dashboard (session) route, not a secret-key one, so a `sk_` key gets `401` there.
+- **Lists and tags** are populated server-side with `tags` / `listIds` / `addToList` on `POST /events` (see [custom events](/integrations/custom-events)). Finding a list's ID, adding contacts already in your audience, and renaming or deleting a list are **dashboard (session)** actions under `/audience/…`, not secret-key routes — see [Tags, lists & segments](/integrations/tags-lists-segments).
 
 ## Wrap it once
 
