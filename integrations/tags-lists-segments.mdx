@@ -8,7 +8,7 @@ Tags, lists, and segments are how you group contacts so a campaign or automation
 ## The three, in plain terms
 
 - **Tag**, a free-form label on a contact (`vip`, `beta`, `nft-holder`). A contact can carry many. You create a tag just by using it.
-- **List**, a named group a contact belongs to, backed by a tag. Imports land in a list, and capture forms add to a bound list. List names are unique per workspace. A list is usually what you send a campaign to.
+- **List**, a named group a contact belongs to, backed by a tag. Imports land in a list, and capture forms add to a bound list. List names are unique per workspace. A list is usually what you send a campaign to. Every list has an **ID** you can copy from **Audience → Lists** (the row's ⋯ menu → **Copy list ID**) to use as `listIds` on an event or in the API.
 - **Segment**, a saved audience definition. Either a **fixed set** (materialized from a query or an [Agentic Chat](/intelligence/agentic-chat) answer) or a **rule** that re-evaluates over time. Segments feed campaigns and automations too.
 
 <Note>
@@ -55,6 +55,34 @@ Save a [SQL or Reports result](/intelligence/reports-and-segments#save-as-a-segm
 - "They gave consent through a form" → the form's **bound list**.
 - "It depends on branching or timing" → an **automation** action.
 - "Everyone who matches this query or question" → a **segment**.
+
+## Add contacts already in your audience
+
+The ways above decide membership as a contact **arrives or acts**. To add contacts that are **already in your audience** — a backfill, or a hand-picked set — work from the list itself:
+
+- **Dashboard** — open the list under **Audience → Lists** and add members, or select contacts in the audience table and choose **Add to list**.
+- **API** — `POST /audience/segments/{listId}/members` with the contact ids (a list is a kind of segment, so the path says `segments`). Additive and idempotent, up to 1000 per call; it reports who actually joined versus who was already a member.
+
+```bash
+curl -X POST https://api.onchainsuite.com/api/v1/audience/segments/{listId}/members \
+  -H "Authorization: Bearer <session token>" \
+  -H "x-org-id: <your org id>" \
+  -H "Content-Type: application/json" \
+  -d '{ "profileIds": ["contact_abc", "contact_def"] }'
+# → { "added": 2, "alreadyMembers": 0, "skipped": 0, "count": 2 }
+```
+
+<Note>
+The audience API (`/audience/…`) uses your **dashboard session**, not a server `sk_` key — the `sk_` keys are for the ingest API (`/events`). Pass your active workspace as the `x-org-id` header.
+</Note>
+
+## Find, rename, or delete a list
+
+From **Audience → Lists**, each row's ⋯ menu:
+
+- **Copy list ID** — the handle you pass as `listIds` on an event or as `{listId}` in the API. `GET /audience/lists` returns every list with its ID and live member count.
+- **Rename** — changes the display name; membership is unaffected.
+- **Delete** — removes the list. Your contacts are **kept** by default (a list is a saved view, not the people in it); you can choose to delete the members too.
 
 ## Using them downstream
 
