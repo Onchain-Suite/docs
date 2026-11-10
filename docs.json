@@ -248,6 +248,14 @@
     {
       "source": "/intelligence/segments-from-queries",
       "destination": "/intelligence/reports-and-segments"
+    },
+    {
+      "source": "/integrations/webhook-events",
+      "destination": "/api/webhooks"
+    },
+    {
+      "source": "/integrations/third-party-connections",
+      "destination": "/integrations/overview"
     }
   ],
   "contextual": {
